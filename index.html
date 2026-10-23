@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mortgage Calculator</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --font: "Times New Roman", Times, serif;
+    --bg: #0b1f45; --card: #12295a; --text: #f3f1e8; --muted: #a9b8d6;
+    --border: #23407a; --accent: #f2c14e; --accent-soft: #1b3670;
+    --principal: #6fa8ff; --interest: #f5a04a; --tax: #4fd1a0;
+    --insurance: #c39bff; --pmi: #ff6b6f; --hoa: #9fb0cc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.5 var(--font);
+  }
+  header { max-width: 1200px; margin: 0 auto; padding: 28px 16px 8px; }
+  header h1 { margin: 0; font-size: 26px; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  main {
+    max-width: 1200px; margin: 0 auto; padding: 16px;
+    display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start;
+  }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 16px; }
+  .stack { display: grid; gap: 16px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .field { margin-bottom: 12px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  input, select {
+    width: 100%; padding: 9px 10px; font: inherit; color: var(--text);
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .unit { position: relative; }
+  .unit span { position: absolute; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; pointer-events: none; }
+  .unit.pre span { left: 10px; } .unit.pre input { padding-left: 22px; }
+  .unit.post span { right: 10px; } .unit.post input { padding-right: 34px; }
+  details { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; }
+  summary { cursor: pointer; font-weight: 600; font-size: 14px; margin-bottom: 10px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 700px) { .kpis { grid-template-columns: 1fr 1fr; } }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+  .kpi .label { font-size: 12px; color: var(--muted); }
+  .kpi .value { font-size: 22px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .kpi.main { background: var(--accent-soft); border-color: transparent; }
+  .kpi.main .value { color: var(--accent); }
+
+  .breakdown { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: center; }
+  @media (max-width: 560px) { .breakdown { grid-template-columns: 1fr; justify-items: center; } }
+  .legend { width: 100%; }
+  .legend div { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--border); font-variant-numeric: tabular-nums; }
+  .legend div:last-child { border-bottom: 0; font-weight: 700; }
+  .legend i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .legend b { margin-left: auto; font-weight: 600; }
+
+  .savings { background: var(--accent-soft); border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 14px; }
+  .savings:empty { display: none; }
+
+  canvas { width: 100%; display: block; }
+  .chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+  .chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .tabs button, .btn {
+    font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  }
+  .tabs button.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .tabs .spacer { flex: 1; }
+  .table-wrap { max-height: 420px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 7px 10px; text-align: right; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { position: sticky; top: 0; background: var(--card); border-bottom: 1px solid var(--border); font-weight: 600; }
+  tbody tr:nth-child(even) { background: var(--bg); }
+
+  .afford .result { font-size: 14px; margin-top: 4px; }
+  .afford .big { font-size: 20px; font-weight: 700; color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mortgage Calculator</h1>
+  <p>Monthly payment, full cost of the loan, extra-payment savings, amortization schedule and affordability — all updated as you type.</p>
+</header>
+
+<main>
+  <!-- ============ INPUTS ============ -->
+  <section class="card" aria-label="Loan details">
+    <h2>Loan details</h2>
+
+    <div class="field">
+      <label for="price">Home price</label>
+      <div class="unit pre"><span>$</span><input id="price" type="number" min="0" step="1000" value="400000"></div>
+    </div>
+
+    <div class="field">
+      <label>Down payment</label>
+      <div class="row">
+        <div class="unit pre"><span>$</span><input id="downAmt" type="number" min="0" step="1000" value="80000"></div>
+        <div class="unit post"><span>%</span><input id="downPct" type="number" min="0" max="100" step="0.5" value="20"></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="rate">Interest rate</label>
+        <div class="unit post"><span>%</span><input id="rate" type="number" min="0" step="0.05" value="6.5"></div>
+      </div>
+      <div class="field">
+        <label for="term">Loan term</label>
+        <select id="term">
+          <option value="30" selected>30 years</option>
+          <option value="25">25 years</option>
+          <option value="20">20 years</option>
+          <option value="15">15 years</option>
+          <option value="10">10 years</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="start">First payment month</label>
+      <input id="start" type="month">
+    </div>
+
+    <details open>
+      <summary>Taxes, insurance &amp; fees</summary>
+      <div class="row">
+        <div class="field">
+          <label for="tax">Property tax / year</label>
+          <div class="unit post"><span>%</span><input id="tax" type="number" min="0" step="0.05" value="1.1"></div>
+        </div>
+        <div class="field">
+          <label for="ins">Home insurance / year</label>
+          <div class="unit pre"><span>$</span><input id="ins" type="number" min="0" step="50" value="1500"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="pmi">PMI / year</label>
+          <div class="unit post"><span>%</span><input id="pmi" type="number" min="0" step="0.05" value="0.5"></div>
+          <div class="hint">Only charged while down payment &lt; 20%</div>
+        </div>
+        <div class="field">
+          <label for="hoa">HOA / month</label>
+          <div class="unit pre"><span>$</span><input id="hoa" type="number" min="0" step="10" value="0"></div>
+        </div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Extra payments</summary>
+      <div class="row">
+        <div class="field">
+          <label for="extraMonthly">Extra each month</label>
+          <div class="unit pre"><span>$</span><input id="extraMonthly" type="number" min="0" step="50" value="0"></div>
+        </div>
+        <div class="field">
+          <label for="extraYearly">Extra once a year</label>
+          <div class="unit pre"><span>$</span><input id="extraYearly" type="number" min="0" step="500" value="0"></div>
+          <div class="hint">Paid with every 12th payment</div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="lump">One-time lump sum</label>
+        <div class="row">
+          <div class="unit pre"><span>$</span><input id="lump" type="number" min="0" step="1000" value="0"></div>
+          <div class="unit post"><span>mo</span><input id="lumpMonth" type="number" min="1" step="1" value="12" title="Payment number when the lump sum is paid"></div>
+        </div>
+        <div class="hint">Right box = which payment number it goes in with</div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Affordability check</summary>
+      <div class="afford">
+        <div class="row">
+          <div class="field">
+            <label for="income">Gross income / year</label>
+            <div class="unit pre"><span>$</span><input id="income" type="number" min="0" step="1000" value="120000"></div>
+          </div>
+          <div class="field">
+            <label for="debts">Other debts / month</label>
+            <div class="unit pre"><span>$</span><input id="debts" type="number" min="0" step="50" value="400"></div>
+          </div>
+        </div>
+        <div id="affordOut" class="result"></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <div class="stack">
+    <div class="kpis">
+      <div class="kpi main"><div class="label">Monthly payment</div><div class="value" id="kMonthly">–</div></div>
+      <div class="kpi"><div class="label">Loan amount</div><div class="value" id="kLoan">–</div></div>
+      <div class="kpi"><div class="label">Total interest</div><div class="value" id="kInterest">–</div></div>
+      <div class="kpi"><div class="label">Payoff date</div><div class="value" id="kPayoff">–</div></div>
+    </div>
+
+    <section class="card">
+      <h2>Monthly payment breakdown</h2>
+      <div class="breakdown">
+        <canvas id="donut" width="180" height="180" style="width:180px;height:180px"></canvas>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="savings" id="savings"></div>
+    </section>
+
+    <section class="card">
+      <h2>Loan balance over time</h2>
+      <canvas id="chart" height="260"></canvas>
+      <div class="chart-legend">
+        <span><i style="background:var(--principal)"></i>Remaining balance</span>
+        <span><i style="background:var(--interest)"></i>Cumulative interest paid</span>
+        <span id="baselineKey" hidden><i style="background:var(--muted)"></i>Balance without extra payments</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Amortization schedule</h2>
+      <div class="tabs">
+        <button id="tabYear" class="active">By year</button>
+        <button id="tabMonth">By month</button>
+        <span class="spacer"></span>
+        <button class="btn" id="csv">Download CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th id="periodHead">Year</th><th>Principal</th><th>Interest</th><th>Extra</th><th>Total paid</th><th>Balance</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const num = id => Math.max(0, parseFloat($(id).value) || 0);
+const money = (v, cents = false) => v.toLocaleString('en-US', {
+  style: 'currency', currency: 'USD',
+  minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0
+});
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+// Default start month = next month
+(() => {
+  const d = new Date(); d.setMonth(d.getMonth() + 1);
+  $('start').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+})();
+
+// ---------- Core math ----------
+// Standard fixed-rate payment: P * r / (1 - (1+r)^-n)
+function monthlyPI(principal, annualRate, months) {
+  const r = annualRate / 100 / 12;
+  if (r === 0) return principal / months;
+  return principal * r / (1 - Math.pow(1 + r, -months));
+}
+
+// Walks the loan month by month, applying any extra payments to principal.
+function amortize(principal, annualRate, months, payment, extras, homePrice, pmiRate) {
+  const r = annualRate / 100 / 12;
+  const rows = [];
+  let balance = principal, totalInterest = 0, totalPMI = 0;
+  for (let m = 1; m <= months && balance > 0.005; m++) {
+    const interest = balance * r;
+    let princ = Math.min(payment - interest, balance);
+    let extra = 0;
+    if (extras) {
+      extra = extras.monthly + (m % 12 === 0 ? extras.yearly : 0) + (m === extras.lumpMonth ? extras.lump : 0);
+      extra = Math.min(extra, balance - princ);
+    }
+    balance -= princ + extra;
+    // PMI stops with the payment that brings the balance to 80% of the original home price
+    const pmi = balance > homePrice * 0.8 ? principal * pmiRate / 100 / 12 : 0;
+    totalInterest += interest;
+    totalPMI += pmi;
+    rows.push({ m, interest, princ, extra, pmi, balance: Math.max(balance, 0), cumInterest: totalInterest });
+  }
+  return { rows, totalInterest, totalPMI };
+}
+
+// ---------- Down payment $ <-> % sync ----------
+let lastDownEdited = 'pct';
+$('downAmt').addEventListener('input', () => { lastDownEdited = 'amt'; syncDown(); calc(); });
+$('downPct').addEventListener('input', () => { lastDownEdited = 'pct'; syncDown(); calc(); });
+$('price').addEventListener('input', () => { syncDown(); calc(); });
+function syncDown() {
+  const price = num('price');
+  if (lastDownEdited === 'pct') {
+    if (num('downPct') > 100) $('downPct').value = 100;
+    $('downAmt').value = Math.round(price * num('downPct') / 100);
+  } else {
+    if (num('downAmt') > price) $('downAmt').value = price;
+    $('downPct').value = price ? +(num('downAmt') / price * 100).toFixed(2) : 0;
+  }
+}
+
+// ---------- Main calculation ----------
+let state = null, view = 'year';
+
+function calc() {
+  const price = num('price');
+  const down = Math.min(num('downAmt'), price);
+  const loan = price - down;
+  const rate = num('rate');
+  const months = parseInt($('term').value, 10) * 12;
+  const downPct = price ? down / price * 100 : 0;
+  const pmiRate = downPct < 20 ? num('pmi') : 0;
+
+  const pi = loan > 0 ? monthlyPI(loan, rate, months) : 0;
+  const tax = price * num('tax') / 100 / 12;
+  const ins = num('ins') / 12;
+  const pmi = loan * pmiRate / 100 / 12;
+  const hoa = num('hoa');
+  const total = pi + tax + ins + pmi + hoa;
+
+  const extras = {
+    monthly: num('extraMonthly'), yearly: num('extraYearly'),
+    lump: num('lump'), lumpMonth: Math.round(num('lumpMonth')) || 1
+  };
+  const hasExtras = extras.monthly + extras.yearly + extras.lump > 0;
+
+  const base = amortize(loan, rate, months, pi, null, price, pmiRate);
+  const withExtra = hasExtras ? amortize(loan, rate, months, pi, extras, price, pmiRate) : base;
+
+  state = { price, loan, rate, months, pi, tax, ins, pmi, hoa, total, base, withExtra, hasExtras };
+
+  // KPIs
+  $('kMonthly').textContent = money(total);
+  $('kLoan').textContent = money(loan);
+  $('kInterest').textContent = money(withExtra.totalInterest);
+  $('kPayoff').textContent = payoffLabel(withExtra.rows.length);
+
+  // Breakdown legend + donut
+  const parts = [
+    ['Principal & interest', pi, '--principal'],
+    ['Property tax', tax, '--tax'],
+    ['Home insurance', ins, '--insurance'],
+    ['PMI', pmi, '--pmi'],
+    ['HOA', hoa, '--hoa'],
+  ].filter(p => p[1] > 0);
+  $('legend').innerHTML = parts.map(([n, v, c]) =>
+    `<div><i style="background:var(${c})"></i>${n}<b>${money(v, true)}</b></div>`).join('') +
+    `<div>Total per month<b>${money(total, true)}</b></div>`;
+  drawDonut(parts);
+
+  // Extra payment savings
+  const saved = base.totalInterest - withExtra.totalInterest;
+  let summary = '';
+  if (hasExtras && loan > 0 && saved > 0.5) {
+    const monthsSaved = base.rows.length - withExtra.rows.length;
+    const y = Math.floor(monthsSaved / 12), mo = monthsSaved % 12;
+    summary = `With your extra payments you save <b>${money(saved)}</b> in interest and pay off the loan
+      <b>${y ? y + ' yr ' : ''}${mo} mo</b> sooner (${payoffLabel(withExtra.rows.length)} instead of ${payoffLabel(base.rows.length)}).`;
+  } else if (loan > 0) {
+    summary = `Over the full term you'll pay <b>${money(loan + base.totalInterest)}</b> in principal and interest — <b>${money(base.totalInterest)}</b> of that is interest.`;
+    if (hasExtras) summary += ` <br>Your extra payments have no effect — the lump sum falls after the loan is already paid off.`;
+  }
+  // PMI doesn't last forever — say when it ends and what it costs in total
+  const pmiMonths = withExtra.rows.filter(r => r.pmi > 0).length;
+  if (pmiMonths) summary += `<br>PMI ends after <b>${pmiMonths}</b> payments (${payoffLabel(pmiMonths)}), costing <b>${money(withExtra.totalPMI)}</b> in total.`;
+  $('savings').innerHTML = summary;
+
+  affordability();
+  drawChart();
+  renderTable();
+}
+
+function payoffLabel(n) {
+  if (!n) return '–';
+  let [y, m] = $('start').value.split('-').map(Number);
+  if (!y) { const now = new Date(); y = now.getFullYear(); m = now.getMonth() + 2; } // empty → next month
+  const d = new Date(y, m - 1 + n - 1, 1);
+  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+// ---------- Affordability (28/36 rule) ----------
+function affordability() {
+  const monthlyIncome = num('income') / 12;
+  if (!monthlyIncome) { $('affordOut').innerHTML = ''; return; }
+  const front = state.total / monthlyIncome * 100;
+  const back = (state.total + num('debts')) / monthlyIncome * 100;
+  const maxHousing = Math.min(monthlyIncome * 0.28, monthlyIncome * 0.36 - num('debts'));
+  const ok = front <= 28 && back <= 36;
+  $('affordOut').innerHTML = `
+    Housing cost is <b>${front.toFixed(1)}%</b> of income (guideline ≤ 28%)<br>
+    All debts are <b>${back.toFixed(1)}%</b> of income (guideline ≤ 36%)<br>
+    Suggested max housing payment: <span class="big">${money(Math.max(maxHousing, 0))}</span>/mo<br>
+    <span style="color:${ok ? 'var(--tax)' : 'var(--pmi)'}">${ok ? '✓ Within common lender guidelines' : '⚠ Above common lender guidelines'}</span>`;
+}
+
+// ---------- Donut chart ----------
+function drawDonut(parts) {
+  const c = $('donut'), dpr = window.devicePixelRatio || 1;
+  c.width = 180 * dpr; c.height = 180 * dpr;
+  const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
+  const sum = parts.reduce((s, p) => s + p[1], 0);
+  let a = -Math.PI / 2;
+  ctx.lineWidth = 26;
+  if (!sum) { ctx.strokeStyle = css('--border'); ctx.beginPath(); ctx.arc(90, 90, 70, 0, Math.PI * 2); ctx.stroke(); return; }
+  parts.forEach(([, v, col]) => {
+    const sweep = v / sum * Math.PI * 2;
+    ctx.strokeStyle = css(col);
+    ctx.beginPath(); ctx.arc(90, 90, 70, a, a + sweep); ctx.stroke();
+    a += sweep;
+  });
+  ctx.fillStyle = css('--text'); ctx.textAlign = 'center';
+  ctx.font = '700 20px ' + css('--font'); ctx.fillText(money(sum), 90, 94);
+  ctx.fillStyle = css('--muted'); ctx.font = '13px ' + css('--font'); ctx.fillText('per month', 90, 112);
+}
+
+// ---------- Balance line chart ----------
+function drawChart() {
+  const c = $('chart'), dpr = window.devicePixelRatio || 1;
+  const W = c.clientWidth, H = 260;
+  c.width = W * dpr; c.height = H * dpr; c.style.height = H + 'px';
+  const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
+  const pad = { l: 64, r: 24, t: 10, b: 28 };
+  const { base, withExtra, loan, months, hasExtras } = state;
+  const rows = withExtra.rows;
+  if (!rows.length) return;
+
+  const maxY = Math.max(loan, withExtra.totalInterest, base.totalInterest) || 1;
+  const x = m => pad.l + (m / months) * (W - pad.l - pad.r);
+  const y = v => pad.t + (1 - v / maxY) * (H - pad.t - pad.b);
+
+  // grid + labels
+  ctx.strokeStyle = css('--border'); ctx.fillStyle = css('--muted');
+  ctx.font = '12px ' + css('--font'); ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const v = maxY * i / 4, yy = y(v);
+    ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(W - pad.r, yy); ctx.stroke();
+    ctx.textAlign = 'right'; ctx.fillText(v >= 1000 ? '$' + Math.round(v / 1000) + 'k' : money(v), pad.l - 8, yy + 4);
+  }
+  const years = months / 12, step = years > 20 ? 5 : years > 10 ? 2 : 1;
+  ctx.textAlign = 'center';
+  for (let yr = 0; yr <= years; yr += step) ctx.fillText('Yr ' + yr, x(yr * 12), H - 8);
+
+  const line = (data, key, color, dash) => {
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.setLineDash(dash || []);
+    ctx.beginPath(); ctx.moveTo(x(0), y(key === 'balance' ? loan : 0));
+    data.forEach(r => ctx.lineTo(x(r.m), y(r[key])));
+    ctx.stroke(); ctx.setLineDash([]);
+  };
+  if (hasExtras) line(base.rows, 'balance', css('--muted'), [5, 4]);
+  line(rows, 'balance', css('--principal'));
+  line(rows, 'cumInterest', css('--interest'));
+  $('baselineKey').hidden = !hasExtras;
+}
+
+// ---------- Amortization table ----------
+function groupedRows() {
+  const rows = state.withExtra.rows;
+  if (view === 'month') return rows.map(r => ({ label: `${r.m} · ${payoffLabel(r.m)}`, ...r, paid: r.princ + r.interest + r.extra }));
+  const out = [];
+  rows.forEach(r => {
+    const i = Math.floor((r.m - 1) / 12);
+    out[i] = out[i] || { label: 'Year ' + (i + 1), princ: 0, interest: 0, extra: 0, paid: 0 };
+    out[i].princ += r.princ; out[i].interest += r.interest; out[i].extra += r.extra;
+    out[i].paid += r.princ + r.interest + r.extra; out[i].balance = r.balance;
+  });
+  return out;
+}
+function renderTable() {
+  $('periodHead').textContent = view === 'year' ? 'Year' : 'Payment';
+  $('tbody').innerHTML = groupedRows().map(r =>
+    `<tr><td>${r.label}</td><td>${money(r.princ, true)}</td><td>${money(r.interest, true)}</td>
+     <td>${money(r.extra, true)}</td><td>${money(r.paid, true)}</td><td>${money(r.balance, true)}</td></tr>`).join('');
+}
+$('tabYear').onclick = () => { view = 'year'; $('tabYear').classList.add('active'); $('tabMonth').classList.remove('active'); renderTable(); };
+$('tabMonth').onclick = () => { view = 'month'; $('tabMonth').classList.add('active'); $('tabYear').classList.remove('active'); renderTable(); };
+
+$('csv').onclick = () => {
+  const lines = ['Payment,Date,Principal,Interest,Extra,PMI,Balance'];
+  state.withExtra.rows.forEach(r => lines.push([r.m, payoffLabel(r.m), r.princ.toFixed(2), r.interest.toFixed(2), r.extra.toFixed(2), r.pmi.toFixed(2), r.balance.toFixed(2)].join(',')));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+  a.download = 'amortization-schedule.csv'; a.click();
+};
+
+// Recalculate on any other input change
+document.querySelectorAll('input, select').forEach(el => {
+  if (!['downAmt', 'downPct', 'price'].includes(el.id)) el.addEventListener('input', calc);
+});
+window.addEventListener('resize', () => state && drawChart());
+
+syncDown();
+calc();
+</script>
+</body>
+</html>
