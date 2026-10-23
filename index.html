@@ -208,15 +208,6 @@
     </div>
 
     <section class="card">
-      <h2>Monthly payment breakdown</h2>
-      <div class="breakdown">
-        <canvas id="donut" width="180" height="180" style="width:180px;height:180px"></canvas>
-        <div class="legend" id="legend"></div>
-      </div>
-      <div class="savings" id="savings"></div>
-    </section>
-
-    <section class="card">
       <h2>Loan balance over time</h2>
       <canvas id="chart" height="260"></canvas>
       <div class="chart-legend">
@@ -224,6 +215,15 @@
         <span><i style="background:var(--interest)"></i>Cumulative interest paid</span>
         <span id="baselineKey" hidden><i style="background:var(--muted)"></i>Balance without extra payments</span>
       </div>
+    </section>
+
+    <section class="card">
+      <h2>Monthly payment breakdown</h2>
+      <div class="breakdown">
+        <canvas id="donut" width="180" height="180" style="width:180px;height:180px"></canvas>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="savings" id="savings"></div>
     </section>
 
     <section class="card">
