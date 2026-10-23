@@ -28,6 +28,7 @@
   @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
   .card h2 { margin: 0 0 12px; font-size: 16px; }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; }
   .stack { display: grid; gap: 16px; }
   label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
   .field { margin-bottom: 12px; }
@@ -95,7 +96,10 @@
 <main>
   <!-- ============ INPUTS ============ -->
   <section class="card" aria-label="Loan details">
-    <h2>Loan details</h2>
+    <div class="card-head">
+      <h2>Loan details</h2>
+      <button class="btn" id="reset" title="Put every input back to its starting value">Reset</button>
+    </div>
 
     <div class="field">
       <label for="price">Home price</label>
@@ -487,6 +491,16 @@ $('csv').onclick = () => {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
   a.download = 'amortization-schedule.csv'; a.click();
+};
+
+// Reset button: restore every input to the value it had when the page loaded
+const defaults = {};
+document.querySelectorAll('input, select').forEach(el => defaults[el.id] = el.value);
+$('reset').onclick = () => {
+  for (const id in defaults) $(id).value = defaults[id];
+  lastDownEdited = 'pct';
+  syncDown();
+  calc();
 };
 
 // Recalculate on any other input change
