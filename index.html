@@ -13,12 +13,27 @@
     --principal: #6fa8ff; --interest: #f5a04a; --tax: #4fd1a0;
     --insurance: #c39bff; --pmi: #ff6b6f; --hoa: #9fb0cc;
   }
+  /* Light theme, switched on by the dark mode toggle */
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #f4f1e8; --card: #ffffff; --text: #14213d; --muted: #5b6785;
+    --border: #ddd6c4; --accent: #1f4fa8; --accent-soft: #e6ecf8;
+    --principal: #1f5fd1; --interest: #d9741c; --tax: #1d9a6c;
+    --insurance: #7c4ddb; --pmi: #d63c41; --hoa: #7d8aa3;
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--bg); color: var(--text);
     font: 16px/1.5 var(--font);
   }
-  header { max-width: 1200px; margin: 0 auto; padding: 28px 16px 8px; }
+  header {
+    max-width: 1200px; margin: 0 auto; padding: 28px 16px 8px;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  }
+  #themeToggle {
+    flex: none; font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+  }
   header h1 { margin: 0; font-size: 26px; }
   header p { margin: 4px 0 0; color: var(--muted); }
   main {
@@ -89,8 +104,11 @@
 </head>
 <body>
 <header>
-  <h1>Mortgage Calculator</h1>
-  <p>Monthly payment, full cost of the loan, extra-payment savings, amortization schedule and affordability — all updated as you type.</p>
+  <div>
+    <h1>Mortgage Calculator</h1>
+    <p>Monthly payment, full cost of the loan, extra-payment savings, amortization schedule and affordability — all updated as you type.</p>
+  </div>
+  <button id="themeToggle" aria-pressed="true">☀ Light mode</button>
 </header>
 
 <main>
@@ -508,6 +526,19 @@ document.querySelectorAll('input, select').forEach(el => {
   if (!['downAmt', 'downPct', 'price'].includes(el.id)) el.addEventListener('input', calc);
 });
 window.addEventListener('resize', () => state && drawChart());
+
+// ---------- Dark mode toggle ----------
+// Dark (navy) is the default; the choice is remembered in this browser.
+function applyTheme(dark) {
+  if (dark) document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', 'light');
+  $('themeToggle').textContent = dark ? '☀ Light mode' : '🌙 Dark mode';
+  $('themeToggle').setAttribute('aria-pressed', dark);
+  try { localStorage.setItem('mortgage-theme', dark ? 'dark' : 'light'); } catch (e) {}
+  if (state) calc(); // charts are drawn on canvas, so redraw them in the new colours
+}
+$('themeToggle').onclick = () => applyTheme(document.documentElement.hasAttribute('data-theme'));
+try { if (localStorage.getItem('mortgage-theme') === 'light') applyTheme(false); } catch (e) {}
 
 syncDown();
 calc();
