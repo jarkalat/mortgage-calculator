@@ -98,6 +98,18 @@
   thead th { position: sticky; top: 0; background: var(--card); border-bottom: 1px solid var(--border); font-weight: 600; }
   tbody tr:nth-child(even) { background: var(--bg); }
 
+  .optional { color: var(--muted); font-style: italic; }
+  .over { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 700px) { .over { grid-template-columns: 1fr; } }
+  .over > div { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .over .label { font-size: 12px; color: var(--muted); }
+  .over .value { font-size: 22px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .over .sub { font-size: 13px; color: var(--muted); }
+  .over .compare { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .over .compare span { color: var(--muted); font-size: 14px; }
+  .over .saved { background: var(--accent-soft); border-color: transparent; }
+  .over .saved .value { color: var(--tax); }
+
   .afford .result { font-size: 14px; margin-top: 4px; }
   .afford .big { font-size: 20px; font-weight: 700; color: var(--accent); }
 </style>
@@ -154,6 +166,12 @@
       <input id="start" type="month">
     </div>
 
+    <div class="field">
+      <label for="extraMonthly">Extra monthly payment <span class="optional">(optional)</span></label>
+      <div class="unit pre"><span>$</span><input id="extraMonthly" type="number" min="0" step="50" value="0"></div>
+      <div class="hint">Paid on top of the normal payment each month; it all goes toward the loan itself</div>
+    </div>
+
     <details open>
       <summary>Taxes, insurance &amp; fees</summary>
       <div class="row">
@@ -180,17 +198,11 @@
     </details>
 
     <details>
-      <summary>Extra payments</summary>
-      <div class="row">
-        <div class="field">
-          <label for="extraMonthly">Extra each month</label>
-          <div class="unit pre"><span>$</span><input id="extraMonthly" type="number" min="0" step="50" value="0"></div>
-        </div>
-        <div class="field">
-          <label for="extraYearly">Extra once a year</label>
-          <div class="unit pre"><span>$</span><input id="extraYearly" type="number" min="0" step="500" value="0"></div>
-          <div class="hint">Paid with every 12th payment</div>
-        </div>
+      <summary>More extra payments</summary>
+      <div class="field">
+        <label for="extraYearly">Extra once a year</label>
+        <div class="unit pre"><span>$</span><input id="extraYearly" type="number" min="0" step="500" value="0"></div>
+        <div class="hint">Paid with every 12th payment</div>
       </div>
       <div class="field">
         <label for="lump">One-time lump sum</label>
@@ -228,6 +240,27 @@
       <div class="kpi"><div class="label">Total interest</div><div class="value" id="kInterest">–</div></div>
       <div class="kpi"><div class="label">Payoff date</div><div class="value" id="kPayoff">–</div></div>
     </div>
+
+    <section class="card" id="overCard" hidden>
+      <h2>Effect of your extra payments</h2>
+      <div class="over">
+        <div>
+          <div class="label">New payoff time</div>
+          <div class="value" id="oTime">–</div>
+          <div class="sub" id="oTimeSub"></div>
+        </div>
+        <div>
+          <div class="label">Total interest</div>
+          <div class="compare"><span>Without extra</span><b id="oIntBase">–</b></div>
+          <div class="compare"><span>With extra</span><b id="oIntExtra">–</b></div>
+        </div>
+        <div class="saved">
+          <div class="label">Interest saved</div>
+          <div class="value" id="oSaved">–</div>
+          <div class="sub" id="oSavedSub"></div>
+        </div>
+      </div>
+    </section>
 
     <section class="card">
       <h2>Loan balance over time</h2>
@@ -377,14 +410,20 @@ function calc() {
     `<div>Total per month<b>${money(total, true)}</b></div>`;
   drawDonut(parts);
 
-  // Extra payment savings
+  // Extra payment effect: compare the loan with and without the extras
   const saved = base.totalInterest - withExtra.totalInterest;
+  // Show the panel if the extras save interest OR shorten the loan (at 0% they only shorten it)
+  const effective = hasExtras && loan > 0 && (saved > 0.5 || withExtra.rows.length < base.rows.length);
+  $('overCard').hidden = !effective;
   let summary = '';
-  if (hasExtras && loan > 0 && saved > 0.5) {
-    const monthsSaved = base.rows.length - withExtra.rows.length;
-    const y = Math.floor(monthsSaved / 12), mo = monthsSaved % 12;
-    summary = `With your extra payments you save <b>${money(saved)}</b> in interest and pay off the loan
-      <b>${y ? y + ' yr ' : ''}${mo} mo</b> sooner (${payoffLabel(withExtra.rows.length)} instead of ${payoffLabel(base.rows.length)}).`;
+  if (effective) {
+    const nNew = withExtra.rows.length, nBase = base.rows.length;
+    $('oTime').textContent = duration(nNew);
+    $('oTimeSub').textContent = `instead of ${duration(nBase)} · paid off ${payoffLabel(nNew)}`;
+    $('oIntBase').textContent = money(base.totalInterest);
+    $('oIntExtra').textContent = money(withExtra.totalInterest);
+    $('oSaved').textContent = money(saved);
+    $('oSavedSub').textContent = `and ${duration(nBase - nNew)} sooner`;
   } else if (loan > 0) {
     summary = `Over the full term you'll pay <b>${money(loan + base.totalInterest)}</b> in principal and interest — <b>${money(base.totalInterest)}</b> of that is interest.`;
     if (hasExtras) summary += ` <br>Your extra payments have no effect — the lump sum falls after the loan is already paid off.`;
@@ -392,11 +431,17 @@ function calc() {
   // PMI doesn't last forever — say when it ends and what it costs in total
   const pmiMonths = withExtra.rows.filter(r => r.pmi > 0).length;
   if (pmiMonths) summary += `<br>PMI ends after <b>${pmiMonths}</b> payments (${payoffLabel(pmiMonths)}), costing <b>${money(withExtra.totalPMI)}</b> in total.`;
-  $('savings').innerHTML = summary;
+  $('savings').innerHTML = summary.replace(/^<br>/, '');
 
   affordability();
   drawChart();
   renderTable();
+}
+
+// Number of monthly payments → "23 yr 11 mo"
+function duration(n) {
+  const y = Math.floor(n / 12), m = n % 12;
+  return [y && `${y} yr`, m && `${m} mo`].filter(Boolean).join(' ') || '0 mo';
 }
 
 function payoffLabel(n) {
@@ -475,10 +520,38 @@ function drawChart() {
     data.forEach(r => ctx.lineTo(x(r.m), y(r[key])));
     ctx.stroke(); ctx.setLineDash([]);
   };
-  if (hasExtras) line(base.rows, 'balance', css('--muted'), [5, 4]);
+  const effective = hasExtras && rows.length < base.rows.length;
+  const plotTop = pad.t, plotBottom = H - pad.b;
+  if (effective) {
+    // Shade the stretch of time the extra payments cut off the loan
+    const x0 = x(rows.length), x1 = x(base.rows.length);
+    ctx.fillStyle = css('--accent-soft');
+    ctx.fillRect(x0, plotTop, x1 - x0, plotBottom - plotTop);
+    ctx.fillStyle = css('--muted'); ctx.textAlign = 'center';
+    if (x1 - x0 > 70) ctx.fillText(duration(base.rows.length - rows.length) + ' sooner', (x0 + x1) / 2, plotTop + 16);
+    line(base.rows, 'balance', css('--muted'), [5, 4]);
+  }
   line(rows, 'balance', css('--principal'));
   line(rows, 'cumInterest', css('--interest'));
-  $('baselineKey').hidden = !hasExtras;
+  if (effective) {
+    // Payoff markers: original finish (hollow) and new, earlier finish (filled)
+    const dot = (m, color, filled) => {
+      ctx.beginPath(); ctx.arc(x(m), y(0), 5, 0, Math.PI * 2);
+      ctx.lineWidth = 2; ctx.strokeStyle = color; ctx.fillStyle = filled ? color : css('--card');
+      ctx.fill(); ctx.stroke();
+    };
+    dot(base.rows.length, css('--muted'), false);
+    dot(rows.length, css('--principal'), true);
+    // Label on a small card-coloured box so chart lines don't run through it
+    const label = 'Paid off: ' + duration(rows.length);
+    ctx.font = '700 13px ' + css('--font'); ctx.textAlign = 'left';
+    const tw = ctx.measureText(label).width, lx = x(rows.length);
+    const bx = Math.min(Math.max(lx - tw / 2 - 6, pad.l), W - pad.r - tw - 12), by = y(0) - 34;
+    ctx.fillStyle = css('--card'); ctx.strokeStyle = css('--principal'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(bx, by, tw + 12, 20, 6); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = css('--text'); ctx.fillText(label, bx + 6, by + 14);
+  }
+  $('baselineKey').hidden = !effective;
 }
 
 // ---------- Amortization table ----------
