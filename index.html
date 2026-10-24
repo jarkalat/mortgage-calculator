@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-US">
+<html lang="en-US" data-cur="USD">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -111,6 +111,20 @@
   .over .saved { background: var(--accent-soft); border-color: transparent; }
   .over .saved .value { color: var(--tax); }
 
+  /* Currency switch and per-currency fields */
+  .currency { display: flex; gap: 6px; }
+  .currency button {
+    flex: 1; font: inherit; font-size: 14px; padding: 7px 0; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  }
+  .currency button.active { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 700; }
+  :root[data-cur="USD"] .eu-only, :root:not([data-cur="USD"]) .us-only { display: none; }
+  .warn {
+    margin-top: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.4;
+    background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 6px;
+  }
+  .warn.strong { border-left-color: var(--pmi); }
+
   footer { max-width: 1200px; margin: 0 auto; padding: 8px 16px 32px; text-align: center; }
   footer p { margin: 0; font-size: 13px; color: var(--muted); }
 
@@ -136,22 +150,33 @@
     </div>
 
     <div class="field">
+      <label id="currencyLabel">Currency</label>
+      <div class="currency" role="group" aria-labelledby="currencyLabel">
+        <button type="button" data-cur="USD" class="active" aria-pressed="true">USD</button>
+        <button type="button" data-cur="CZK" aria-pressed="false">CZK</button>
+        <button type="button" data-cur="EUR" aria-pressed="false">EUR</button>
+      </div>
+    </div>
+
+    <div class="field">
       <label for="price">Home price</label>
-      <div class="unit pre"><span>$</span><input id="price" type="number" min="0" step="1000" value="400000"></div>
+      <div class="unit pre money"><span>$</span><input id="price" type="number" min="0" step="1000" value="400000"></div>
     </div>
 
     <div class="field">
       <label>Down payment</label>
       <div class="row">
-        <div class="unit pre"><span>$</span><input id="downAmt" type="number" min="0" step="1000" value="80000"></div>
+        <div class="unit pre money"><span>$</span><input id="downAmt" type="number" min="0" step="1000" value="80000"></div>
         <div class="unit post"><span>%</span><input id="downPct" type="number" min="0" max="100" step="0.5" value="20"></div>
       </div>
+      <div class="warn" id="ltvWarn" hidden></div>
     </div>
 
     <div class="row">
       <div class="field">
         <label for="rate">Interest rate</label>
         <div class="unit post"><span>%</span><input id="rate" type="number" min="0" step="0.05" value="6.5"></div>
+        <div class="hint eu-only">European mortgages usually fix the rate for 1–10 years, not the whole loan. After that the rate resets, so later payments may change.</div>
       </div>
       <div class="field">
         <label for="term">Loan term</label>
@@ -172,7 +197,7 @@
 
     <div class="field">
       <label for="extraMonthly">Extra monthly payment <span class="optional">(optional)</span></label>
-      <div class="unit pre"><span>$</span><input id="extraMonthly" type="number" min="0" step="50" value="0"></div>
+      <div class="unit pre money"><span>$</span><input id="extraMonthly" type="number" min="0" step="50" value="0"></div>
       <div class="hint">Paid on top of the normal payment each month; it all goes toward the loan itself</div>
     </div>
 
@@ -180,23 +205,25 @@
       <summary>Taxes, insurance &amp; fees</summary>
       <div class="row">
         <div class="field">
-          <label for="tax">Property tax / year</label>
-          <div class="unit post"><span>%</span><input id="tax" type="number" min="0" step="0.05" value="1.1"></div>
+          <label for="tax" class="us-only">Property tax / year</label>
+          <label for="taxAmt" class="eu-only">Property tax / year</label>
+          <div class="unit post us-only"><span>%</span><input id="tax" type="number" min="0" step="0.05" value="1.1"></div>
+          <div class="unit pre money eu-only"><span>$</span><input id="taxAmt" type="number" min="0" step="100" value="0"></div>
         </div>
         <div class="field">
           <label for="ins">Home insurance / year</label>
-          <div class="unit pre"><span>$</span><input id="ins" type="number" min="0" step="50" value="1500"></div>
+          <div class="unit pre money"><span>$</span><input id="ins" type="number" min="0" step="50" value="1500"></div>
         </div>
       </div>
       <div class="row">
-        <div class="field">
+        <div class="field us-only">
           <label for="pmi">PMI / year</label>
           <div class="unit post"><span>%</span><input id="pmi" type="number" min="0" step="0.05" value="0.5"></div>
           <div class="hint">Only charged while down payment &lt; 20%</div>
         </div>
         <div class="field">
-          <label for="hoa">HOA / month</label>
-          <div class="unit pre"><span>$</span><input id="hoa" type="number" min="0" step="10" value="0"></div>
+          <label for="hoa" id="hoaLabel">HOA / month</label>
+          <div class="unit pre money"><span>$</span><input id="hoa" type="number" min="0" step="10" value="0"></div>
         </div>
       </div>
     </details>
@@ -205,13 +232,13 @@
       <summary>More extra payments</summary>
       <div class="field">
         <label for="extraYearly">Extra once a year</label>
-        <div class="unit pre"><span>$</span><input id="extraYearly" type="number" min="0" step="500" value="0"></div>
+        <div class="unit pre money"><span>$</span><input id="extraYearly" type="number" min="0" step="500" value="0"></div>
         <div class="hint">Paid with every 12th payment</div>
       </div>
       <div class="field">
         <label for="lump">One-time lump sum</label>
         <div class="row">
-          <div class="unit pre"><span>$</span><input id="lump" type="number" min="0" step="1000" value="0"></div>
+          <div class="unit pre money"><span>$</span><input id="lump" type="number" min="0" step="1000" value="0"></div>
           <div class="unit post"><span>mo</span><input id="lumpMonth" type="number" min="1" step="1" value="12" title="Payment number when the lump sum is paid"></div>
         </div>
         <div class="hint">Right box = which payment number it goes in with</div>
@@ -224,13 +251,14 @@
         <div class="row">
           <div class="field">
             <label for="income">Gross income / year</label>
-            <div class="unit pre"><span>$</span><input id="income" type="number" min="0" step="1000" value="120000"></div>
+            <div class="unit pre money"><span>$</span><input id="income" type="number" min="0" step="1000" value="120000"></div>
           </div>
           <div class="field">
             <label for="debts">Other debts / month</label>
-            <div class="unit pre"><span>$</span><input id="debts" type="number" min="0" step="50" value="400"></div>
+            <div class="unit pre money"><span>$</span><input id="debts" type="number" min="0" step="50" value="400"></div>
           </div>
         </div>
+        <div class="hint eu-only">Based on the US 28/36 rule of thumb. Czech banks use different limits.</div>
         <div id="affordOut" class="result"></div>
       </div>
     </details>
@@ -310,10 +338,35 @@
 <script>
 const $ = id => document.getElementById(id);
 const num = id => Math.max(0, parseFloat($(id).value) || 0);
-const money = (v, cents = false) => v.toLocaleString('en-US', {
-  style: 'currency', currency: 'USD',
-  minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0
-});
+
+// ---------- Currencies ----------
+// USD keeps the original US rules. CZK and EUR (eu: true) use European rules:
+// no PMI, property tax as a fixed yearly amount, "Repair fund" instead of HOA,
+// and a warning when the loan is above 80% of the price.
+const CURRENCIES = {
+  USD: { locale: 'en-US', symbol: '$', after: false, cents: true, eu: false,
+    steps: { price: 1000, downAmt: 1000, extraMonthly: 50, ins: 50, hoa: 10, extraYearly: 500, lump: 1000, income: 1000, debts: 50 },
+    defaults: { price: 400000, rate: 6.5, tax: 1.1, ins: 1500, pmi: 0.5, hoa: 0, income: 120000, debts: 400 } },
+  CZK: { locale: 'cs-CZ', symbol: 'Kč', after: true, cents: false, eu: true,
+    steps: { price: 100000, downAmt: 100000, extraMonthly: 1000, taxAmt: 500, ins: 500, hoa: 100, extraYearly: 10000, lump: 50000, income: 10000, debts: 1000 },
+    defaults: { price: 7000000, rate: 4.8, taxAmt: 3000, ins: 4000, hoa: 1500, income: 1200000, debts: 5000 } },
+  EUR: { locale: 'en-IE', symbol: '€', after: false, cents: true, eu: true,
+    steps: { price: 5000, downAmt: 5000, extraMonthly: 50, taxAmt: 50, ins: 50, hoa: 10, extraYearly: 500, lump: 1000, income: 1000, debts: 50 },
+    defaults: { price: 350000, rate: 3.5, taxAmt: 800, ins: 500, hoa: 100, income: 60000, debts: 300 } },
+};
+let cur = 'USD';
+const cfg = () => CURRENCIES[cur];
+
+const money = (v, cents = false) => {
+  const c = cfg(), d = cents && c.cents ? 2 : 0;
+  return v.toLocaleString(c.locale, { style: 'currency', currency: cur, minimumFractionDigits: d, maximumFractionDigits: d });
+};
+// Short axis labels: "$306k" in USD (as before), "5,6 mil. Kč" / "€280K" otherwise
+const moneyShort = v => {
+  if (v < 1000) return money(v);
+  if (cur === 'USD') return '$' + Math.round(v / 1000) + 'k';
+  return v.toLocaleString(cfg().locale, { style: 'currency', currency: cur, notation: 'compact', maximumFractionDigits: 1 });
+};
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
 // Default start month = next month
@@ -379,10 +432,12 @@ function calc() {
   const rate = num('rate');
   const months = parseInt($('term').value, 10) * 12;
   const downPct = price ? down / price * 100 : 0;
-  const pmiRate = downPct < 20 ? num('pmi') : 0;
+  const eu = cfg().eu;
+  const pmiRate = !eu && downPct < 20 ? num('pmi') : 0;   // no PMI in Europe
 
   const pi = loan > 0 ? monthlyPI(loan, rate, months) : 0;
-  const tax = price * num('tax') / 100 / 12;
+  // US: property tax is a % of the price; Europe: a fixed yearly amount
+  const tax = eu ? num('taxAmt') / 12 : price * num('tax') / 100 / 12;
   const ins = num('ins') / 12;
   const pmi = loan * pmiRate / 100 / 12;
   const hoa = num('hoa');
@@ -411,8 +466,23 @@ function calc() {
     ['Property tax', tax, '--tax'],
     ['Home insurance', ins, '--insurance'],
     ['PMI', pmi, '--pmi'],
-    ['HOA', hoa, '--hoa'],
+    [eu ? 'Repair fund' : 'HOA', hoa, '--hoa'],
   ].filter(p => p[1] > 0);
+
+  // Loan-to-value warning (Europe): the Czech National Bank normally caps loans at 80%
+  const ltv = price ? loan / price * 100 : 0, warn = $('ltvWarn');
+  warn.hidden = !(eu && ltv > 80 + 1e-9);
+  if (!warn.hidden) {
+    const pct = `<b>Loan is ${ltv.toFixed(1)}% of the price.</b> `;
+    warn.classList.toggle('strong', ltv > 90 + 1e-9);
+    warn.innerHTML = ltv > 90 + 1e-9
+      ? pct + (cur === 'CZK'
+        ? 'That is above even the 90% limit the Czech National Bank allows for buyers under 36, so Czech banks normally won’t lend this much.'
+        : 'That is above even the 90% limit the Czech National Bank allows for buyers under 36; most European lenders won’t go this high.')
+      : pct + (cur === 'CZK'
+        ? 'The Czech National Bank normally caps mortgages at 80% of the home value (90% for buyers under 36).'
+        : 'Many European regulators cap mortgages at 80% (the Czech National Bank: 80%, or 90% for buyers under 36).');
+  }
   $('legend').innerHTML = parts.map(([n, v, c]) =>
     `<div><i style="background:var(${c})"></i>${n}<b>${money(v, true)}</b></div>`).join('') +
     `<div>Total per month<b>${money(total, true)}</b></div>`;
@@ -516,7 +586,7 @@ function drawChart() {
   for (let i = 0; i <= 4; i++) {
     const v = maxY * i / 4, yy = y(v);
     ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(W - pad.r, yy); ctx.stroke();
-    ctx.textAlign = 'right'; ctx.fillText(v >= 1000 ? '$' + Math.round(v / 1000) + 'k' : money(v), pad.l - 8, yy + 4);
+    ctx.textAlign = 'right'; ctx.fillText(moneyShort(v), pad.l - 8, yy + 4);
   }
   const years = months / 12, step = years > 20 ? 5 : years > 10 ? 2 : 1;
   ctx.textAlign = 'center';
@@ -585,22 +655,55 @@ $('tabYear').onclick = () => { view = 'year'; $('tabYear').classList.add('active
 $('tabMonth').onclick = () => { view = 'month'; $('tabMonth').classList.add('active'); $('tabYear').classList.remove('active'); renderTable(); };
 
 $('csv').onclick = () => {
-  const lines = ['Payment,Date,Principal,Interest,Extra,PMI,Balance'];
-  state.withExtra.rows.forEach(r => lines.push([r.m, payoffLabel(r.m), r.princ.toFixed(2), r.interest.toFixed(2), r.extra.toFixed(2), r.pmi.toFixed(2), r.balance.toFixed(2)].join(',')));
+  const lines = [];
+  if (!cfg().eu) {
+    lines.push('Payment,Date,Principal,Interest,Extra,PMI,Balance');
+    state.withExtra.rows.forEach(r => lines.push([r.m, payoffLabel(r.m), r.princ.toFixed(2), r.interest.toFixed(2), r.extra.toFixed(2), r.pmi.toFixed(2), r.balance.toFixed(2)].join(',')));
+  } else {
+    // Europe: no PMI column; amounts labelled with the currency
+    lines.push(`Payment,Date,Principal (${cur}),Interest (${cur}),Extra (${cur}),Balance (${cur})`);
+    state.withExtra.rows.forEach(r => lines.push([r.m, payoffLabel(r.m), r.princ.toFixed(2), r.interest.toFixed(2), r.extra.toFixed(2), r.balance.toFixed(2)].join(',')));
+  }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
   a.download = 'amortization-schedule.csv'; a.click();
 };
 
-// Reset button: restore every input to the value it had when the page loaded
+// Reset button: restore every input to its starting value for the current currency
+// (page-load values, with the currency's own starting numbers on top)
 const defaults = {};
 document.querySelectorAll('input, select').forEach(el => defaults[el.id] = el.value);
-$('reset').onclick = () => {
+function applyDefaults() {
   for (const id in defaults) $(id).value = defaults[id];
+  for (const [id, v] of Object.entries(cfg().defaults)) $(id).value = v;
   lastDownEdited = 'pct';
   syncDown();
   calc();
-};
+}
+$('reset').onclick = applyDefaults;
+
+// ---------- Currency switch ----------
+function setCurrency(code, fill) {
+  cur = code;
+  const c = cfg();
+  document.documentElement.dataset.cur = code;
+  document.querySelectorAll('.currency button').forEach(b => {
+    b.classList.toggle('active', b.dataset.cur === code);
+    b.setAttribute('aria-pressed', b.dataset.cur === code);
+  });
+  // Symbol in input boxes: "$" / "€" before the number, "Kč" after it
+  document.querySelectorAll('.unit.money').forEach(u => {
+    u.querySelector('span').textContent = c.symbol;
+    u.classList.toggle('pre', !c.after);
+    u.classList.toggle('post', c.after);
+  });
+  for (const [id, step] of Object.entries(c.steps)) $(id).step = step;
+  $('hoaLabel').textContent = c.eu ? 'Repair fund / month' : 'HOA / month';
+  try { localStorage.setItem('mortgage-currency', code); } catch (e) {}
+  if (fill) applyDefaults(); else calc();
+}
+document.querySelectorAll('.currency button').forEach(b =>
+  b.addEventListener('click', () => { if (b.dataset.cur !== cur) setCurrency(b.dataset.cur, true); }));
 
 // Recalculate on any other input change
 document.querySelectorAll('input, select').forEach(el => {
@@ -623,6 +726,12 @@ try { if (localStorage.getItem('mortgage-theme') === 'light') applyTheme(false);
 
 syncDown();
 calc();
+
+// Reopen in the currency chosen last time (with that currency's starting numbers)
+try {
+  const saved = localStorage.getItem('mortgage-currency');
+  if (saved && saved !== 'USD' && CURRENCIES[saved]) setCurrency(saved, true);
+} catch (e) {}
 </script>
 </body>
 </html>
