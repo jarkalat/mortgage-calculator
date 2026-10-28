@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en-US" data-cur="USD">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mortgage Calculator with Extra Payments</title>
+<meta name="description" content="Estimate your monthly mortgage payment with taxes, insurance and PMI, and see how extra payments shorten your loan and cut total interest. Free tool.">
+<script src="js/theme-init.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/mortgage.css">
+</head>
+<body>
+<nav class="topnav" id="topnav" data-page="mortgage" aria-label="Abodex tools"></nav>
+<header>
+  <div>
+    <h1>Mortgage Calculator</h1>
+    <p>Monthly payment, full cost of the loan, extra-payment savings, amortization schedule and affordability — all updated as you type.</p>
+  </div>
+</header>
+
+<main>
+  <!-- ============ INPUTS ============ -->
+  <section class="card" aria-label="Loan details">
+    <div class="card-head">
+      <h2>Loan details</h2>
+      <button class="btn" id="reset" title="Put every input back to its starting value">Reset</button>
+    </div>
+
+    <div class="field">
+      <label id="currencyLabel">Currency</label>
+      <div class="currency" role="group" aria-labelledby="currencyLabel">
+        <button type="button" data-cur="USD" class="active" aria-pressed="true">USD</button>
+        <button type="button" data-cur="CZK" aria-pressed="false">CZK</button>
+        <button type="button" data-cur="EUR" aria-pressed="false">EUR</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="price">Home price</label>
+      <div class="unit pre money"><span>$</span><input id="price" type="number" min="0" step="1000" value="400000"></div>
+    </div>
+
+    <div class="field">
+      <label>Down payment</label>
+      <div class="row">
+        <div class="unit pre money"><span>$</span><input id="downAmt" type="number" min="0" step="1000" value="80000"></div>
+        <div class="unit post"><span>%</span><input id="downPct" type="number" min="0" max="100" step="0.5" value="20"></div>
+      </div>
+      <div class="warn" id="ltvWarn" hidden></div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="rate">Interest rate</label>
+        <div class="unit post"><span>%</span><input id="rate" type="number" min="0" step="0.05" value="6.5"></div>
+        <div class="hint eu-only">European mortgages usually fix the rate for 1–10 years, not the whole loan. After that the rate resets, so later payments may change.</div>
+      </div>
+      <div class="field">
+        <label for="term">Loan term</label>
+        <select id="term">
+          <option value="30" selected>30 years</option>
+          <option value="25">25 years</option>
+          <option value="20">20 years</option>
+          <option value="15">15 years</option>
+          <option value="10">10 years</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="start">First payment month</label>
+      <input id="start" type="month">
+    </div>
+
+    <div class="field">
+      <label for="extraMonthly">Extra monthly payment <span class="optional">(optional)</span></label>
+      <div class="unit pre money"><span>$</span><input id="extraMonthly" type="number" min="0" step="50" value="0"></div>
+      <div class="hint">Paid on top of the normal payment each month; it all goes toward the loan itself</div>
+    </div>
+
+    <details open>
+      <summary>Taxes, insurance &amp; fees</summary>
+      <div class="row">
+        <div class="field">
+          <label for="tax" class="us-only">Property tax / year</label>
+          <label for="taxAmt" class="eu-only">Property tax / year</label>
+          <div class="unit post us-only"><span>%</span><input id="tax" type="number" min="0" step="0.05" value="1.1"></div>
+          <div class="unit pre money eu-only"><span>$</span><input id="taxAmt" type="number" min="0" step="100" value="0"></div>
+        </div>
+        <div class="field">
+          <label for="ins">Home insurance / year</label>
+          <div class="unit pre money"><span>$</span><input id="ins" type="number" min="0" step="50" value="1500"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field us-only">
+          <label for="pmi">PMI / year</label>
+          <div class="unit post"><span>%</span><input id="pmi" type="number" min="0" step="0.05" value="0.5"></div>
+          <div class="hint">Only charged while down payment &lt; 20%</div>
+        </div>
+        <div class="field">
+          <label for="hoa" id="hoaLabel">HOA / month</label>
+          <div class="unit pre money"><span>$</span><input id="hoa" type="number" min="0" step="10" value="0"></div>
+        </div>
+      </div>
+    </details>
+
+    <details>
+      <summary>More extra payments</summary>
+      <div class="field">
+        <label for="extraYearly">Extra once a year</label>
+        <div class="unit pre money"><span>$</span><input id="extraYearly" type="number" min="0" step="500" value="0"></div>
+        <div class="hint">Paid with every 12th payment</div>
+      </div>
+      <div class="field">
+        <label for="lump">One-time lump sum</label>
+        <div class="row">
+          <div class="unit pre money"><span>$</span><input id="lump" type="number" min="0" step="1000" value="0"></div>
+          <div class="unit post"><span>mo</span><input id="lumpMonth" type="number" min="1" step="1" value="12" title="Payment number when the lump sum is paid"></div>
+        </div>
+        <div class="hint">Right box = which payment number it goes in with</div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Affordability check</summary>
+      <div class="afford">
+        <div class="row">
+          <div class="field">
+            <label for="income">Gross income / year</label>
+            <div class="unit pre money"><span>$</span><input id="income" type="number" min="0" step="1000" value="120000"></div>
+          </div>
+          <div class="field">
+            <label for="debts">Other debts / month</label>
+            <div class="unit pre money"><span>$</span><input id="debts" type="number" min="0" step="50" value="400"></div>
+          </div>
+        </div>
+        <div class="hint eu-only">Based on the US 28/36 rule of thumb. Czech banks use different limits.</div>
+        <div id="affordOut" class="result"></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <div class="stack">
+    <div class="kpis">
+      <div class="kpi main"><div class="label">Monthly payment</div><div class="value" id="kMonthly">–</div></div>
+      <div class="kpi"><div class="label">Loan amount</div><div class="value" id="kLoan">–</div></div>
+      <div class="kpi"><div class="label">Total interest</div><div class="value" id="kInterest">–</div></div>
+      <div class="kpi"><div class="label">Payoff date</div><div class="value" id="kPayoff">–</div></div>
+    </div>
+
+    <section class="card" id="overCard" hidden>
+      <h2>Effect of your extra payments</h2>
+      <div class="over">
+        <div>
+          <div class="label">New payoff time</div>
+          <div class="value" id="oTime">–</div>
+          <div class="sub" id="oTimeSub"></div>
+        </div>
+        <div>
+          <div class="label">Total interest</div>
+          <div class="compare"><span>Without extra</span><b id="oIntBase">–</b></div>
+          <div class="compare"><span>With extra</span><b id="oIntExtra">–</b></div>
+        </div>
+        <div class="saved">
+          <div class="label">Interest saved</div>
+          <div class="value" id="oSaved">–</div>
+          <div class="sub" id="oSavedSub"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Loan balance over time</h2>
+      <canvas id="chart" height="260"></canvas>
+      <div class="chart-legend">
+        <span><i style="background:var(--principal)"></i>Remaining balance</span>
+        <span><i style="background:var(--interest)"></i>Cumulative interest paid</span>
+        <span id="baselineKey" hidden><i style="background:var(--muted)"></i>Balance without extra payments</span>
+        <span id="fixKey" hidden><i style="background:var(--accent)"></i>Fixation ends</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Monthly payment breakdown</h2>
+      <div class="breakdown">
+        <canvas id="donut" width="180" height="180" style="width:180px;height:180px"></canvas>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="savings" id="savings"></div>
+    </section>
+
+    <section class="card">
+      <h2>Amortization schedule</h2>
+      <div class="tabs">
+        <button id="tabYear" class="active">By year</button>
+        <button id="tabMonth">By month</button>
+        <span class="spacer"></span>
+        <button class="btn" id="csv">Download CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th id="periodHead">Year</th><th>Principal</th><th>Interest</th><th>Extra</th><th>Total paid</th><th>Balance</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="stressCard" hidden>
+      <h2>Rate fixation stress test</h2>
+      <p class="lead">Fixation is the period your interest rate is locked; when it ends, the bank resets the rate to current market levels and recalculates your monthly payment.</p>
+      <p class="hint us-only">Most US mortgages are fixed for the full term; this models an adjustable-rate (ARM) loan.</p>
+      <div class="row">
+        <div class="field">
+          <label for="fixYears">Fixation period</label>
+          <select id="fixYears">
+            <option value="1">1 year</option>
+            <option value="3">3 years</option>
+            <option value="5" selected>5 years</option>
+            <option value="7">7 years</option>
+            <option value="10">10 years</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="resetRate">Expected rate after fixation</label>
+          <div class="unit post"><span>%</span><input id="resetRate" type="number" min="0" step="0.05"></div>
+          <div class="hint" id="resetRateHint">Starts at your current rate + 2%</div>
+        </div>
+      </div>
+      <div class="savings" id="stressMsg" hidden></div>
+      <div id="stressBody">
+        <div class="over">
+          <div>
+            <div class="label">Balance when fixation ends</div>
+            <div class="value" id="sBalance">–</div>
+            <div class="sub" id="sBalanceSub"></div>
+          </div>
+          <div>
+            <div class="label">Monthly loan payment</div>
+            <div class="compare"><span>Now</span><b id="sPayNow">–</b></div>
+            <div class="compare"><span id="sPayAfterLabel">After reset</span><b id="sPayAfter">–</b></div>
+            <div class="compare"><span>Difference</span><b id="sPayDiff">–</b></div>
+          </div>
+          <div>
+            <div class="label">Total interest over the loan</div>
+            <div class="value" id="sInt">–</div>
+            <div class="sub" id="sIntSub"></div>
+          </div>
+        </div>
+        <div class="hint">Loan payment = principal + interest. Taxes, insurance and fees don’t change at the reset; extra payments continue as before.</div>
+        <div class="table-wrap stress-table">
+          <table>
+            <thead><tr><th>Reset rate</th><th>Monthly payment</th><th>Difference / month</th><th>Total interest change</th></tr></thead>
+            <tbody id="stressRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <p>For illustration only. Not financial advice. Real offers depend on your lender.</p>
+</footer>
+
+<script src="js/common.js"></script>
+<script src="js/mortgage.js"></script>
+</body>
+</html>
