@@ -125,6 +125,14 @@
   }
   .warn.strong { border-left-color: var(--pmi); }
 
+  /* Rate fixation stress test */
+  .lead { margin: -4px 0 8px; font-size: 14px; }
+  #stressCard .over { margin: 4px 0 8px; }
+  .up { color: var(--pmi); }
+  .down { color: var(--tax); }
+  .stress-table { margin-top: 12px; }
+  .stress-table tr.chosen td { font-weight: 700; }
+
   footer { max-width: 1200px; margin: 0 auto; padding: 8px 16px 32px; text-align: center; }
   footer p { margin: 0; font-size: 13px; color: var(--muted); }
 
@@ -301,6 +309,7 @@
         <span><i style="background:var(--principal)"></i>Remaining balance</span>
         <span><i style="background:var(--interest)"></i>Cumulative interest paid</span>
         <span id="baselineKey" hidden><i style="background:var(--muted)"></i>Balance without extra payments</span>
+        <span id="fixKey" hidden><i style="background:var(--accent)"></i>Fixation ends</span>
       </div>
     </section>
 
@@ -326,6 +335,57 @@
           <thead><tr><th id="periodHead">Year</th><th>Principal</th><th>Interest</th><th>Extra</th><th>Total paid</th><th>Balance</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
+      </div>
+    </section>
+
+    <section class="card" id="stressCard" hidden>
+      <h2>Rate fixation stress test</h2>
+      <p class="lead">Fixation is the period your interest rate is locked; when it ends, the bank resets the rate to current market levels and recalculates your monthly payment.</p>
+      <p class="hint us-only">Most US mortgages are fixed for the full term; this models an adjustable-rate (ARM) loan.</p>
+      <div class="row">
+        <div class="field">
+          <label for="fixYears">Fixation period</label>
+          <select id="fixYears">
+            <option value="1">1 year</option>
+            <option value="3">3 years</option>
+            <option value="5" selected>5 years</option>
+            <option value="7">7 years</option>
+            <option value="10">10 years</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="resetRate">Expected rate after fixation</label>
+          <div class="unit post"><span>%</span><input id="resetRate" type="number" min="0" step="0.05"></div>
+          <div class="hint" id="resetRateHint">Starts at your current rate + 2%</div>
+        </div>
+      </div>
+      <div class="savings" id="stressMsg" hidden></div>
+      <div id="stressBody">
+        <div class="over">
+          <div>
+            <div class="label">Balance when fixation ends</div>
+            <div class="value" id="sBalance">–</div>
+            <div class="sub" id="sBalanceSub"></div>
+          </div>
+          <div>
+            <div class="label">Monthly loan payment</div>
+            <div class="compare"><span>Now</span><b id="sPayNow">–</b></div>
+            <div class="compare"><span id="sPayAfterLabel">After reset</span><b id="sPayAfter">–</b></div>
+            <div class="compare"><span>Difference</span><b id="sPayDiff">–</b></div>
+          </div>
+          <div>
+            <div class="label">Total interest over the loan</div>
+            <div class="value" id="sInt">–</div>
+            <div class="sub" id="sIntSub"></div>
+          </div>
+        </div>
+        <div class="hint">Loan payment = principal + interest. Taxes, insurance and fees don’t change at the reset; extra payments continue as before.</div>
+        <div class="table-wrap stress-table">
+          <table>
+            <thead><tr><th>Reset rate</th><th>Monthly payment</th><th>Difference / month</th><th>Total interest change</th></tr></thead>
+            <tbody id="stressRows"></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </div>
@@ -384,11 +444,17 @@ function monthlyPI(principal, annualRate, months) {
 }
 
 // Walks the loan month by month, applying any extra payments to principal.
-function amortize(principal, annualRate, months, payment, extras, homePrice, pmiRate) {
-  const r = annualRate / 100 / 12;
+// Optional reset = { month, rate }: after that many payments the rate changes and the
+// bank recalculates the payment so the loan still ends on the original date.
+function amortize(principal, annualRate, months, payment, extras, homePrice, pmiRate, reset = null) {
+  let r = annualRate / 100 / 12;
   const rows = [];
   let balance = principal, totalInterest = 0, totalPMI = 0;
   for (let m = 1; m <= months && balance > 0.005; m++) {
+    if (reset && m === reset.month + 1) {
+      r = reset.rate / 100 / 12;
+      payment = monthlyPI(balance, reset.rate, months - reset.month);
+    }
     const interest = balance * r;
     let princ = Math.min(payment - interest, balance);
     let extra = 0;
@@ -452,7 +518,7 @@ function calc() {
   const base = amortize(loan, rate, months, pi, null, price, pmiRate);
   const withExtra = hasExtras ? amortize(loan, rate, months, pi, extras, price, pmiRate) : base;
 
-  state = { price, loan, rate, months, pi, tax, ins, pmi, hoa, total, base, withExtra, hasExtras };
+  state = { price, loan, rate, months, pi, tax, ins, pmi, hoa, total, base, withExtra, hasExtras, extras, pmiRate };
 
   // KPIs
   $('kMonthly').textContent = money(total);
@@ -512,6 +578,7 @@ function calc() {
   $('savings').innerHTML = summary.replace(/^<br>/, '');
 
   affordability();
+  stressTest();
   drawChart();
   renderTable();
 }
@@ -528,6 +595,61 @@ function payoffLabel(n) {
   if (!y) { const now = new Date(); y = now.getFullYear(); m = now.getMonth() + 2; } // empty → next month
   const d = new Date(y, m - 1 + n - 1, 1);
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+// ---------- Rate fixation stress test ----------
+// The expected rate follows "current rate + 2%" until the user types their own value.
+let resetRateAuto = true;
+const pctLabel = v => +v.toFixed(2) + '%';
+const signed = (v, cents) => Math.abs(v) < 0.005 ? money(0, cents) : (v > 0 ? '+' : '−') + money(Math.abs(v), cents);
+const upDown = v => v > 0.005 ? 'up' : v < -0.005 ? 'down' : '';
+
+function stressTest() {
+  const { loan, rate, months, pi, price, withExtra, hasExtras, extras, pmiRate } = state;
+  if (resetRateAuto) $('resetRate').value = +(rate + 2).toFixed(2);
+  $('resetRateHint').textContent = resetRateAuto
+    ? 'Starts at your current rate + 2%'
+    : 'Your own value — clear the box to go back to current rate + 2%';
+  const fix = parseInt($('fixYears').value, 10) * 12;
+  const newRate = num('resetRate');
+  state.fixMonth = null;
+
+  $('stressCard').hidden = !(loan > 0);
+  if (!(loan > 0)) return;
+  // Edge cases: no reset happens
+  let msg = '';
+  if (fix >= months) msg = 'The rate is fixed for the whole loan, so there is no reset.';
+  else if (withExtra.rows.length <= fix) msg = `Your loan is paid off after ${duration(withExtra.rows.length)}, before the fixation ends, so there is no reset.`;
+  $('stressMsg').hidden = !msg; $('stressMsg').textContent = msg;
+  $('stressBody').hidden = !!msg;
+  if (msg) return;
+
+  state.fixMonth = fix;
+  const balance = withExtra.rows[fix - 1].balance;
+  // Same loan, same extras — only the rate changes after the fixation ends
+  const scenario = r => {
+    const run = amortize(loan, rate, months, pi, hasExtras ? extras : null, price, pmiRate, { month: fix, rate: r });
+    return { payment: monthlyPI(balance, r, months - fix), interestChange: run.totalInterest - withExtra.totalInterest };
+  };
+
+  const s = scenario(newRate), diff = s.payment - pi;
+  $('sBalance').textContent = money(balance);
+  $('sBalanceSub').textContent = `after ${fix / 12} yr (${payoffLabel(fix)})${hasExtras ? ', including your extra payments' : ''}`;
+  $('sPayNow').textContent = money(pi, true);
+  $('sPayAfterLabel').textContent = `After reset (${pctLabel(newRate)})`;
+  $('sPayAfter').textContent = money(s.payment, true);
+  $('sPayDiff').textContent = signed(diff, true);
+  $('sPayDiff').className = upDown(diff);
+  $('sInt').textContent = signed(s.interestChange);
+  $('sInt').className = 'value ' + upDown(s.interestChange);
+  $('sIntSub').textContent = `${money(withExtra.totalInterest)} → ${money(withExtra.totalInterest + s.interestChange)}`;
+
+  $('stressRows').innerHTML = [1, 2, 3].map(step => {
+    const r = rate + step, x = scenario(r), d = x.payment - pi;
+    const chosen = Math.abs(r - newRate) < 0.001 ? ' class="chosen"' : '';
+    return `<tr${chosen}><td>${pctLabel(r)} (+${step}%)</td><td>${money(x.payment, true)}</td>
+      <td class="${upDown(d)}">${signed(d, true)}</td><td class="${upDown(x.interestChange)}">${signed(x.interestChange)}</td></tr>`;
+  }).join('');
 }
 
 // ---------- Affordability (28/36 rule) ----------
@@ -630,6 +752,22 @@ function drawChart() {
     ctx.fillStyle = css('--text'); ctx.fillText(label, bx + 6, by + 14);
   }
   $('baselineKey').hidden = !effective;
+
+  // Fixation end (from the stress test): dashed vertical line with a label
+  const fix = state.fixMonth;
+  $('fixKey').hidden = !fix;
+  if (fix) {
+    const fx = x(fix);
+    ctx.strokeStyle = css('--accent'); ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(fx, plotTop); ctx.lineTo(fx, plotBottom); ctx.stroke(); ctx.setLineDash([]);
+    const label = `Fixation ends · yr ${fix / 12}`;
+    ctx.font = '700 12px ' + css('--font'); ctx.textAlign = 'left';
+    const tw = ctx.measureText(label).width;
+    const bx = fx + tw + 18 > W - pad.r ? fx - tw - 18 : fx + 6, by = plotTop + 2;
+    ctx.fillStyle = css('--card'); ctx.strokeStyle = css('--accent'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(bx, by, tw + 12, 18, 6); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = css('--text'); ctx.fillText(label, bx + 6, by + 13);
+  }
 }
 
 // ---------- Amortization table ----------
@@ -677,6 +815,7 @@ function applyDefaults() {
   for (const id in defaults) $(id).value = defaults[id];
   for (const [id, v] of Object.entries(cfg().defaults)) $(id).value = v;
   lastDownEdited = 'pct';
+  resetRateAuto = true;
   syncDown();
   calc();
 }
@@ -704,6 +843,10 @@ function setCurrency(code, fill) {
 }
 document.querySelectorAll('.currency button').forEach(b =>
   b.addEventListener('click', () => { if (b.dataset.cur !== cur) setCurrency(b.dataset.cur, true); }));
+
+// Typing your own expected rate stops it following "current rate + 2%"; clearing the box resumes it.
+// (Registered before the general recalc listener below, so it runs first.)
+$('resetRate').addEventListener('input', () => { resetRateAuto = $('resetRate').value.trim() === ''; });
 
 // Recalculate on any other input change
 document.querySelectorAll('input, select').forEach(el => {
