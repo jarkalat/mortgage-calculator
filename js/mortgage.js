@@ -23,12 +23,7 @@ const mset = () => MORTGAGE_SETTINGS[cur];
 })();
 
 // ---------- Core math ----------
-// Standard fixed-rate payment: P * r / (1 - (1+r)^-n)
-function monthlyPI(principal, annualRate, months) {
-  const r = annualRate / 100 / 12;
-  if (r === 0) return principal / months;
-  return principal * r / (1 - Math.pow(1 + r, -months));
-}
+// monthlyPI() lives in js/finance.js, shared with the other tools.
 
 // Walks the loan month by month, applying any extra payments to principal.
 // Optional reset = { month, rate }: after that many payments the rate changes and the

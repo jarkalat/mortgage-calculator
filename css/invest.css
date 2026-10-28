@@ -1,0 +1,17 @@
+/* Buy-to-let investor styles (loaded after style.css). */
+main { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+/* Let columns shrink to the screen so wide tables scroll inside their box instead of widening the page */
+main > *, .row > *, .stack > * { min-width: 0; }
+input, select { min-width: 0; }
+
+.results .highlight { background: var(--accent-soft); border-color: transparent; }
+.results .sub { margin-top: 4px; }
+.card .table-wrap + .hint { margin-top: 8px; }
+tr.chosen td { font-weight: 700; }
+.defs { margin: 12px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+.defs li { margin: 2px 0; }
+.defs b { color: var(--text); font-weight: 600; }
+.note { margin: 10px 0 0; font-size: 13px; font-style: italic; color: var(--muted); }
+.good { color: var(--tax); }
+.bad { color: var(--pmi); }

@@ -87,6 +87,35 @@ summary { cursor: pointer; font-weight: 600; font-size: 14px; margin-bottom: 10p
 }
 .warn.strong { border-left-color: var(--pmi); }
 
+/* Shared building blocks: buttons, tabs, tables, result tiles, notes, rise/fall colours */
+.tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+.tabs button, .btn {
+  font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+}
+.tabs button.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.tabs .spacer { flex: 1; }
+.table-wrap { max-height: 420px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 10px; text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+thead th { position: sticky; top: 0; background: var(--card); border-bottom: 1px solid var(--border); font-weight: 600; }
+tbody tr:nth-child(even) { background: var(--bg); }
+.optional { color: var(--muted); font-style: italic; }
+.over { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 700px) { .over { grid-template-columns: 1fr; } }
+.over > div { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.over .label { font-size: 12px; color: var(--muted); }
+.over .value { font-size: 22px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.over .sub { font-size: 13px; color: var(--muted); }
+.over .compare { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.over .compare span { color: var(--muted); font-size: 14px; }
+.over .saved { background: var(--accent-soft); border-color: transparent; }
+.over .saved .value { color: var(--tax); }
+.lead { margin: -4px 0 8px; font-size: 14px; }
+.up { color: var(--pmi); }
+.down { color: var(--tax); }
+
 /* Home page: intro and tool cards */
 .hero { padding-top: 44px; }
 .hero h1 { font-size: 40px; letter-spacing: 0.5px; }

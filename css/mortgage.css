@@ -24,37 +24,8 @@ canvas { width: 100%; display: block; }
 .chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
 .chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
 
-.tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
-.tabs button, .btn {
-  font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; cursor: pointer;
-  border: 1px solid var(--border); background: var(--bg); color: var(--text);
-}
-.tabs button.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-.tabs .spacer { flex: 1; }
-.table-wrap { max-height: 420px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
-th, td { padding: 7px 10px; text-align: right; white-space: nowrap; }
-th:first-child, td:first-child { text-align: left; }
-thead th { position: sticky; top: 0; background: var(--card); border-bottom: 1px solid var(--border); font-weight: 600; }
-tbody tr:nth-child(even) { background: var(--bg); }
-
-.optional { color: var(--muted); font-style: italic; }
-.over { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-@media (max-width: 700px) { .over { grid-template-columns: 1fr; } }
-.over > div { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
-.over .label { font-size: 12px; color: var(--muted); }
-.over .value { font-size: 22px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
-.over .sub { font-size: 13px; color: var(--muted); }
-.over .compare { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-variant-numeric: tabular-nums; }
-.over .compare span { color: var(--muted); font-size: 14px; }
-.over .saved { background: var(--accent-soft); border-color: transparent; }
-.over .saved .value { color: var(--tax); }
-
 /* Rate fixation stress test */
-.lead { margin: -4px 0 8px; font-size: 14px; }
 #stressCard .over { margin: 4px 0 8px; }
-.up { color: var(--pmi); }
-.down { color: var(--tax); }
 .stress-table { margin-top: 12px; }
 .stress-table tr.chosen td { font-weight: 700; }
 

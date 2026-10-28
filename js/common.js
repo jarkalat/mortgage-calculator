@@ -10,7 +10,7 @@ const STORE = { currency: 'mortgage-currency', theme: 'mortgage-theme' };
 // Tools without an href show as "coming soon".
 const TOOLS = [
   { id: 'mortgage', name: 'Mortgage calculator', href: 'mortgage.html' },
-  { id: 'buy-to-let', name: 'Buy-to-let investor' },
+  { id: 'buy-to-let', name: 'Buy-to-let investor', href: 'invest.html' },
   { id: 'rent-or-buy', name: 'Rent or buy' },
   { id: 'market', name: 'Housing market' },
 ];
@@ -22,7 +22,7 @@ const TOOLS = [
     ? `<li><a href="${t.href}"${t.id === page ? ' aria-current="page"' : ''}>${t.name}</a></li>`
     : `<li><span class="soon" aria-disabled="true">${t.name} <span class="badge">soon</span></span></li>`).join('');
   nav.innerHTML = `<div class="topnav-inner">
-    <a class="brand" href="index.html"${page === 'home' ? ' aria-current="page"' : ''}>Abodex</a>
+    <a class="brand" href="./"${page === 'home' ? ' aria-current="page"' : ''}>Abodex</a>
     <ul class="nav-links">${links}</ul>
     <button id="themeToggle" aria-pressed="true">☀ Light mode</button>
   </div>`;
