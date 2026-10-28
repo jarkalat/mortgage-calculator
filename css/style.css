@@ -116,6 +116,12 @@ tbody tr:nth-child(even) { background: var(--bg); }
 .up { color: var(--pmi); }
 .down { color: var(--tax); }
 
+/* Tool page layout: inputs on the left, results on the right (one column on small screens).
+   Columns may shrink to the screen so wide tables scroll inside their box instead of widening the page. */
+main.two-col { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 900px) { main.two-col { grid-template-columns: 1fr; } }
+.two-col > *, .two-col .row > *, .two-col .stack > *, .two-col input, .two-col select { min-width: 0; }
+
 /* Home page: intro and tool cards */
 .hero { padding-top: 44px; }
 .hero h1 { font-size: 40px; letter-spacing: 0.5px; }

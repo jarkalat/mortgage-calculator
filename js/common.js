@@ -11,7 +11,7 @@ const STORE = { currency: 'mortgage-currency', theme: 'mortgage-theme' };
 const TOOLS = [
   { id: 'mortgage', name: 'Mortgage calculator', href: 'mortgage.html' },
   { id: 'buy-to-let', name: 'Buy-to-let investor', href: 'invest.html' },
-  { id: 'rent-or-buy', name: 'Rent or buy' },
+  { id: 'rent-or-buy', name: 'Rent or buy', href: 'rent-or-buy.html' },
   { id: 'market', name: 'Housing market' },
 ];
 (function renderNav() {
