@@ -19,6 +19,10 @@ function render() {
   const d = data;
   $('content').hidden = false;
 
+  // Data last updated
+  $('freshRetrieved').innerHTML = `All figures were retrieved from their sources on <b>${dayName(d.retrieved)}</b>.`;
+  $('freshRows').innerHTML = dataFreshness(d).map(f => `<tr><td>${esc(f.what)}</td><td>${esc(f.source)}</td><td>${esc(f.latest)}</td></tr>`).join('');
+
   // 1. Prices per m²
   const P = d.prices_per_m2;
   P.years.forEach((y, k) => { $('pYear' + k).textContent = y; });
@@ -94,10 +98,20 @@ function summary(yields) {
 function setupCopy() {
   const pricePerM2 = data.prices_per_m2.rows.find(r => r.id === 'praha').values.slice(-1)[0];
   const rentPerM2 = data.rents_deloitte.rows.find(r => r.id === 'praha').value;
+  const btn = $('copyBtn');
   const update = () => {
+    // Input check (js/common.js): no link or figures until the size makes sense
+    const problem = inputProblem({ id: 'flatSize', min: 10, max: 400, msg: 'Use a flat size between 10 and 400 m².' });
+    showProblem($('flatSize'), problem);
+    btn.removeAttribute('aria-disabled');
+    if (problem) {
+      btn.removeAttribute('href'); btn.setAttribute('aria-disabled', 'true');
+      $('copyPreview').textContent = 'Enter a flat size between 10 and 400 m² to see the figures.';
+      return;
+    }
     const size = Math.min(400, Math.max(10, Math.round(parseFloat($('flatSize').value) || 55)));
     const price = pricePerM2 * size, rent = rentPerM2 * size;
-    $('copyBtn').href = `invest.html?from=market&price=${price}&rent=${rent}`;
+    btn.href = `invest.html?from=market&price=${price}&rent=${rent}`;
     $('copyPreview').textContent = `${size} m² × ${kc(pricePerM2)} = ${kc(price)} price; ${size} m² × ${kc(rentPerM2)} = ${kc(rent)} rent per month. Opens the investor tool in CZK with these two values; everything else uses its usual starting numbers.`;
   };
   $('flatSize').addEventListener('input', update);

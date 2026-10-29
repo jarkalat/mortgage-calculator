@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Abodex site icon: a brass "A" on the dark page colour -->
+  <rect width="64" height="64" rx="14" fill="#0b0b0c"/>
+  <path d="M19 47 32 16l13 31M24.5 36h15" fill="none" stroke="#c8a26b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

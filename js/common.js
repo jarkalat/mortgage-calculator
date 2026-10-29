@@ -61,6 +61,26 @@ const link = (url, text) => `<a href="${esc(url)}" target="_blank" rel="noopener
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const monthName = ym => { const [y, m] = ym.split('-'); return `${MONTHS[+m - 1]} ${y}`; };
 const dayName = iso => { const [y, m, d] = iso.split('-'); return `${+d} ${MONTHS[+m - 1]} ${y}`; };
+const quarterName = q => { const [y, n] = q.split('-'); return `${n} ${y}`; };
+
+// "Data last updated": how recent each source's latest figure is. Read from the data itself where it has
+// dates (years, months, quarters, rate changes); otherwise the period text exactly as recorded.
+function dataFreshness(d) {
+  const short = src => src.name.split(' – ')[0];
+  const P = d.prices_per_m2, D = d.prague_districts, R = d.rents_deloitte, M = d.rents_mf, RT = d.rates;
+  const repoNow = RT.repo.changes[RT.repo.changes.length - 1], mort = RT.mortgage.series[RT.mortgage.series.length - 1];
+  const CZ = d.index_prague_vs_rest, EU = d.index_cz_vs_eu;
+  return [
+    { id: 'prices', what: 'Flat prices per m²', source: short(P.source), latest: `${P.years[P.years.length - 1]} (calendar year)` },
+    { id: 'districts', what: 'Prague district prices', source: short(D.source), latest: D.source.period },
+    { id: 'rents', what: 'Asking rents', source: short(R.source), latest: R.source.period },
+    { id: 'rentmap', what: 'Rent map (2+kk)', source: short(M.source), latest: M.source.period },
+    { id: 'repo', what: 'Repo rate', source: short(RT.repo.source), latest: `latest change ${dayName(repoNow.valid_from)}` },
+    { id: 'mortgage', what: 'New-mortgage rates', source: short(RT.mortgage.source), latest: monthName(mort[0]) },
+    { id: 'indexCz', what: 'Price index, Prague vs rest', source: short(CZ.source), latest: quarterName(CZ.quarters[CZ.quarters.length - 1]) },
+    { id: 'indexEu', what: 'Price index, Czechia vs EU', source: short(EU.source), latest: quarterName(EU.quarters[EU.quarters.length - 1]) },
+  ];
+}
 
 // "Source: … · period · retrieved · links" under every table and chart
 function sourceLine(src, extra = '') {
@@ -68,6 +88,64 @@ function sourceLine(src, extra = '') {
   const published = src.published ? ` · published ${dayName(src.published)}` : '';
   const updated = src.updated ? ` · updated ${dayName(src.updated)}` : '';
   return `<b>Source:</b> ${esc(src.name)}${published}${updated} · <b>Period:</b> ${esc(src.period)} · retrieved ${dayName(src.retrieved)} · ${links}${extra}`;
+}
+
+// ---------- Input checks ----------
+// Each tool lists rules like { id, min, max, int, optional, msg, check, skip }. A field that breaks its rule gets a
+// short message under it, and the tool's results pause (dimmed, last valid numbers kept) until it is fixed.
+// Empty optional fields count as 0, as before. Fields hidden for the current currency are skipped.
+function inputProblem(r) {
+  const el = $(r.id);
+  if ((cfg().eu && el.closest('.us-only')) || (!cfg().eu && el.closest('.eu-only')) || (r.skip && r.skip())) return '';
+  const raw = el.value.trim();
+  if (el.type === 'month') return raw ? '' : 'Please choose a month.';
+  if (el.validity.badInput) return 'Please enter a number.';
+  if (raw === '') return r.optional ? '' : 'Please enter a number.';
+  const v = Number(raw);
+  if (!isFinite(v)) return 'Please enter a number.';
+  if (v < 0 && (r.min ?? 0) >= 0) return 'This can’t be negative.';
+  if (r.int && !Number.isInteger(v)) return 'Please use a whole number.';
+  if ((r.min !== undefined && v < r.min) || (r.max !== undefined && v > r.max)) return r.msg;
+  return (r.check && r.check(v)) || '';
+}
+
+function showProblem(el, msg) {
+  const errId = el.id + 'Error';
+  let err = $(errId);
+  if (!msg) {
+    if (err) err.remove();
+    el.removeAttribute('aria-invalid'); el.removeAttribute('aria-describedby');
+    return;
+  }
+  if (!err) {
+    // Under the input box; under the whole row when boxes sit side by side (down payment $ and %)
+    let after = el.closest('.unit') || el;
+    if (after.parentElement.classList.contains('row')) after = after.parentElement;
+    while (after.nextElementSibling && after.nextElementSibling.classList.contains('field-error')) after = after.nextElementSibling;
+    err = document.createElement('div');
+    err.className = 'field-error'; err.id = errId; err.setAttribute('aria-live', 'polite');
+    after.after(err);
+  }
+  err.textContent = msg;
+  el.setAttribute('aria-invalid', 'true'); el.setAttribute('aria-describedby', errId);
+  const box = el.closest('details');
+  if (box) box.open = true;   // never hide a field that needs fixing
+}
+
+// results: the results column (gets the "paused" note); also: other result boxes to dim (optional)
+function checkInputs(rules, results, also = []) {
+  let ok = true;
+  rules.forEach(r => { const msg = inputProblem(r); showProblem($(r.id), msg); if (msg) ok = false; });
+  let note = results.querySelector(':scope > .paused-note');
+  if (!ok && !note) {
+    note = document.createElement('p');
+    note.className = 'warn strong paused-note'; note.setAttribute('role', 'status');
+    note.textContent = 'Results are paused until the highlighted field is fixed. The numbers below are from your last valid entry.';
+    results.prepend(note);
+  }
+  if (ok && note) note.remove();
+  [results, ...also].forEach(el => el.classList.toggle(el === results ? 'paused' : 'paused-item', !ok));
+  return ok;
 }
 
 // ---------- Currency switch ----------

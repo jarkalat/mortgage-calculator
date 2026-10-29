@@ -49,7 +49,10 @@ function renderFacts(d) {
     <h3>${f.label}</h3><p class="value">${f.value}</p><p class="explain">${f.text}</p><p class="source"><b>Source:</b> ${f.src}</p>
   </div>`).join('');
   if (!reduceMotion()) document.querySelectorAll('#facts .value').forEach((el, k) => onceVisible(el, () => countUp(el, facts[k])));
-  $('glanceSource').innerHTML = `Data retrieved ${dayName(d.retrieved)}. Full sources, links and charts are on the <a href="market.html">market page</a>.`;
+  // Data last updated: the four sources used above
+  const fresh = Object.fromEntries(dataFreshness(d).map(f => [f.id, f]));
+  const latest = ['prices', 'rents', 'mortgage', 'repo'].map(id => `${fresh[id].what.toLowerCase()}: ${esc(fresh[id].latest)} — ${esc(fresh[id].source)}`).join('; ');
+  $('glanceSource').innerHTML = `<b>Data last updated:</b> retrieved ${dayName(d.retrieved)}. Latest periods: ${latest}. Full sources, links and charts are on the <a href="market.html">market page</a>.`;
 }
 
 // Count a number up from zero once, in the same format, always ending on the exact published text.
