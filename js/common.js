@@ -51,6 +51,25 @@ const moneyShort = v => {
   return v.toLocaleString(cfg().locale, { style: 'currency', currency: cur, notation: 'compact', maximumFractionDigits: 1 });
 };
 
+// ---------- Czech market data (data/market.json) ----------
+// Used by the market page and the home page. Always Kč, whatever currency is chosen.
+// ("percent", not "pct": invest.js has its own pct for fractions.)
+const kc = v => v.toLocaleString('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 });
+const percent = (v, d = 2) => v.toFixed(d) + '%';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const link = (url, text) => `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(text)}</a>`;
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const monthName = ym => { const [y, m] = ym.split('-'); return `${MONTHS[+m - 1]} ${y}`; };
+const dayName = iso => { const [y, m, d] = iso.split('-'); return `${+d} ${MONTHS[+m - 1]} ${y}`; };
+
+// "Source: … · period · retrieved · links" under every table and chart
+function sourceLine(src, extra = '') {
+  const links = [src.page && link(src.page, 'source page'), src.page_index && link(src.page_index, 'index page'), src.file && link(src.file, 'data file')].filter(Boolean).join(' · ');
+  const published = src.published ? ` · published ${dayName(src.published)}` : '';
+  const updated = src.updated ? ` · updated ${dayName(src.updated)}` : '';
+  return `<b>Source:</b> ${esc(src.name)}${published}${updated} · <b>Period:</b> ${esc(src.period)} · retrieved ${dayName(src.retrieved)} · ${links}${extra}`;
+}
+
 // ---------- Currency switch ----------
 // Updates everything shared, saves the choice, then tells the page through a
 // "currencychange" event (detail.fill = load that currency's starting numbers).

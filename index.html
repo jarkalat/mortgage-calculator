@@ -4,40 +4,79 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Abodex – Property Investment Toolkit</title>
-<meta name="description" content="Free property calculators in USD, CZK and EUR — mortgage, buy-to-let, rent or buy — plus Czech housing market data: prices, rents, yields and rates.">
+<meta name="description" content="Free property calculators and Czech housing market data for buyers and small investors: mortgage, buy-to-let and rent-or-buy tools, plus prices, yields and rates from official sources.">
 <script src="js/theme-init.js"></script>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/home.css">
 </head>
 <body>
 <nav class="topnav" id="topnav" data-page="home" aria-label="Abodex tools"></nav>
 <header class="hero">
   <div>
-    <h1>Abodex</h1>
-    <p>Simple, honest calculators for buying, renting and investing in property.</p>
+    <h1>Property numbers you can check</h1>
+    <p>Abodex is a set of free property calculators and Czech housing market data for home buyers and small investors. Every figure shows where it comes from, and nothing you type leaves your browser.</p>
   </div>
 </header>
 
-<main class="tools" aria-label="Tools">
-  <a class="card tool" href="mortgage.html">
-    <h2>Mortgage calculator</h2>
-    <p>Monthly payment, extra payments, a rate fixation stress test and the full schedule — in USD, CZK or EUR.</p>
-    <span class="go">Open calculator →</span>
-  </a>
-  <a class="card tool" href="invest.html">
-    <h2>Buy-to-let investor</h2>
-    <p>Rental yield, cash flow and the return on your deposit.</p>
-    <span class="go">Open tool →</span>
-  </a>
-  <a class="card tool" href="rent-or-buy.html">
-    <h2>Rent or buy</h2>
-    <p>Compare the long-term cost of renting with buying.</p>
-    <span class="go">Open tool →</span>
-  </a>
-  <a class="card tool" href="market.html">
-    <h2>Housing market</h2>
-    <p>Price and rent trends to put your numbers in context.</p>
-    <span class="go">Open data →</span>
-  </a>
+<main class="home">
+  <!-- Every number here is filled in by js/home.js from data/market.json -->
+  <section class="block" aria-labelledby="glanceTitle">
+    <div class="block-head">
+      <h2 id="glanceTitle">Market at a glance</h2>
+      <a href="market.html">All Czech market data →</a>
+    </div>
+    <p class="load-note" id="glanceNote" hidden></p>
+    <div class="facts" id="facts"></div>
+    <p class="source" id="glanceSource"></p>
+  </section>
+
+  <section class="block" aria-labelledby="toolsTitle">
+    <div class="block-head"><h2 id="toolsTitle">Tools</h2></div>
+    <div class="tools">
+      <a class="card tool" href="mortgage.html">
+        <p class="q">Can I afford this mortgage?</p>
+        <h3>Mortgage calculator</h3>
+        <p>Monthly payment, extra payments, a rate fixation stress test and the full schedule — in USD, CZK or EUR.</p>
+        <span class="go">Open calculator →</span>
+      </a>
+      <a class="card tool" href="invest.html">
+        <p class="q">Does this flat pay for itself as a rental?</p>
+        <h3>Buy-to-let investor</h3>
+        <p>Rental yield, cash flow and the return on your deposit.</p>
+        <span class="go">Open tool →</span>
+      </a>
+      <a class="card tool" href="rent-or-buy.html">
+        <p class="q">Should I rent or buy?</p>
+        <h3>Rent or buy</h3>
+        <p>Compare the long-term cost of renting with buying.</p>
+        <span class="go">Open tool →</span>
+      </a>
+      <a class="card tool" href="market.html">
+        <p class="q">What is the market doing?</p>
+        <h3>Housing market</h3>
+        <p>Price and rent trends to put your numbers in context.</p>
+        <span class="go">Open data →</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="howTitle">
+    <div class="block-head"><h2 id="howTitle">How Abodex works</h2></div>
+    <ul class="points">
+      <li class="card">
+        <h3>Official data, with sources</h3>
+        <p>Market figures come from the Czech Statistical Office, the Czech National Bank, the Ministry of Finance and Eurostat, plus Deloitte’s indices where marked as a private source. Each one shows its source and period.</p>
+      </li>
+      <li class="card">
+        <h3>Calculations you can check</h3>
+        <p>Every result comes with a plain-English explanation of what it means, and the mortgage schedule can be downloaded as a CSV file to check line by line.</p>
+      </li>
+      <li class="card">
+        <h3>No sign-up, nothing collected</h3>
+        <p>There are no accounts, cookies, analytics or trackers. Your numbers stay in your browser; only your currency and theme choices are saved there.</p>
+      </li>
+    </ul>
+  </section>
 </main>
 
 <footer>
@@ -45,5 +84,6 @@
 </footer>
 
 <script src="js/common.js"></script>
+<script src="js/home.js"></script>
 </body>
 </html>

@@ -1,20 +1,6 @@
 // Abodex Housing market. Czech data only: values are always shown in Kč or as an index, so this page
 // has no currency switch. Every number comes from data/market.json, which records its source.
-const kc = v => v.toLocaleString('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 });
-const pct = (v, d = 2) => v.toFixed(d) + '%';
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const link = (url, text) => `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(text)}</a>`;
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const monthName = ym => { const [y, m] = ym.split('-'); return `${MONTHS[+m - 1]} ${y}`; };
-const dayName = iso => { const [y, m, d] = iso.split('-'); return `${+d} ${MONTHS[+m - 1]} ${y}`; };
-
-// "Source: … · period · retrieved · links" under every table and chart
-function sourceLine(src, extra = '') {
-  const links = [src.page && link(src.page, 'source page'), src.page_index && link(src.page_index, 'index page'), src.file && link(src.file, 'data file')].filter(Boolean).join(' · ');
-  const published = src.published ? ` · published ${dayName(src.published)}` : '';
-  const updated = src.updated ? ` · updated ${dayName(src.updated)}` : '';
-  return `<b>Source:</b> ${esc(src.name)}${published}${updated} · <b>Period:</b> ${esc(src.period)} · retrieved ${dayName(src.retrieved)} · ${links}${extra}`;
-}
+// Formatting (kc, percent, sourceLine, …) is shared in common.js.
 
 let data = null;
 
@@ -65,14 +51,14 @@ function render() {
   const rent = id => R.rows.find(r => r.id === id).value;
   const yields = R.rows.map(r => ({ label: r.label, id: r.id, rent: rent(r.id), price: price(r.id), y: rent(r.id) * 12 / price(r.id) * 100 }));
   $('yieldFormula').innerHTML = `<b>Gross yield</b> = rent per m² × 12 ÷ price per m² <span class="muted">— before any costs, empty months or tax.</span>`;
-  $('yieldRows').innerHTML = yields.map(x => `<tr><td>${esc(x.label)}</td><td>${kc(x.rent)}</td><td>${kc(x.price)}</td><td><b>${pct(x.y)}</b></td></tr>`).join('');
+  $('yieldRows').innerHTML = yields.map(x => `<tr><td>${esc(x.label)}</td><td>${kc(x.rent)}</td><td>${kc(x.price)}</td><td><b>${percent(x.y)}</b></td></tr>`).join('');
   const pragueAlt = rent('praha') * 12 / D.prague_overall * 100;
-  $('yieldNote').textContent = `These yields combine Deloitte’s asking rents (${R.source.period}) with CZSO’s ${P.years[P.years.length - 1]} average purchase prices; Deloitte’s own Prague price of ${kc(D.prague_overall)}/m² would give a lower Prague yield of ${pct(pragueAlt)}.`;
+  $('yieldNote').textContent = `These yields combine Deloitte’s asking rents (${R.source.period}) with CZSO’s ${P.years[P.years.length - 1]} average purchase prices; Deloitte’s own Prague price of ${kc(D.prague_overall)}/m² would give a lower Prague yield of ${percent(pragueAlt)}.`;
   $('yieldSource').innerHTML = `<b>Inputs:</b> rents — ${esc(R.source.name)}, ${esc(R.source.period)}; prices — ${esc(P.source.name)}, ${P.years[P.years.length - 1]}. See sections 1 and 2 for the links.`;
 
   // 4. Rates
   const RT = d.rates, last = RT.mortgage.series[RT.mortgage.series.length - 1], repoNow = RT.repo.changes[RT.repo.changes.length - 1];
-  $('rateLatest').textContent = `Latest: repo rate ${pct(repoNow.rate)} since ${dayName(repoNow.valid_from)}; average new-mortgage rate ${pct(last[1])} in ${monthName(last[0])}. The repo line steps on the dates the CNB changed it.`;
+  $('rateLatest').textContent = `Latest: repo rate ${percent(repoNow.rate)} since ${dayName(repoNow.valid_from)}; average new-mortgage rate ${percent(last[1])} in ${monthName(last[0])}. The repo line steps on the dates the CNB changed it.`;
   $('repoSource').innerHTML = sourceLine(RT.repo.source);
   $('mortSource').innerHTML = sourceLine(RT.mortgage.source);
 
@@ -95,9 +81,9 @@ function summary(yields) {
   const ci = d.index_prague_vs_rest, ce = d.index_cz_vs_eu;
   const growth = s => s[s.length - 1] / s[0];
   const items = [
-    `<b>Prague is expensive:</b> flats there sold for ${kc(pr[n - 1])}/m² in ${P.years[n - 1]}, about ${(pr[n - 1] / cr[n - 1]).toFixed(1)} times the Czech average of ${kc(cr[n - 1])}/m², and Prague prices were ${pct((pr[n - 1] / pr[n - 2] - 1) * 100, 1)} higher than a year earlier.`,
-    `<b>Rent covers less in Prague:</b> gross yields are ${yields.map(x => `${pct(x.y)} in ${x.label}`).join(', ')} — before any costs. ${below.length ? `${below.join(' and ')} ${below.length > 1 ? 'are' : 'is'} below` : 'None is below'} the ${pct(last[1])} average new-mortgage rate (${monthName(last[0])})${above.length ? `, ${above.join(' and ')} above it` : ''}, so with a large mortgage the rent alone rarely pays the loan in the big cities.`,
-    `<b>Borrowing got a little dearer this year:</b> the CNB set its repo rate to ${pct(repoNow.rate)} on ${dayName(repoNow.valid_from)}, and the average new-mortgage rate rose from ${pct(low[1])} (${monthName(low[0])}) to ${pct(last[1])} (${monthName(last[0])}).`,
+    `<b>Prague is expensive:</b> flats there sold for ${kc(pr[n - 1])}/m² in ${P.years[n - 1]}, about ${(pr[n - 1] / cr[n - 1]).toFixed(1)} times the Czech average of ${kc(cr[n - 1])}/m², and Prague prices were ${percent((pr[n - 1] / pr[n - 2] - 1) * 100, 1)} higher than a year earlier.`,
+    `<b>Rent covers less in Prague:</b> gross yields are ${yields.map(x => `${percent(x.y)} in ${x.label}`).join(', ')} — before any costs. ${below.length ? `${below.join(' and ')} ${below.length > 1 ? 'are' : 'is'} below` : 'None is below'} the ${percent(last[1])} average new-mortgage rate (${monthName(last[0])})${above.length ? `, ${above.join(' and ')} above it` : ''}, so with a large mortgage the rent alone rarely pays the loan in the big cities.`,
+    `<b>Borrowing got a little dearer this year:</b> the CNB set its repo rate to ${percent(repoNow.rate)} on ${dayName(repoNow.valid_from)}, and the average new-mortgage rate rose from ${percent(low[1])} (${monthName(low[0])}) to ${percent(last[1])} (${monthName(last[0])}).`,
     `<b>Prices have risen fast:</b> since ${ci.quarters[0].replace('-', ' ')}, existing flats rose to about ${growth(ci.series.Prague).toFixed(1)} times their level in Prague and ${growth(ci.series['Rest of Czechia']).toFixed(1)} times in the rest of Czechia; Czech dwelling prices (index ${ce.series.Czechia[ce.series.Czechia.length - 1]}) also rose far faster than the EU's (${ce.series['EU-27'][ce.series['EU-27'].length - 1]}), both 2015 = 100.`,
     `<b>Use these as a starting point:</b> the rents are asking rents and the prices are averages, so a specific flat can differ a lot. Try your own numbers in the investor tool below.`,
   ];
