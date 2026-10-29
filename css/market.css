@@ -1,0 +1,36 @@
+/* Housing market styles (loaded after style.css). Single column; no currency switch on this page. */
+main.market { max-width: 1000px; }
+main.market .stack > * { min-width: 0; }
+h3.sub { margin: 18px 0 8px; font-size: 15px; }
+.private {
+  font-size: 11px; font-weight: 400; padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: 1px;
+  border: 1px solid var(--accent); color: var(--accent); white-space: nowrap;
+}
+.source { margin: 8px 0 0; font-size: 12px; color: var(--muted); line-height: 1.45; overflow-wrap: anywhere; }
+.source a { color: var(--muted); }
+.source b { color: var(--text); font-weight: 600; }
+.formula { margin: 0 0 12px; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 6px; font-size: 15px; }
+.summary { margin: 0; padding-left: 20px; }
+.summary li { margin: 6px 0; }
+.load-note { padding: 14px 16px; border-left: 3px solid var(--pmi); background: var(--card); border-radius: 8px; }
+details { margin-top: 8px; }
+details .table-wrap { max-height: 360px; margin-top: 6px; }
+.defs { margin: 12px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+.defs b { color: var(--text); font-weight: 600; }
+canvas { width: 100%; display: block; }
+.chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+.chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.copy-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.copy-row .field { margin: 0; width: 160px; }
+a.btn { text-decoration: none; display: inline-block; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 700; padding: 9px 16px; font-size: 14px; }
+.muted { color: var(--muted); }
+tr.total td { font-weight: 700; }
+/* Small screens: let headers wrap and tighten cells so short tables (like the yields) fit without scrolling */
+@media (max-width: 560px) {
+  main.market th { white-space: normal; }
+  main.market th, main.market td { padding: 6px 6px; }
+  main.market td .muted { display: block; font-size: 11px; }
+  main.market table { font-size: 12px; }
+  main.market td:first-child { white-space: normal; }
+}

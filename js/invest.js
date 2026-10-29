@@ -132,3 +132,19 @@ document.querySelectorAll('main input, main select').forEach(el => el.addEventLi
 
 calc();
 // (js/common.js reopens the currency chosen last time once this script has run.)
+
+// Starting values from the Housing market page: invest.html?from=market&price=…&rent=… (Czech data, so CZK).
+// Registered after common.js's listener, so it runs after the saved currency is restored.
+document.addEventListener('DOMContentLoaded', () => {
+  const q = new URLSearchParams(location.search);
+  const price = Math.round(parseFloat(q.get('price'))), rent = Math.round(parseFloat(q.get('rent')));
+  if (q.get('from') !== 'market' || !(price > 0) || !(rent > 0)) return;
+  setCurrency('CZK', true);                 // CZK with its usual starting numbers…
+  $('price').value = price; $('rent').value = rent;   // …then the two values from the market page
+  calc();
+  const note = document.createElement('p');
+  note.className = 'hint';
+  note.id = 'fromMarket';
+  note.textContent = `Starting point from the Housing market page: price ${money(price)} and rent ${money(rent)} a month (Prague averages × flat size). Everything else uses the usual CZK starting numbers.`;
+  document.querySelector('header > div').appendChild(note);
+});

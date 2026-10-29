@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abodex test: chart stability</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 24px; background: #fff; color: #111; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .pass { color: #116329; } .fail { color: #b3261e; font-weight: 600; }
+  #summary { font-size: 18px; margin: 12px 0; }
+  li { margin: 2px 0; }
+  iframe { width: 1280px; height: 900px; border: 1px solid #ccc; position: absolute; left: -10000px; }
+</style>
+</head>
+<body>
+<h1>Chart stability test</h1>
+<p>Opens every page that draws charts, redraws the charts many times (window resizes, phone and desktop widths, light and dark mode)
+and checks each chart keeps the same size and is still drawn. Catches charts that grow on every redraw until the browser
+refuses to draw them (Chrome shows a white box with a broken-content icon). Run it from a web server, e.g.
+<code>python3 -m http.server</code> in the project folder, then open <code>/tests/chart-stability.html</code>.</p>
+<p id="summary">Running…</p>
+<ul id="results"></ul>
+<iframe id="frame" title="page under test"></iframe>
+
+<script>
+// Pages with canvas charts, and how to tell the charts are ready
+const PAGES = [
+  { url: '../mortgage.html', ready: d => d.getElementById('chart') && d.getElementById('chart').width > 0 },
+  { url: '../rent-or-buy.html', ready: d => d.getElementById('chart') && d.getElementById('chart').width > 0 },
+  { url: '../market.html', ready: d => d.getElementById('content') && !d.getElementById('content').hidden && d.getElementById('rateChart').width > 0 },
+];
+const REDRAWS = 12;               // more than enough for a doubling bug to pass any browser limit
+const MAX_SIDE = 16384;           // well under Chrome's 32 767 px canvas limit
+
+const results = [];
+const check = (name, ok, detail = '') => results.push({ name, ok: !!ok, detail });
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const frame = document.getElementById('frame');
+
+function load(url) {
+  return new Promise(resolve => { frame.onload = () => resolve(frame.contentWindow); frame.src = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now(); });
+}
+async function until(fn, ms = 5000) { const end = Date.now() + ms; while (Date.now() < end) { if (fn()) return true; await wait(50); } return false; }
+
+// What a chart looks like right now
+function measure(c, win) {
+  const dpr = win.devicePixelRatio || 1;
+  return { cssW: c.clientWidth, cssH: c.clientHeight, w: c.width, h: c.height, dpr };
+}
+function painted(c) {
+  try {
+    const px = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    let ink = 0; for (let k = 3; k < px.length; k += 16) if (px[k]) ink++;
+    return ink;
+  } catch (e) { return 0; }   // an unallocatable canvas throws here
+}
+
+async function testPage(p) {
+  const win = await load(p.url), doc = win.document;
+  const ready = await until(() => p.ready(doc));
+  check(`${p.url}: charts drew on load`, ready);
+  if (!ready) return;
+  await wait(100);
+  const charts = [...doc.querySelectorAll('canvas')].filter(c => c.offsetParent !== null);
+  check(`${p.url}: found ${charts.length} visible chart(s)`, charts.length > 0);
+  const first = charts.map(c => measure(c, win));
+
+  const startTheme = doc.documentElement.getAttribute('data-theme');
+  const toggle = doc.getElementById('themeToggle');
+  for (let k = 0; k < REDRAWS; k++) {
+    win.dispatchEvent(new win.Event('resize'));
+    if (k % 3 === 0) toggle.click();                 // light ⇄ dark redraws too
+  }
+  frame.style.width = '375px'; await wait(150); win.dispatchEvent(new win.Event('resize'));   // phone width
+  frame.style.width = '1280px'; await wait(150); win.dispatchEvent(new win.Event('resize'));  // back to desktop
+  if (doc.documentElement.getAttribute('data-theme') !== startTheme) toggle.click();          // leave the theme as found
+  await wait(100);
+
+  charts.forEach((c, i) => {
+    const id = c.id || `canvas ${i + 1}`, now = measure(c, win), was = first[i];
+    check(`${p.url} #${id}: same on-screen height after ${REDRAWS} redraws (${was.cssH}px)`, now.cssH === was.cssH, `was ${was.cssH}px, now ${now.cssH}px`);
+    check(`${p.url} #${id}: pixel buffer matches on-screen size × ${now.dpr}`, Math.abs(now.w - Math.round(now.cssW * now.dpr)) <= 1 && Math.abs(now.h - Math.round(now.cssH * now.dpr)) <= 1, `${now.w}×${now.h} for ${now.cssW}×${now.cssH}`);
+    check(`${p.url} #${id}: within browser canvas limits`, now.w <= MAX_SIDE && now.h <= MAX_SIDE, `${now.w}×${now.h}`);
+    check(`${p.url} #${id}: still drawn`, painted(c) > 50);
+  });
+}
+
+(async () => {
+  for (const p of PAGES) {
+    try { await testPage(p); } catch (e) { check(`${p.url}: no errors`, false, e.message); }
+  }
+  const failed = results.filter(r => !r.ok);
+  document.getElementById('summary').innerHTML = failed.length
+    ? `<span class="fail">FAILED: ${failed.length} of ${results.length} checks</span>`
+    : `<span class="pass">PASSED: all ${results.length} checks</span>`;
+  document.getElementById('results').innerHTML = results.map(r =>
+    `<li class="${r.ok ? 'pass' : 'fail'}">${r.ok ? '✓' : '✗'} ${r.name}${r.ok || !r.detail ? '' : ' — ' + r.detail}</li>`).join('');
+  document.title = (failed.length ? 'FAIL' : 'PASS') + ' – chart stability';
+  window.TEST_RESULT = { passed: results.length - failed.length, total: results.length, failed };
+})();
+</script>
+</body>
+</html>

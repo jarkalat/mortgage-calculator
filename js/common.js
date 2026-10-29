@@ -12,7 +12,7 @@ const TOOLS = [
   { id: 'mortgage', name: 'Mortgage calculator', href: 'mortgage.html' },
   { id: 'buy-to-let', name: 'Buy-to-let investor', href: 'invest.html' },
   { id: 'rent-or-buy', name: 'Rent or buy', href: 'rent-or-buy.html' },
-  { id: 'market', name: 'Housing market' },
+  { id: 'market', name: 'Housing market', href: 'market.html' },
 ];
 (function renderNav() {
   const nav = $('topnav');
