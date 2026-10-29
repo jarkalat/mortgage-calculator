@@ -87,6 +87,15 @@ a { color: var(--accent); }
   font-size: 11px; font-weight: 500; padding: 1px 8px; border-radius: 999px; vertical-align: 1px;
   border: 1px solid var(--border); color: var(--muted); white-space: nowrap;
 }
+/* Language switch "CS | EN" and theme toggle, side by side at the end of the nav */
+.nav-tools { flex: none; display: flex; align-items: center; gap: var(--space-3); }
+.lang-switch { display: flex; align-items: center; font-size: 13px; color: var(--border-strong); }
+.lang-switch button {
+  font: inherit; font-weight: 600; letter-spacing: 0.02em; padding: 6px; border: 0; border-radius: var(--radius-sm);
+  background: none; color: var(--muted); cursor: pointer; transition: color var(--fast) ease;
+}
+.lang-switch button:hover { color: var(--text); }
+.lang-switch button[aria-pressed="true"] { color: var(--accent); }
 #themeToggle {
   flex: none; font: inherit; font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--border); background: var(--card); color: var(--text);

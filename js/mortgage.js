@@ -72,18 +72,19 @@ function syncDown() {
 }
 
 // ---------- Input checks (js/common.js): results wait until every field makes sense ----------
-const PCT = 'Use a percentage between 0% and 100%.', RATE = 'Use a rate between 0% and 30%.';
+// (msg is a key in js/lang/*.js; check() returns the message itself)
+const PCT = 'check.pct', RATE = 'check.rate';
 const RULES = [
-  { id: 'price', check: v => v > 0 ? '' : 'Enter a price above 0.' },
-  { id: 'downAmt', check: v => !inputProblem(rule('price')) && v > num('price') ? 'The down payment can’t be more than the price.' : '' },
+  { id: 'price', check: v => v > 0 ? '' : t('check.price') },
+  { id: 'downAmt', check: v => !inputProblem(rule('price')) && v > num('price') ? t('m.checkDown') : '' },
   { id: 'downPct', max: 100, msg: PCT },
   { id: 'rate', max: 30, msg: RATE },
   { id: 'start' },
   { id: 'extraMonthly', optional: true },
   { id: 'tax', max: 100, msg: PCT }, { id: 'taxAmt' }, { id: 'ins' }, { id: 'pmi', max: 100, msg: PCT }, { id: 'hoa' },
   { id: 'extraYearly', optional: true }, { id: 'lump', optional: true },
-  { id: 'lumpMonth', optional: true, int: true, min: 1, msg: 'Use a payment number of 1 or more.',
-    check: v => v > parseInt($('term').value, 10) * 12 ? `The loan has only ${parseInt($('term').value, 10) * 12} payments.` : '' },
+  { id: 'lumpMonth', optional: true, int: true, min: 1, msg: 'm.checkLumpMin',
+    check: v => v > parseInt($('term').value, 10) * 12 ? t('m.checkLumpMax', { n: parseInt($('term').value, 10) * 12 }) : '' },
   { id: 'income', optional: true }, { id: 'debts', optional: true },
   // While it follows "current rate + 2%" by itself, only your own value is checked
   { id: 'resetRate', optional: true, max: 30, msg: RATE, skip: () => resetRateAuto },
@@ -131,30 +132,26 @@ function calc() {
 
   // Breakdown legend + donut
   const parts = [
-    ['Principal & interest', pi, '--principal'],
-    ['Property tax', tax, '--tax'],
-    ['Home insurance', ins, '--insurance'],
-    ['PMI', pmi, '--pmi'],
-    [eu ? 'Repair fund' : 'HOA', hoa, '--hoa'],
+    [t('m.partPI'), pi, '--principal'],
+    [t('m.partTax'), tax, '--tax'],
+    [t('m.partIns'), ins, '--insurance'],
+    [t('m.partPMI'), pmi, '--pmi'],
+    [t(eu ? 'm.partRepair' : 'm.partHOA'), hoa, '--hoa'],
   ].filter(p => p[1] > 0);
 
   // Loan-to-value warning (Europe): the Czech National Bank normally caps loans at 80%
   const ltv = price ? loan / price * 100 : 0, warn = $('ltvWarn');
   warn.hidden = !(eu && ltv > 80 + 1e-9);
   if (!warn.hidden) {
-    const pct = `<b>Loan is ${ltv.toFixed(1)}% of the price.</b> `;
+    const pct = `<b>${t('ltv.head', { pct: percent(ltv, 1) })}</b> `;
     warn.classList.toggle('strong', ltv > 90 + 1e-9);
     warn.innerHTML = ltv > 90 + 1e-9
-      ? pct + (cur === 'CZK'
-        ? 'That is above even the 90% limit the Czech National Bank allows for buyers under 36, so Czech banks normally won’t lend this much.'
-        : 'That is above even the 90% limit the Czech National Bank allows for buyers under 36; most European lenders won’t go this high.')
-      : pct + (cur === 'CZK'
-        ? 'The Czech National Bank normally caps mortgages at 80% of the home value (90% for buyers under 36).'
-        : 'Many European regulators cap mortgages at 80% (the Czech National Bank: 80%, or 90% for buyers under 36).');
+      ? pct + t(cur === 'CZK' ? 'ltv.over90Czk' : 'ltv.over90Eur')
+      : pct + t(cur === 'CZK' ? 'ltv.czk' : 'ltv.eur');
   }
   $('legend').innerHTML = parts.map(([n, v, c]) =>
     `<div><i style="background:var(${c})"></i>${n}<b>${money(v, true)}</b></div>`).join('') +
-    `<div>Total per month<b>${money(total, true)}</b></div>`;
+    `<div>${t('m.totalMonth')}<b>${money(total, true)}</b></div>`;
   drawDonut(parts);
 
   // Extra payment effect: compare the loan with and without the extras
@@ -166,18 +163,18 @@ function calc() {
   if (effective) {
     const nNew = withExtra.rows.length, nBase = base.rows.length;
     $('oTime').textContent = duration(nNew);
-    $('oTimeSub').textContent = `instead of ${duration(nBase)} · paid off ${payoffLabel(nNew)}`;
+    $('oTimeSub').textContent = t('m.insteadOf', { dur: duration(nBase), date: payoffLabel(nNew) });
     $('oIntBase').textContent = money(base.totalInterest);
     $('oIntExtra').textContent = money(withExtra.totalInterest);
     $('oSaved').textContent = money(saved);
-    $('oSavedSub').textContent = `and ${duration(nBase - nNew)} sooner`;
+    $('oSavedSub').textContent = t('m.sooner', { dur: duration(nBase - nNew) });
   } else if (loan > 0) {
-    summary = `Over the full term you'll pay <b>${money(loan + base.totalInterest)}</b> in principal and interest — <b>${money(base.totalInterest)}</b> of that is interest.`;
-    if (hasExtras) summary += ` <br>Your extra payments have no effect — the lump sum falls after the loan is already paid off.`;
+    summary = t('m.summary', { total: money(loan + base.totalInterest), interest: money(base.totalInterest) });
+    if (hasExtras) summary += ` <br>${t('m.noEffect')}`;
   }
   // PMI doesn't last forever — say when it ends and what it costs in total
   const pmiMonths = withExtra.rows.filter(r => r.pmi > 0).length;
-  if (pmiMonths) summary += `<br>PMI ends after <b>${pmiMonths}</b> payments (${payoffLabel(pmiMonths)}), costing <b>${money(withExtra.totalPMI)}</b> in total.`;
+  if (pmiMonths) summary += '<br>' + tn('m.pmiEnds', pmiMonths, { date: payoffLabel(pmiMonths), cost: money(withExtra.totalPMI) });
   $('savings').innerHTML = summary.replace(/^<br>/, '');
 
   affordability();
@@ -186,33 +183,32 @@ function calc() {
   renderTable();
 }
 
-// Number of monthly payments → "23 yr 11 mo"
+// Number of monthly payments → "23 yr 11 mo" / "23 let 11 měs."
 function duration(n) {
   const y = Math.floor(n / 12), m = n % 12;
-  return [y && `${y} yr`, m && `${m} mo`].filter(Boolean).join(' ') || '0 mo';
+  return [y && tn('dur.y', y), m && t('dur.mo', { n: m })].filter(Boolean).join(' ') || t('dur.mo', { n: 0 });
 }
 
+// Month of the nth payment: "Nov 2026" / "listopad 2026"
 function payoffLabel(n) {
   if (!n) return '–';
   let [y, m] = $('start').value.split('-').map(Number);
   if (!y) { const now = new Date(); y = now.getFullYear(); m = now.getMonth() + 2; } // empty → next month
   const d = new Date(y, m - 1 + n - 1, 1);
-  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  return monthName(`${d.getFullYear()}-${d.getMonth() + 1}`);
 }
 
 // ---------- Rate fixation stress test ----------
 // The expected rate follows "current rate + 2%" until the user types their own value.
 let resetRateAuto = true;
-const pctLabel = v => +v.toFixed(2) + '%';
+const pctLabel = v => pctText(trimDec(v, 2));
 const signed = (v, cents) => Math.abs(v) < 0.005 ? money(0, cents) : (v > 0 ? '+' : '−') + money(Math.abs(v), cents);
 const upDown = v => v > 0.005 ? 'up' : v < -0.005 ? 'down' : '';
 
 function stressTest() {
   const { loan, rate, months, pi, price, withExtra, hasExtras, extras, pmiRate } = state;
   if (resetRateAuto) $('resetRate').value = +(rate + 2).toFixed(2);
-  $('resetRateHint').textContent = resetRateAuto
-    ? 'Starts at your current rate + 2%'
-    : 'Your own value — clear the box to go back to current rate + 2%';
+  $('resetRateHint').textContent = t(resetRateAuto ? 'm.resetAuto' : 'm.resetOwn');
   const fix = parseInt($('fixYears').value, 10) * 12;
   const newRate = num('resetRate');
   state.fixMonth = null;
@@ -221,8 +217,8 @@ function stressTest() {
   if (!(loan > 0)) return;
   // Edge cases: no reset happens
   let msg = '';
-  if (fix >= months) msg = 'The rate is fixed for the whole loan, so there is no reset.';
-  else if (withExtra.rows.length <= fix) msg = `Your loan is paid off after ${duration(withExtra.rows.length)}, before the fixation ends, so there is no reset.`;
+  if (fix >= months) msg = t('m.fixedWhole');
+  else if (withExtra.rows.length <= fix) msg = t('m.paidBefore', { dur: duration(withExtra.rows.length) });
   $('stressMsg').hidden = !msg; $('stressMsg').textContent = msg;
   $('stressBody').hidden = !!msg;
   if (msg) return;
@@ -237,9 +233,9 @@ function stressTest() {
 
   const s = scenario(newRate), diff = s.payment - pi;
   $('sBalance').textContent = money(balance);
-  $('sBalanceSub').textContent = `after ${fix / 12} yr (${payoffLabel(fix)})${hasExtras ? ', including your extra payments' : ''}`;
+  $('sBalanceSub').textContent = tn('m.afterFix', fix / 12, { date: payoffLabel(fix) }) + (hasExtras ? t('m.inclExtra') : '');
   $('sPayNow').textContent = money(pi, true);
-  $('sPayAfterLabel').textContent = `After reset (${pctLabel(newRate)})`;
+  $('sPayAfterLabel').textContent = t('m.afterReset', { rate: pctLabel(newRate) });
   $('sPayAfter').textContent = money(s.payment, true);
   $('sPayDiff').textContent = signed(diff, true);
   $('sPayDiff').className = upDown(diff);
@@ -250,7 +246,7 @@ function stressTest() {
   $('stressRows').innerHTML = [1, 2, 3].map(step => {
     const r = rate + step, x = scenario(r), d = x.payment - pi;
     const chosen = Math.abs(r - newRate) < 0.001 ? ' class="chosen"' : '';
-    return `<tr${chosen}><td>${pctLabel(r)} (+${step}%)</td><td>${money(x.payment, true)}</td>
+    return `<tr${chosen}><td>${pctLabel(r)} (+${pctText(step)})</td><td>${money(x.payment, true)}</td>
       <td class="${upDown(d)}">${signed(d, true)}</td><td class="${upDown(x.interestChange)}">${signed(x.interestChange)}</td></tr>`;
   }).join('');
 }
@@ -264,10 +260,10 @@ function affordability() {
   const maxHousing = Math.min(monthlyIncome * 0.28, monthlyIncome * 0.36 - num('debts'));
   const ok = front <= 28 && back <= 36;
   $('affordOut').innerHTML = `
-    Housing cost is <b>${front.toFixed(1)}%</b> of income (guideline ≤ 28%)<br>
-    All debts are <b>${back.toFixed(1)}%</b> of income (guideline ≤ 36%)<br>
-    Suggested max housing payment: <span class="big">${money(Math.max(maxHousing, 0))}</span>/mo<br>
-    <span style="color:${ok ? 'var(--tax)' : 'var(--pmi)'}">${ok ? '✓ Within common lender guidelines' : '⚠ Above common lender guidelines'}</span>`;
+    ${t('m.aHousing', { pct: percent(front, 1) })}<br>
+    ${t('m.aDebts', { pct: percent(back, 1) })}<br>
+    ${t('m.aMax', { amt: money(Math.max(maxHousing, 0)) })}<br>
+    <span style="color:${ok ? 'var(--tax)' : 'var(--pmi)'}">${t(ok ? 'm.aOk' : 'm.aOver')}</span>`;
 }
 
 // ---------- Donut chart ----------
@@ -287,7 +283,7 @@ function drawDonut(parts) {
   });
   ctx.fillStyle = css('--text'); ctx.textAlign = 'center';
   ctx.font = '700 20px ' + css('--font'); ctx.fillText(money(sum), 90, 94);
-  ctx.fillStyle = css('--muted'); ctx.font = '13px ' + css('--font'); ctx.fillText('per month', 90, 112);
+  ctx.fillStyle = css('--muted'); ctx.font = '13px ' + css('--font'); ctx.fillText(t('m.perMonth'), 90, 112);
 }
 
 // ---------- Balance line chart ----------
@@ -315,7 +311,7 @@ function drawChart() {
   }
   const years = months / 12, step = years > 20 ? 5 : years > 10 ? 2 : 1;
   ctx.textAlign = 'center';
-  for (let yr = 0; yr <= years; yr += step) ctx.fillText('Yr ' + yr, x(yr * 12), H - 8);
+  for (let yr = 0; yr <= years; yr += step) ctx.fillText(t('chart.yr', { n: yr }), x(yr * 12), H - 8);
 
   const line = (data, key, color, dash) => {
     ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.setLineDash(dash || []);
@@ -331,7 +327,7 @@ function drawChart() {
     ctx.fillStyle = css('--accent-soft');
     ctx.fillRect(x0, plotTop, x1 - x0, plotBottom - plotTop);
     ctx.fillStyle = css('--muted'); ctx.textAlign = 'center';
-    if (x1 - x0 > 70) ctx.fillText(duration(base.rows.length - rows.length) + ' sooner', (x0 + x1) / 2, plotTop + 16);
+    if (x1 - x0 > 70) ctx.fillText(t('m.chartSooner', { dur: duration(base.rows.length - rows.length) }), (x0 + x1) / 2, plotTop + 16);
     line(base.rows, 'balance', css('--muted'), [5, 4]);
   }
   line(rows, 'balance', css('--principal'));
@@ -346,7 +342,7 @@ function drawChart() {
     dot(base.rows.length, css('--muted'), false);
     dot(rows.length, css('--principal'), true);
     // Label on a small card-coloured box so chart lines don't run through it
-    const label = 'Paid off: ' + duration(rows.length);
+    const label = t('m.chartPaidOff', { dur: duration(rows.length) });
     ctx.font = '700 13px ' + css('--font'); ctx.textAlign = 'left';
     const tw = ctx.measureText(label).width, lx = x(rows.length);
     const bx = Math.min(Math.max(lx - tw / 2 - 6, pad.l), W - pad.r - tw - 12), by = y(0) - 34;
@@ -363,7 +359,7 @@ function drawChart() {
     const fx = x(fix);
     ctx.strokeStyle = css('--accent'); ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
     ctx.beginPath(); ctx.moveTo(fx, plotTop); ctx.lineTo(fx, plotBottom); ctx.stroke(); ctx.setLineDash([]);
-    const label = `Fixation ends · yr ${fix / 12}`;
+    const label = t('m.chartFix', { n: fix / 12 });
     ctx.font = '700 12px ' + css('--font'); ctx.textAlign = 'left';
     const tw = ctx.measureText(label).width;
     const bx = fx + tw + 18 > W - pad.r ? fx - tw - 18 : fx + 6, by = plotTop + 2;
@@ -380,14 +376,14 @@ function groupedRows() {
   const out = [];
   rows.forEach(r => {
     const i = Math.floor((r.m - 1) / 12);
-    out[i] = out[i] || { label: 'Year ' + (i + 1), princ: 0, interest: 0, extra: 0, paid: 0 };
+    out[i] = out[i] || { label: t('m.yearRow', { n: i + 1 }), princ: 0, interest: 0, extra: 0, paid: 0 };
     out[i].princ += r.princ; out[i].interest += r.interest; out[i].extra += r.extra;
     out[i].paid += r.princ + r.interest + r.extra; out[i].balance = r.balance;
   });
   return out;
 }
 function renderTable() {
-  $('periodHead').textContent = view === 'year' ? 'Year' : 'Payment';
+  $('periodHead').textContent = t(view === 'year' ? 'common.year' : 'm.thPayment');
   $('tbody').innerHTML = groupedRows().map(r =>
     `<tr><td>${r.label}</td><td>${money(r.princ, true)}</td><td>${money(r.interest, true)}</td>
      <td>${money(r.extra, true)}</td><td>${money(r.paid, true)}</td><td>${money(r.balance, true)}</td></tr>`).join('');
@@ -395,19 +391,22 @@ function renderTable() {
 $('tabYear').onclick = () => { view = 'year'; $('tabYear').classList.add('active'); $('tabMonth').classList.remove('active'); renderTable(); };
 $('tabMonth').onclick = () => { view = 'month'; $('tabMonth').classList.add('active'); $('tabYear').classList.remove('active'); renderTable(); };
 
+// CSV: English uses commas and a decimal point; Czech uses semicolons and a decimal comma, as Czech Excel expects
 $('csv').onclick = () => {
+  const cs = lang === 'cs', sep = cs ? ';' : ',', n = v => (cs ? v.toFixed(2).replace('.', ',') : v.toFixed(2));
+  const col = key => t('csv.' + key) + (cfg().eu ? ` (${cur})` : '');
   const lines = [];
   if (!cfg().eu) {
-    lines.push('Payment,Date,Principal,Interest,Extra,PMI,Balance');
-    state.withExtra.rows.forEach(r => lines.push([r.m, payoffLabel(r.m), r.princ.toFixed(2), r.interest.toFixed(2), r.extra.toFixed(2), r.pmi.toFixed(2), r.balance.toFixed(2)].join(',')));
+    lines.push([t('csv.payment'), t('csv.date'), col('principal'), col('interest'), col('extra'), col('pmi'), col('balance')].join(sep));
+    state.withExtra.rows.forEach(r => lines.push([r.m, payoffLabel(r.m), n(r.princ), n(r.interest), n(r.extra), n(r.pmi), n(r.balance)].join(sep)));
   } else {
     // Europe: no PMI column; amounts labelled with the currency
-    lines.push(`Payment,Date,Principal (${cur}),Interest (${cur}),Extra (${cur}),Balance (${cur})`);
-    state.withExtra.rows.forEach(r => lines.push([r.m, payoffLabel(r.m), r.princ.toFixed(2), r.interest.toFixed(2), r.extra.toFixed(2), r.balance.toFixed(2)].join(',')));
+    lines.push([t('csv.payment'), t('csv.date'), col('principal'), col('interest'), col('extra'), col('balance')].join(sep));
+    state.withExtra.rows.forEach(r => lines.push([r.m, payoffLabel(r.m), n(r.princ), n(r.interest), n(r.extra), n(r.balance)].join(sep)));
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
-  a.download = 'amortization-schedule.csv'; a.click();
+  a.download = t('csv.file'); a.click();
 };
 
 // Reset button: restore every input to its starting value for the current currency
@@ -426,11 +425,14 @@ $('reset').onclick = applyDefaults;
 
 // ---------- Currency switch ----------
 // js/common.js handles the buttons, symbols and saving; this sets up the calculator's own parts.
+const hoaLabel = () => { $('hoaLabel').textContent = t(cfg().eu ? 'common.repairMonth' : 'common.hoaMonth'); };
 document.addEventListener('currencychange', e => {
   for (const [id, step] of Object.entries(mset().steps)) $(id).step = step;
-  $('hoaLabel').textContent = cfg().eu ? 'Repair fund / month' : 'HOA / month';
+  hoaLabel();
   if (e.detail.fill) applyDefaults(); else calc();
 });
+// Language switch (js/common.js has already swapped the page's fixed texts)
+document.addEventListener('langchange', () => { hoaLabel(); calc(); });
 
 // Typing your own expected rate stops it following "current rate + 2%"; clearing the box resumes it.
 // (Registered before the general recalc listener below, so it runs first.)

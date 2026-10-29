@@ -2,19 +2,21 @@
 // into the HTML), worked out the same way as on the market page. Formatting is shared in common.js.
 const sourceName = src => esc(src.name.split(' – ')[0]);
 
+let raw = null, failed = false;
 fetch('data/market.json', { cache: 'no-cache' })
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-  .then(renderFacts)
-  .catch(() => {
-    const n = $('glanceNote');
-    n.hidden = false;
-    n.innerHTML = (location.protocol === 'file:'
-      ? '<b>The market figures couldn’t be loaded.</b> Browsers block pages opened straight from your disk from reading data files.'
-      : '<b>The market figures couldn’t be loaded.</b> Please reload the page.')
-      + ' The <a href="market.html">market page</a> has the full data.';
-  });
+  .then(d => { raw = d; renderFacts(localData(d), true); })
+  .catch(() => { failed = true; loadNote(); });
 
-function renderFacts(d) {
+function loadNote() {
+  const n = $('glanceNote');
+  n.hidden = false;
+  n.innerHTML = t(location.protocol === 'file:' ? 'h.loadFile' : 'h.loadRetry') + ' ' + t('h.loadMore');
+}
+// Language switch: the same figures again, in the new language (no count-up the second time)
+document.addEventListener('langchange', () => { if (raw) renderFacts(localData(raw), false); else if (failed) loadNote(); });
+
+function renderFacts(d, animate) {
   const P = d.prices_per_m2, n = P.years.length, year = P.years[n - 1];
   const price = id => P.rows.find(r => r.id === id).values[n - 1];
   const R = d.rents_deloitte, rent = R.rows.find(r => r.id === 'praha').value;
@@ -25,34 +27,34 @@ function renderFacts(d) {
 
   const facts = [
     {
-      label: 'Prague flat price per m²', value: kc(price('praha')), num: price('praha'), fmt: kc,
-      text: `What flats in Prague sold for on average in ${year}, about ${(price('praha') / price('cr')).toFixed(1)} times the Czech average of ${kc(price('cr'))}.`,
+      label: t('h.f1'), value: kc(price('praha')), num: price('praha'), fmt: kc,
+      text: t('h.f1t', { year, ratio: dec(price('praha') / price('cr'), 1), avg: kc(price('cr')) }),
       src: `${sourceName(P.source)} · ${year}`,
     },
     {
-      label: 'Prague gross rental yield', value: percent(grossYield), num: grossYield, fmt: percent,
-      text: `A year’s asking rent (${kc(rent)} per m² a month) as a share of the price per m², before any costs, empty months or tax.`,
-      src: `rent — ${sourceName(R.source)}, ${esc(R.source.period)}; price — ${sourceName(P.source)}, ${year}`,
+      label: t('h.f2'), value: percent(grossYield), num: grossYield, fmt: percent,
+      text: t('h.f2t', { rent: kc(rent) }),
+      src: t('h.f2s', { rname: sourceName(R.source), rperiod: esc(R.source.period), pname: sourceName(P.source), year }),
     },
     {
-      label: 'Average new mortgage rate', value: percent(last[1]), num: last[1], fmt: percent,
-      text: `The average yearly interest rate Czech banks charged on new home loans in ${monthName(last[0])}.`,
+      label: t('h.f3'), value: percent(last[1]), num: last[1], fmt: percent,
+      text: t('h.f3t', { month: monthName(last[0]) }),
       src: `${sourceName(M.source)} · ${monthName(last[0])}`,
     },
     {
-      label: 'CNB repo rate', value: percent(repoNow.rate), num: repoNow.rate, fmt: percent,
-      text: `The Czech National Bank’s main interest rate, which steers what banks charge; it has been at this level since ${dayName(repoNow.valid_from)}.`,
-      src: `${sourceName(RP.source)} · since ${dayName(repoNow.valid_from)}`,
+      label: t('h.f4'), value: percent(repoNow.rate), num: repoNow.rate, fmt: percent,
+      text: t('h.f4t', { date: dayName(repoNow.valid_from) }),
+      src: t('h.f4s', { name: sourceName(RP.source), date: dayName(repoNow.valid_from) }),
     },
   ];
   $('facts').innerHTML = facts.map(f => `<div class="card fact">
-    <h3>${f.label}</h3><p class="value">${f.value}</p><p class="explain">${f.text}</p><p class="source"><b>Source:</b> ${f.src}</p>
+    <h3>${f.label}</h3><p class="value">${f.value}</p><p class="explain">${f.text}</p><p class="source"><b>${t('src.source')}</b> ${f.src}</p>
   </div>`).join('');
-  if (!reduceMotion()) document.querySelectorAll('#facts .value').forEach((el, k) => onceVisible(el, () => countUp(el, facts[k])));
+  if (animate && !reduceMotion()) document.querySelectorAll('#facts .value').forEach((el, k) => onceVisible(el, () => countUp(el, facts[k])));
   // Data last updated: the four sources used above
   const fresh = Object.fromEntries(dataFreshness(d).map(f => [f.id, f]));
   const latest = ['prices', 'rents', 'mortgage', 'repo'].map(id => `${fresh[id].what.toLowerCase()}: ${esc(fresh[id].latest)} — ${esc(fresh[id].source)}`).join('; ');
-  $('glanceSource').innerHTML = `<b>Data last updated:</b> retrieved ${dayName(d.retrieved)}. Latest periods: ${latest}. Full sources, links and charts are on the <a href="market.html">market page</a>.`;
+  $('glanceSource').innerHTML = t('h.updated', { date: dayName(d.retrieved), latest });
 }
 
 // Count a number up from zero once, in the same format, always ending on the exact published text.

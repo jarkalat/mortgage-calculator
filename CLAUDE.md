@@ -16,12 +16,27 @@ no dependencies, no frameworks. Repo: https://github.com/jarkalat/mortgage-calcu
 - `fonts/` — Inter v4.1 variable font (`InterVariable.woff2`, `InterVariable-Italic.woff2`) from github.com/rsms/inter, with its `LICENSE.txt` (SIL OFL; keep it next to the fonts). Self-hosted: no Google Fonts or other outside requests. No `<link rel="preload">` (Chrome warns it is unused).
 - `css/<page>.css` — page-only styles (`mortgage`, `invest`, `rent-or-buy`, `market`).
 - `js/theme-init.js` — in `<head>` on every page; applies a saved light theme before drawing.
+- `js/lang-init.js` — in `<head>` on every page; picks the language: `?lang=cs|en` (saved), else the saved choice, else Czech if the browser's language is Czech, else English. Sets `<html lang>`.
+- `js/lang/en.js`, `js/lang/cs.js` — **every visible text**, one file per language with the same keys (loaded just before `common.js`).
 - `js/common.js` — loaded first on every page (see below).
 - `js/finance.js` — shared loan maths.
 - `js/<page>.js` — each tool's own code.
 - `data/market.json` — every market number with source, page/file link, period and retrieval date.
-- `tests/chart-stability.html` — browser test for charts.
+- `tests/chart-stability.html` — browser test for charts (both languages).
+- `tests/translations.html` — browser test: every key in both languages, every key the pages/scripts use exists, same numbers in both.
 - `google34bc03fa02bbb9b0.html` — Google Search Console verification. **Never touch, move or rename.**
+
+## Languages (English / Czech)
+- Never write visible text into HTML or JS without a key. In HTML: `data-i18n="key"` (text), `data-i18n-html="key"` (text with
+  markup), `data-i18n-attr="title:key; aria-label:key"`; keep the English in the HTML too (the test checks it matches `en.js`).
+  In JS: `t('key', { name: value })`, plurals `tn('key', n)` with `key.one` / `key.few` (2–4) / `key.many`.
+- Add every new key to **both** language files; the test fails otherwise. Czech uses natural Czech bank terms.
+- Numbers follow the language, not the currency: use `money()`, `percent()`, `dec()`, `trimDec()`, `pctText()`, `monthName()`,
+  `dayName()` from `common.js`, never `toFixed() + '%'`. English output stays as before; Czech: `4,22 %`, `7 233 600 Kč`, `1 234 $`.
+  Language and currency are independent.
+- Switching language fires `langchange`; each page redraws its results. Texts from `data/market.json` (notes, periods,
+  area names) are translated with `localData()` from `data.<path>` keys; source names and links are never translated.
+- Czech CSV uses semicolons and a decimal comma (for Czech Excel); English CSV is unchanged.
 
 ## Shared code
 - **`common.js`**: renders the nav from the `TOOLS` list (brand links to `./`); `$`, `css()`;
@@ -29,7 +44,7 @@ no dependencies, no frameworks. Repo: https://github.com/jarkalat/mortgage-calcu
   `.currency` button group, which updates `.unit.money` symbols and fires `currencychange`
   (`detail.fill` = load that page's starting numbers); dark mode (`applyTheme`, fires `themechange`);
   restores the saved currency on `DOMContentLoaded`. Settings keys stay `mortgage-currency` /
-  `mortgage-theme` so visitors keep their choices.
+  `mortgage-theme` (and `mortgage-lang`) so visitors keep their choices.
 - **`finance.js`**: `monthlyPI(principal, ratePct, months)` and `balanceAfter(...)`. Use these; don't copy the formula.
 - **`.two-col`**: `<main class="two-col">` gives inputs left / results right, one column under 900px,
   and lets columns shrink so wide tables scroll inside `.table-wrap` instead of widening the page.
@@ -56,7 +71,7 @@ no dependencies, no frameworks. Repo: https://github.com/jarkalat/mortgage-calcu
 - **Never invent, estimate or fill in a number.** Copy exactly; if a number isn't published, leave it out and say so.
   Record source name, exact link, period and retrieval date for every number, and show source + period under every table and chart.
 - No data collection: no analytics, trackers, cookies, accounts or sending user input anywhere.
-  Only local browser settings (currency, theme) are stored.
+  Only local browser settings (language, currency, theme) are stored.
 - Every result gets a one-sentence plain-English explanation. Keep the footer disclaimer on every page.
 
 ## Testing
@@ -66,6 +81,7 @@ There is no test framework; tests run in a browser against a local server (not `
 python3 -m http.server 8765 --bind 127.0.0.1
 ```
 - Open `http://127.0.0.1:8765/tests/chart-stability.html` — must say PASS. It redraws every chart on all chart pages many times and checks size and drawing.
+- Open `http://127.0.0.1:8765/tests/translations.html` — must say PASS.
 - For calculator changes: check results against independent closed-form formulas (not the page's own loop),
   and compare old vs new pages step by step (text, inputs, chart pixels, computed styles) at a fixed 1280×900 viewport.
 - For market data: re-check every number in `data/market.json` against the downloaded source files.

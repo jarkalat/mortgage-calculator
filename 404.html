@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Page not found – Abodex</title>
+<title data-i18n="nf.title">Page not found – Abodex</title>
 <meta name="robots" content="noindex">
 <script>
   // GitHub Pages shows this page for any missing address, however deep, so point relative links at the
@@ -19,6 +19,7 @@
 </script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script src="js/theme-init.js"></script>
+<script src="js/lang-init.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/home.css">
 </head>
@@ -26,48 +27,50 @@
 <nav class="topnav" id="topnav" data-page="404" aria-label="Abodex tools"></nav>
 <header class="hero">
   <div>
-    <h1>Page not found</h1>
-    <p>The page you were looking for isn’t here. It may have moved, or there may be a typo in the address.</p>
-    <p><a class="btn primary" href="./">Go to the home page →</a></p>
+    <h1 data-i18n="nf.h1">Page not found</h1>
+    <p data-i18n="nf.lead">The page you were looking for isn’t here. It may have moved, or there may be a typo in the address.</p>
+    <p><a class="btn primary" href="./" data-i18n="nf.home">Go to the home page →</a></p>
   </div>
 </header>
 
 <main class="home">
   <section class="block" aria-labelledby="toolsTitle">
-    <div class="block-head"><h2 id="toolsTitle">Or open a tool</h2></div>
+    <div class="block-head"><h2 id="toolsTitle" data-i18n="nf.tools">Or open a tool</h2></div>
     <div class="tools">
       <a class="card tool" href="mortgage.html">
-        <p class="q">Can I afford this mortgage?</p>
-        <h3>Mortgage calculator</h3>
-        <p>Monthly payment, extra payments, a rate fixation stress test and the full schedule — in USD, CZK or EUR.</p>
-        <span class="go">Open calculator →</span>
+        <p class="q" data-i18n="card.mQ">Can I afford this mortgage?</p>
+        <h3 data-i18n="card.mH">Mortgage calculator</h3>
+        <p data-i18n="card.mP">Monthly payment, extra payments, a rate fixation stress test and the full schedule — in USD, CZK or EUR.</p>
+        <span class="go" data-i18n="card.mGo">Open calculator →</span>
       </a>
       <a class="card tool" href="invest.html">
-        <p class="q">Does this flat pay for itself as a rental?</p>
-        <h3>Buy-to-let investor</h3>
-        <p>Rental yield, cash flow and the return on your deposit.</p>
-        <span class="go">Open tool →</span>
+        <p class="q" data-i18n="card.iQ">Does this flat pay for itself as a rental?</p>
+        <h3 data-i18n="card.iH">Buy-to-let investor</h3>
+        <p data-i18n="card.iP">Rental yield, cash flow and the return on your deposit.</p>
+        <span class="go" data-i18n="card.go">Open tool →</span>
       </a>
       <a class="card tool" href="rent-or-buy.html">
-        <p class="q">Should I rent or buy?</p>
-        <h3>Rent or buy</h3>
-        <p>Compare the long-term cost of renting with buying.</p>
-        <span class="go">Open tool →</span>
+        <p class="q" data-i18n="card.rQ">Should I rent or buy?</p>
+        <h3 data-i18n="card.rH">Rent or buy</h3>
+        <p data-i18n="card.rP">Compare the long-term cost of renting with buying.</p>
+        <span class="go" data-i18n="card.go">Open tool →</span>
       </a>
       <a class="card tool" href="market.html">
-        <p class="q">What is the market doing?</p>
-        <h3>Housing market</h3>
-        <p>Price and rent trends to put your numbers in context.</p>
-        <span class="go">Open data →</span>
+        <p class="q" data-i18n="card.kQ">What is the market doing?</p>
+        <h3 data-i18n="card.kH">Housing market</h3>
+        <p data-i18n="card.kP">Price and rent trends to put your numbers in context.</p>
+        <span class="go" data-i18n="card.kGo">Open data →</span>
       </a>
     </div>
   </section>
 </main>
 
 <footer>
-  <p>For illustration only. Not financial advice. Real offers depend on your lender.</p>
+  <p data-i18n="footer">For illustration only. Not financial advice. Real offers depend on your lender.</p>
 </footer>
 
+<script src="js/lang/en.js"></script>
+<script src="js/lang/cs.js"></script>
 <script src="js/common.js"></script>
 </body>
 </html>

@@ -23,7 +23,7 @@ const LEVERAGE = [0, 50, 70, 80];
 
 // Formatting: signed money and percentages, with a proper minus sign
 const signed = (v, cents) => Math.abs(v) < 0.005 ? money(0, cents) : (v > 0 ? '+' : '−') + money(Math.abs(v), cents);
-const pct = v => v === null || !isFinite(v) ? 'n/a' : (v < -0.000005 ? '−' : '') + Math.abs(v * 100).toFixed(2) + '%';
+const pct = v => v === null || !isFinite(v) ? t('common.na') : (v < -0.000005 ? '−' : '') + percent(Math.abs(v * 100));
 const tone = v => v > 0.005 ? 'good' : v < -0.005 ? 'bad' : '';   // green when you gain, red when you pay
 
 // ---------- The model ----------
@@ -53,15 +53,15 @@ function inputs() {
   return i;
 }
 
-// Input checks (js/common.js): results wait until every field makes sense
-const PCT = 'Use a percentage between 0% and 100%.', GROWTH = 'Use a yearly change between −50% and +50%.';
+// Input checks (js/common.js): results wait until every field makes sense (msg = key in js/lang/*.js)
+const PCT = 'check.pct', GROWTH = 'check.growth';
 const RULES = [
-  { id: 'price', check: v => v > 0 ? '' : 'Enter a price above 0.' },
+  { id: 'price', check: v => v > 0 ? '' : t('check.price') },
   { id: 'fees' }, { id: 'reno' }, { id: 'furn' },
   { id: 'loanPct', max: 100, msg: PCT },
-  { id: 'rate', max: 30, msg: 'Use a rate between 0% and 30%.' },
+  { id: 'rate', max: 30, msg: 'check.rate' },
   { id: 'rent' },
-  { id: 'vacancy', max: 12, msg: 'A year has at most 12 months.' },
+  { id: 'vacancy', max: 12, msg: 'i.checkVacancy' },
   { id: 'hoa' }, { id: 'taxPct', max: 100, msg: PCT }, { id: 'taxAmt' }, { id: 'ins' },
   { id: 'maint', max: 100, msg: PCT }, { id: 'mgmt', optional: true, max: 100, msg: PCT },
   { id: 'rentGrowth', min: -50, max: 50, msg: GROWTH }, { id: 'priceGrowth', min: -50, max: 50, msg: GROWTH },
@@ -85,26 +85,22 @@ function calc() {
   if (denom > 0) {
     const be = (i.fixed + 12 * m.payment) / denom, gap = i.rent - be;
     $('rBreakEven').textContent = money(be, true);
-    $('rBreakEvenGap').textContent = Math.abs(gap) < 0.005 ? 'Your rent is exactly at break-even.'
-      : `Your rent is ${money(Math.abs(gap), true)} ${gap > 0 ? 'above' : 'below'} it.`;
+    $('rBreakEvenGap').textContent = Math.abs(gap) < 0.005 ? t('i.beExact')
+      : t(gap > 0 ? 'i.beAbove' : 'i.beBelow', { amt: money(Math.abs(gap), true) });
   } else {
-    $('rBreakEven').textContent = 'n/a';
-    $('rBreakEvenGap').textContent = i.vacancy >= 12
-      ? 'Not possible: with the flat empty all year, no rent covers the costs.'
-      : 'Not possible: maintenance and management take all of the rent.';
+    $('rBreakEven').textContent = t('common.na');
+    $('rBreakEvenGap').textContent = t(i.vacancy >= 12 ? 'i.beEmpty' : 'i.beCosts');
   }
 
   // Loan-to-value warning (Europe): the Czech National Bank normally caps loans at 80%
   const warn = $('ltvWarn');
   warn.hidden = !(cfg().eu && i.loanPct > 80 + 1e-9);
-  if (!warn.hidden) warn.innerHTML = `<b>Loan is ${+i.loanPct.toFixed(1)}% of the price.</b> ` + (cur === 'CZK'
-    ? 'The Czech National Bank normally caps mortgages at 80% of the property value (90% for buyers under 36).'
-    : 'Many European regulators cap mortgages at 80% (the Czech National Bank: 80%, or 90% for buyers under 36).');
+  if (!warn.hidden) warn.innerHTML = `<b>${t('ltv.head', { pct: pctText(trimDec(i.loanPct, 1)) })}</b> ` + t(cur === 'CZK' ? 'ltv.czkProperty' : 'ltv.eur');
 
   // Leverage table: same flat, same rate and term, different loan sizes
   $('leverageRows').innerHTML = LEVERAGE.map(p => {
     const x = model(i, p), chosen = Math.abs(i.loanPct - p) < 1e-9 ? ' class="chosen"' : '';
-    return `<tr${chosen}><td>${p}%</td><td>${money(x.loan)}</td><td>${money(x.cashIn)}</td><td>${money(x.payment, true)}</td>
+    return `<tr${chosen}><td>${pctText(p)}</td><td>${money(x.loan)}</td><td>${money(x.cashIn)}</td><td>${money(x.payment, true)}</td>
       <td class="${tone(x.cashFlowYear)}">${signed(x.cashFlowYear / 12, true)}</td><td class="${x.coc === null ? '' : tone(x.coc)}">${pct(x.coc)}</td></tr>`;
   }).join('');
 
@@ -137,11 +133,14 @@ function applyDefaults() {
 }
 $('reset').onclick = applyDefaults;
 
+const hoaLabel = () => { $('hoaLabel').textContent = t(cfg().eu ? 'common.repairMonth' : 'common.hoaMonth'); };
 document.addEventListener('currencychange', e => {
   for (const [id, step] of Object.entries(iset().steps)) $(id).step = step;
-  $('hoaLabel').textContent = cfg().eu ? 'Repair fund / month' : 'HOA / month';
+  hoaLabel();
   if (e.detail.fill) applyDefaults(); else calc();
 });
+// Language switch (js/common.js has already swapped the page's fixed texts)
+document.addEventListener('langchange', () => { hoaLabel(); calc(); fromMarketNote(); });
 
 document.querySelectorAll('main input, main select').forEach(el => el.addEventListener('input', calc));
 
@@ -160,6 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const note = document.createElement('p');
   note.className = 'hint';
   note.id = 'fromMarket';
-  note.textContent = `Starting point from the Housing market page: price ${money(price)} and rent ${money(rent)} a month (Prague averages × flat size). Everything else uses the usual CZK starting numbers.`;
+  note.dataset.price = price; note.dataset.rent = rent;
   document.querySelector('header > div').appendChild(note);
+  fromMarketNote();
 });
+function fromMarketNote() {
+  const note = $('fromMarket');
+  if (note) note.textContent = t('i.fromMarket', { price: kc(+note.dataset.price), rent: kc(+note.dataset.rent) });
+}

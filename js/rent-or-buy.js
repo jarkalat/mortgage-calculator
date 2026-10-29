@@ -77,47 +77,46 @@ function simulate(i, priceGrowth = i.priceGrowth) {
 // ---------- Rendering ----------
 let last = null;
 
-// Input checks (js/common.js): results wait until every field makes sense
-const PCT = 'Use a percentage between 0% and 100%.', GROWTH = 'Use a yearly change between −50% and +50%.';
+// Input checks (js/common.js): results wait until every field makes sense (msg = key in js/lang/*.js)
+const PCT = 'check.pct', GROWTH = 'check.growth';
 const RULES = [
-  { id: 'price', check: v => v > 0 ? '' : 'Enter a price above 0.' },
+  { id: 'price', check: v => v > 0 ? '' : t('check.price') },
   { id: 'buying' },
   { id: 'downPct', max: 100, msg: PCT },
-  { id: 'rate', max: 30, msg: 'Use a rate between 0% and 30%.' },
+  { id: 'rate', max: 30, msg: 'check.rate' },
   { id: 'hoa' }, { id: 'taxPct', max: 100, msg: PCT }, { id: 'taxAmt' }, { id: 'ins' },
   { id: 'maint', max: 100, msg: PCT },
   { id: 'rent' },
   { id: 'rentGrowth', min: -50, max: 50, msg: GROWTH }, { id: 'priceGrowth', min: -50, max: 50, msg: GROWTH },
-  { id: 'ret', min: -50, max: 50, msg: 'Use a yearly return between −50% and +50%.' },
-  { id: 'sell', max: 50, msg: 'Use a percentage between 0% and 50%.' },
-  { id: 'years', int: true, min: 1, max: 30, msg: 'Use a whole number of years from 1 to 30.' },
+  { id: 'ret', min: -50, max: 50, msg: 'rb.checkRet' },
+  { id: 'sell', max: 50, msg: 'rb.checkSell' },
+  { id: 'years', int: true, min: 1, max: 30, msg: 'rb.checkYears' },
 ];
 
 function calc() {
   if (!checkInputs(RULES, document.querySelector('main > .stack'))) return;
-  const i = inputs(), s = simulate(i), e = s.end, diff = e.buyerNW - e.renterNW, yrs = i.years === 1 ? '1 year' : `${i.years} years`;
+  const i = inputs(), s = simulate(i), e = s.end, diff = e.buyerNW - e.renterNW, over = tn('rb.over', i.years);
   last = { i, s };
 
-  $('resultsTitle').textContent = `After ${yrs}`;
+  $('resultsTitle').textContent = tn('rb.after', i.years);
   $('rBuyer').textContent = money(e.buyerNW);
   $('rRenter').textContent = money(e.renterNW);
   $('rDiff').textContent = signed(diff);
   $('rDiff').className = 'value ' + tone(diff);
-  $('rBreakEven').textContent = s.breakEven ? `Year ${s.breakEven}` : 'Renting wins';
+  $('rBreakEven').textContent = s.breakEven ? t('rb.beYear', { n: s.breakEven }) : t('rb.rentWins');
 
-  // Verdict in plain English
+  // Verdict in plain words
   const first = s.rows[1], payMore = first.buyerPays - first.rent;
-  const start = Math.abs(payMore) < 0.5 ? 'In the first year buying and renting cost the same each month.'
-    : `In the first year the buyer pays ${money(first.buyerPays)} a month against ${money(first.rent)} rent, so the ${payMore > 0 ? 'renter' : 'buyer'} invests the ${money(Math.abs(payMore))} difference.`;
+  const start = Math.abs(payMore) < 0.5 ? t('rb.same')
+    : t(payMore > 0 ? 'rb.firstRenter' : 'rb.firstBuyer', { pays: money(first.buyerPays), rent: money(first.rent), diff: money(Math.abs(payMore)) });
   let verdict;
   if (s.breakEven) {
-    verdict = `Over ${yrs}, buying leaves you about ${about(diff)} better off than renting and investing the difference. `
-      + (s.breakEven === 1 ? 'Buying is ahead from the first year and stays ahead.' : `Buying pulls ahead in year ${s.breakEven} and stays ahead.`);
+    verdict = t('rb.buyWins', { over, amt: about(diff) }) + ' '
+      + (s.breakEven === 1 ? t('rb.aheadFirst') : t('rb.aheadYear', { n: s.breakEven }));
   } else if (Math.abs(diff) < 0.5) {
-    verdict = `Over ${yrs}, buying and renting come out even.`;
+    verdict = t('rb.even', { over });
   } else {
-    verdict = `Over ${yrs}, renting and investing the difference leaves you about ${about(diff)} better off than buying — renting wins over this period. `
-      + 'Buying would need more years, cheaper borrowing or faster price growth to catch up.';
+    verdict = t('rb.rentWinsText', { over, amt: about(diff) }) + ' ' + t('rb.catchUp');
   }
   $('verdict').textContent = verdict + ' ' + start;
 
@@ -126,7 +125,7 @@ function calc() {
   $('growthRows').innerHTML = GROWTH_SCENARIOS.map(g => {
     const x = simulate(i, g / 100).end, d = x.buyerNW - x.renterNW;
     const chosen = Math.abs(Math.abs(g - i.priceGrowth * 100) - nearest) < 1e-9 ? ' class="chosen"' : '';
-    return `<tr${chosen}><td>${g}%</td><td>${money(x.buyerNW)}</td><td>${money(x.renterNW)}</td><td class="${tone(d)}">${signed(d)}</td></tr>`;
+    return `<tr${chosen}><td>${pctText(g)}</td><td>${money(x.buyerNW)}</td><td>${money(x.renterNW)}</td><td class="${tone(d)}">${signed(d)}</td></tr>`;
   }).join('');
 
   // Yearly table
@@ -139,9 +138,7 @@ function calc() {
   // Loan-to-value warning (Europe): the Czech National Bank normally caps loans at 80%
   const ltv = (1 - i.down) * 100, warn = $('ltvWarn');
   warn.hidden = !(i.eu && ltv > 80 + 1e-9);
-  if (!warn.hidden) warn.innerHTML = `<b>Loan is ${+ltv.toFixed(1)}% of the price.</b> ` + (cur === 'CZK'
-    ? 'The Czech National Bank normally caps mortgages at 80% of the home value (90% for buyers under 36).'
-    : 'Many European regulators cap mortgages at 80% (the Czech National Bank: 80%, or 90% for buyers under 36).');
+  if (!warn.hidden) warn.innerHTML = `<b>${t('ltv.head', { pct: pctText(trimDec(ltv, 1)) })}</b> ` + t(cur === 'CZK' ? 'ltv.czk' : 'ltv.eur');
 
   drawChart();
 }
@@ -169,7 +166,7 @@ function drawChart() {
   }
   const step = i.years > 20 ? 5 : i.years > 10 ? 2 : 1;
   ctx.textAlign = 'center';
-  for (let yr = 0; yr <= i.years; yr += step) ctx.fillText('Yr ' + yr, x(yr), H - 8);
+  for (let yr = 0; yr <= i.years; yr += step) ctx.fillText(t('chart.yr', { n: yr }), x(yr), H - 8);
 
   if (s.breakEven) {   // shade the years where buying stays ahead
     ctx.fillStyle = css('--accent-soft');
@@ -185,7 +182,7 @@ function drawChart() {
   line('renterNW', css('--interest'));
   line('buyerNW', css('--principal'));
   if (s.breakEven) {
-    const label = `Buying ahead from yr ${s.breakEven}`;
+    const label = t('rb.chartAhead', { n: s.breakEven });
     ctx.font = '700 12px ' + css('--font'); ctx.textAlign = 'left';
     const tw = ctx.measureText(label).width, bx0 = x(s.breakEven);
     const bx = bx0 + tw + 18 > W - pad.r ? bx0 - tw - 18 : bx0 + 6, by = pad.t + 2;
@@ -206,14 +203,18 @@ function applyDefaults() {
 }
 $('reset').onclick = applyDefaults;
 
+function hoaLabels() {
+  const eu = cfg().eu;
+  $('hoaLabel').textContent = t(eu ? 'common.repairMonth' : 'common.hoaMonth');
+  $('hoaHint').textContent = t(eu ? 'rb.repairHint' : 'rb.hoaHint');
+}
 document.addEventListener('currencychange', e => {
   for (const [id, step] of Object.entries(rset().steps)) $(id).step = step;
-  const eu = cfg().eu;
-  $('hoaLabel').textContent = eu ? 'Repair fund / month' : 'HOA / month';
-  $('hoaHint').textContent = eu ? 'The monthly payment into the building’s repair fund (fond oprav).'
-    : 'A monthly fee to the building or association for shared upkeep.';
+  hoaLabels();
   if (e.detail.fill) applyDefaults(); else calc();
 });
+// Language switch (js/common.js has already swapped the page's fixed texts)
+document.addEventListener('langchange', () => { hoaLabels(); calc(); });
 document.addEventListener('themechange', drawChart);
 window.addEventListener('resize', drawChart);
 document.querySelectorAll('main input, main select').forEach(el => el.addEventListener('input', calc));
