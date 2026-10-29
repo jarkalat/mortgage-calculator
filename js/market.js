@@ -6,7 +6,7 @@ let data = null;
 
 fetch('data/market.json', { cache: 'no-cache' })
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-  .then(d => { data = d; render(); })
+  .then(d => { data = d; render(); revealSections(); })
   .catch(() => {
     const n = $('loadNote');
     n.hidden = false;

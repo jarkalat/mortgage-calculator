@@ -25,22 +25,22 @@ function renderFacts(d) {
 
   const facts = [
     {
-      label: 'Prague flat price per m²', value: kc(price('praha')),
+      label: 'Prague flat price per m²', value: kc(price('praha')), num: price('praha'), fmt: kc,
       text: `What flats in Prague sold for on average in ${year}, about ${(price('praha') / price('cr')).toFixed(1)} times the Czech average of ${kc(price('cr'))}.`,
       src: `${sourceName(P.source)} · ${year}`,
     },
     {
-      label: 'Prague gross rental yield', value: percent(grossYield),
+      label: 'Prague gross rental yield', value: percent(grossYield), num: grossYield, fmt: percent,
       text: `A year’s asking rent (${kc(rent)} per m² a month) as a share of the price per m², before any costs, empty months or tax.`,
       src: `rent — ${sourceName(R.source)}, ${esc(R.source.period)}; price — ${sourceName(P.source)}, ${year}`,
     },
     {
-      label: 'Average new mortgage rate', value: percent(last[1]),
+      label: 'Average new mortgage rate', value: percent(last[1]), num: last[1], fmt: percent,
       text: `The average yearly interest rate Czech banks charged on new home loans in ${monthName(last[0])}.`,
       src: `${sourceName(M.source)} · ${monthName(last[0])}`,
     },
     {
-      label: 'CNB repo rate', value: percent(repoNow.rate),
+      label: 'CNB repo rate', value: percent(repoNow.rate), num: repoNow.rate, fmt: percent,
       text: `The Czech National Bank’s main interest rate, which steers what banks charge; it has been at this level since ${dayName(repoNow.valid_from)}.`,
       src: `${sourceName(RP.source)} · since ${dayName(repoNow.valid_from)}`,
     },
@@ -48,5 +48,19 @@ function renderFacts(d) {
   $('facts').innerHTML = facts.map(f => `<div class="card fact">
     <h3>${f.label}</h3><p class="value">${f.value}</p><p class="explain">${f.text}</p><p class="source"><b>Source:</b> ${f.src}</p>
   </div>`).join('');
+  if (!reduceMotion()) document.querySelectorAll('#facts .value').forEach((el, k) => onceVisible(el, () => countUp(el, facts[k])));
   $('glanceSource').innerHTML = `Data retrieved ${dayName(d.retrieved)}. Full sources, links and charts are on the <a href="market.html">market page</a>.`;
+}
+
+// Count a number up from zero once, in the same format, always ending on the exact published text.
+// aria-busy asks screen readers to wait for the final value.
+function countUp(el, f) {
+  const start = performance.now(), ms = 900;
+  el.setAttribute('aria-busy', 'true');
+  const step = now => {
+    const t = Math.min(1, (now - start) / ms);
+    if (t < 1) { el.textContent = f.fmt(f.num * (1 - Math.pow(1 - t, 3))); requestAnimationFrame(step); }
+    else { el.textContent = f.value; el.removeAttribute('aria-busy'); }
+  };
+  requestAnimationFrame(step);
 }

@@ -97,6 +97,13 @@ document.querySelectorAll('.currency button').forEach(b =>
 // Dark (navy) is the default. js/theme-init.js applies a saved light theme before
 // the page appears; this keeps the button in step and saves changes.
 function applyTheme(dark) {
+  // Cross-fade the colours for a moment (skipped with "reduce motion")
+  const root = document.documentElement;
+  if (!reduceMotion()) {
+    root.classList.add('theme-switching');
+    clearTimeout(applyTheme.timer);
+    applyTheme.timer = setTimeout(() => root.classList.remove('theme-switching'), 300);
+  }
   if (dark) document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme', 'light');
   $('themeToggle').textContent = dark ? '☀ Light mode' : '🌙 Dark mode';
@@ -108,6 +115,41 @@ $('themeToggle').onclick = () => applyTheme(document.documentElement.hasAttribut
 if (document.documentElement.getAttribute('data-theme') === 'light') {
   $('themeToggle').textContent = '🌙 Dark mode';
   $('themeToggle').setAttribute('aria-pressed', false);
+}
+
+// ---------- Motion ----------
+// Everything that moves is switched off when the system's "reduce motion" setting is on.
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Run fn(el) once, the first time el scrolls into view
+function onceVisible(el, fn) {
+  if (!('IntersectionObserver' in window)) return fn(el);
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) { io.unobserve(e.target); fn(e.target); }
+  }), { rootMargin: '0px 0px -8% 0px' });
+  io.observe(el);
+}
+
+// Sections fade in gently as they scroll into view. Only sections still below the screen are
+// hidden first, so nothing already visible flickers, and without JavaScript everything just shows.
+// Pages that show content later (the market page) call this again once it is on screen.
+function revealSections() {
+  if (reduceMotion() || !('IntersectionObserver' in window)) return;
+  document.querySelectorAll('main > *, main > .stack > *, .block').forEach(el => {
+    if (el.classList.contains('stack') || el.querySelector('.block')) return;  // fade the parts, not their wrapper
+    if (el.classList.contains('reveal') || el.hidden) return;
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return;
+    el.classList.add('reveal');
+    onceVisible(el, s => s.classList.add('in'));
+  });
+}
+document.addEventListener('DOMContentLoaded', revealSections);
+
+// Charts are drawn on canvases with the page font; redraw them (they listen for "themechange")
+// once Inter has loaded, so a first draw in the fallback font doesn't stay on screen.
+if (document.fonts && document.fonts.load) {
+  document.fonts.load('12px Inter').then(() => document.dispatchEvent(new CustomEvent('themechange',
+    { detail: { dark: !document.documentElement.hasAttribute('data-theme') } }))).catch(() => {});
 }
 
 // Reopen in the currency chosen last time, once the page's own script has set itself up
