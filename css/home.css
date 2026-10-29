@@ -1,0 +1,36 @@
+/* Home page styles (loaded after style.css): sections, market facts, tool cards, "how it works". */
+main.home { padding-top: 8px; }
+.block { margin-bottom: 28px; }
+.block-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; margin-bottom: 12px; }
+.block-head h2 { margin: 0; font-size: 26px; }
+.block-head a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.block-head a:hover { text-decoration: underline; }
+.hero p { max-width: 760px; }
+
+/* Market at a glance */
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.fact { display: flex; flex-direction: column; min-width: 0; }
+.fact h3 { margin: 0; font-size: 15px; color: var(--muted); font-weight: 400; }
+.fact .value { margin: 2px 0 6px; font-size: 32px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.fact .explain { margin: 0; flex: 1; }
+.source { margin: 8px 0 0; font-size: 12px; color: var(--muted); line-height: 1.45; overflow-wrap: anywhere; }
+.source a { color: var(--muted); }
+.source b { color: var(--text); font-weight: 600; }
+.load-note { padding: 14px 16px; border-left: 3px solid var(--pmi); background: var(--card); border-radius: 8px; }
+.load-note a { color: var(--accent); }
+
+/* Tool cards: the question first, then the tool's name */
+.tools { padding: 0; }
+.tool .q { margin: 0; color: var(--accent); font-weight: 700; flex: none; }
+.tool h3 { margin: 0; font-size: 20px; }
+
+/* How Abodex works */
+.points { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.points h3 { margin: 0 0 6px; font-size: 18px; }
+.points p { margin: 0; color: var(--muted); }
+
+@media (max-width: 560px) {
+  .hero h1 { font-size: 32px; }
+  .hero p { font-size: 17px; }
+  .block-head h2 { font-size: 22px; }
+}
