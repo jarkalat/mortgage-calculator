@@ -59,21 +59,42 @@ let lastDownEdited = 'pct';
 $('downAmt').addEventListener('input', () => { lastDownEdited = 'amt'; syncDown(); calc(); });
 $('downPct').addEventListener('input', () => { lastDownEdited = 'pct'; syncDown(); calc(); });
 $('price').addEventListener('input', () => { syncDown(); calc(); });
+// Only a valid entry is copied to the other box, so a mistake shows its message in one place and
+// what you typed stays as you typed it.
 function syncDown() {
   const price = num('price');
+  if (inputProblem(rule('price'))) return;
   if (lastDownEdited === 'pct') {
-    if (num('downPct') > 100) $('downPct').value = 100;
-    $('downAmt').value = Math.round(price * num('downPct') / 100);
-  } else {
-    if (num('downAmt') > price) $('downAmt').value = price;
-    $('downPct').value = price ? +(num('downAmt') / price * 100).toFixed(2) : 0;
+    if (!inputProblem(rule('downPct'))) $('downAmt').value = Math.round(price * num('downPct') / 100);
+  } else if (!inputProblem(rule('downAmt'))) {
+    $('downPct').value = +(num('downAmt') / price * 100).toFixed(2);
   }
 }
+
+// ---------- Input checks (js/common.js): results wait until every field makes sense ----------
+const PCT = 'Use a percentage between 0% and 100%.', RATE = 'Use a rate between 0% and 30%.';
+const RULES = [
+  { id: 'price', check: v => v > 0 ? '' : 'Enter a price above 0.' },
+  { id: 'downAmt', check: v => !inputProblem(rule('price')) && v > num('price') ? 'The down payment can’t be more than the price.' : '' },
+  { id: 'downPct', max: 100, msg: PCT },
+  { id: 'rate', max: 30, msg: RATE },
+  { id: 'start' },
+  { id: 'extraMonthly', optional: true },
+  { id: 'tax', max: 100, msg: PCT }, { id: 'taxAmt' }, { id: 'ins' }, { id: 'pmi', max: 100, msg: PCT }, { id: 'hoa' },
+  { id: 'extraYearly', optional: true }, { id: 'lump', optional: true },
+  { id: 'lumpMonth', optional: true, int: true, min: 1, msg: 'Use a payment number of 1 or more.',
+    check: v => v > parseInt($('term').value, 10) * 12 ? `The loan has only ${parseInt($('term').value, 10) * 12} payments.` : '' },
+  { id: 'income', optional: true }, { id: 'debts', optional: true },
+  // While it follows "current rate + 2%" by itself, only your own value is checked
+  { id: 'resetRate', optional: true, max: 30, msg: RATE, skip: () => resetRateAuto },
+];
+const rule = id => RULES.find(r => r.id === id);
 
 // ---------- Main calculation ----------
 let state = null, view = 'year';
 
 function calc() {
+  if (!checkInputs(RULES, document.querySelector('main > .stack'), [$('affordOut')])) return;
   const price = num('price');
   const down = Math.min(num('downAmt'), price);
   const loan = price - down;

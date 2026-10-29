@@ -53,7 +53,22 @@ function inputs() {
   return i;
 }
 
+// Input checks (js/common.js): results wait until every field makes sense
+const PCT = 'Use a percentage between 0% and 100%.', GROWTH = 'Use a yearly change between −50% and +50%.';
+const RULES = [
+  { id: 'price', check: v => v > 0 ? '' : 'Enter a price above 0.' },
+  { id: 'fees' }, { id: 'reno' }, { id: 'furn' },
+  { id: 'loanPct', max: 100, msg: PCT },
+  { id: 'rate', max: 30, msg: 'Use a rate between 0% and 30%.' },
+  { id: 'rent' },
+  { id: 'vacancy', max: 12, msg: 'A year has at most 12 months.' },
+  { id: 'hoa' }, { id: 'taxPct', max: 100, msg: PCT }, { id: 'taxAmt' }, { id: 'ins' },
+  { id: 'maint', max: 100, msg: PCT }, { id: 'mgmt', optional: true, max: 100, msg: PCT },
+  { id: 'rentGrowth', min: -50, max: 50, msg: GROWTH }, { id: 'priceGrowth', min: -50, max: 50, msg: GROWTH },
+];
+
 function calc() {
+  if (!checkInputs(RULES, document.querySelector('main > .stack'))) return;
   const i = inputs(), m = model(i, i.loanPct);
 
   // Headline results

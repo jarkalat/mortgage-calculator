@@ -152,6 +152,13 @@ summary:hover { color: var(--accent); }
 }
 .warn.strong { border-left-color: var(--pmi); }
 
+/* Input checks (js/common.js checkInputs): message under the field; results dim until it is fixed.
+   A results card that holds the field being fixed stays bright. */
+input[aria-invalid="true"], input[aria-invalid="true"]:hover, input[aria-invalid="true"]:focus { border-color: var(--pmi); }
+.field-error { margin-top: var(--space-1); font-size: 13px; line-height: 1.5; color: var(--pmi); }
+.paused-note { margin: 0; }
+.paused > :not(.paused-note):not(:has([aria-invalid="true"])), .paused-item { opacity: 0.4; transition: opacity var(--fast) ease; }
+
 /* Shared building blocks: buttons, tabs, tables, result tiles, notes, rise/fall colours */
 .tabs { display: flex; gap: 6px; margin-bottom: var(--space-4); flex-wrap: wrap; align-items: center; }
 .tabs button, .btn {

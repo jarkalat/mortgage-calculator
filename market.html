@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Czech Housing Market: Prices, Rents, Yields &amp; Mortgage Rates</title>
 <meta name="description" content="Czech flat prices and rents per m², gross rental yields, CNB and mortgage rates and price indices for Prague, Brno and Czechia — with every source cited.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script src="js/theme-init.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/market.css">
@@ -22,6 +23,16 @@
   <p class="load-note" id="loadNote" hidden></p>
 
   <div class="stack" id="content" hidden>
+    <section class="card" id="freshness">
+      <h2>Data last updated</h2>
+      <p class="lead" id="freshRetrieved"></p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Data</th><th>Source</th><th>Latest period</th></tr></thead>
+        <tbody id="freshRows"></tbody>
+      </table></div>
+      <p class="hint">Sources publish on their own schedules, so the latest period differs from one to the next. Full links are under each table and chart below.</p>
+    </section>
+
     <section class="card" id="summaryCard">
       <h2>What this means for buyers and investors</h2>
       <ul class="summary" id="summary"></ul>
