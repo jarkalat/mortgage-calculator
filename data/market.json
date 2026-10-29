@@ -1,0 +1,2157 @@
+{
+ "about": "Abodex Housing market data. Every number is copied exactly from the named source; nothing is estimated.",
+ "retrieved": "2026-10-29",
+ "prices_per_m2": {
+  "title": "Average purchase prices of flats",
+  "unit": "Kč/m²",
+  "years": [
+   2023,
+   2024,
+   2025
+  ],
+  "source": {
+   "name": "Czech Statistical Office (CZSO) – Ceny nemovitostí – za období 2023–2025, published 15 Jul 2026",
+   "page": "https://csu.gov.cz/produkty/ceny-nemovitosti",
+   "period": "calendar years 2023, 2024, 2025",
+   "retrieved": "2026-10-29"
+  },
+  "rows": [
+   {
+    "id": "praha",
+    "label": "Prague",
+    "source_label": "Hlavní město Praha",
+    "table": "2-1 (by region)",
+    "file": "https://csu.gov.cz/docs/107508/21442f75-2c27-fb93-0f43-c8567ba3c596/0140162606.xlsx?version=1.0",
+    "values": [
+     103693,
+     115889,
+     131520
+    ]
+   },
+   {
+    "id": "brno",
+    "label": "Brno",
+    "source_label": "Brno-město",
+    "table": "2-4 (by district)",
+    "file": "https://csu.gov.cz/docs/107508/3472a929-e82b-ea1c-80c5-79997a57e8d0/0140162607.xlsx?version=1.0",
+    "values": [
+     77827,
+     88333,
+     99713
+    ]
+   },
+   {
+    "id": "cr",
+    "label": "Czechia",
+    "source_label": "Celkem ČR",
+    "table": "2-1 (by region)",
+    "file": "https://csu.gov.cz/docs/107508/21442f75-2c27-fb93-0f43-c8567ba3c596/0140162606.xlsx?version=1.0",
+    "values": [
+     58641,
+     63521,
+     72410
+    ]
+   }
+  ]
+ },
+ "prague_districts": {
+  "title": "Average sale prices in selected Prague districts",
+  "unit": "Kč/m²",
+  "private_source": true,
+  "source": {
+   "name": "Deloitte Real Index (private source)",
+   "page": "https://www.deloitte.com/cz-sk/cs/about/press-room/skutecne-ceny-prodavanych-bytu-v-praze-vzrostly-za-posledniho-pul-roku-o-2-4-procenta.html",
+   "page_index": "https://www.deloitte.com/cz-sk/cs/Industries/real-estate/collections/real-index.html",
+   "published": "2026-09-21",
+   "period": "first half of 2026 per the press release; Deloitte's index page labels the same edition \"Q1 2026\"",
+   "retrieved": "2026-10-29"
+  },
+  "note": "Incomplete list: Deloitte names only these districts in its published text.",
+  "prague_overall": 153100,
+  "rows": [
+   {
+    "district": "Praha 1",
+    "value": 216700,
+    "where": "press release + index page"
+   },
+   {
+    "district": "Praha 2",
+    "value": 199900,
+    "where": "press release + index page"
+   },
+   {
+    "district": "Praha 7",
+    "value": 170100,
+    "where": "press release"
+   },
+   {
+    "district": "Praha 3",
+    "value": 163000,
+    "where": "press release"
+   },
+   {
+    "district": "Praha 4",
+    "value": 144400,
+    "where": "index page (lowest average price)"
+   }
+  ]
+ },
+ "rents_deloitte": {
+  "title": "Average asking rents",
+  "unit": "Kč/m² per month",
+  "private_source": true,
+  "source": {
+   "name": "Deloitte Rent Index (private source)",
+   "page": "https://www.deloitte.com/cz-sk/cs/about/press-room/najemne-v-praze-i-vetsine-krajskych-mest-mirne-zlevnilo.html",
+   "published": "2026-08-17",
+   "period": "Q2 2026",
+   "retrieved": "2026-10-29"
+  },
+  "note": "Based on rental offers. Deloitte's national figure covers the regional cities and regions it tracks.",
+  "rows": [
+   {
+    "id": "praha",
+    "label": "Prague",
+    "value": 462
+   },
+   {
+    "id": "brno",
+    "label": "Brno",
+    "value": 390
+   },
+   {
+    "id": "cr",
+    "label": "Czechia",
+    "value": 343
+   }
+  ]
+ },
+ "rents_mf": {
+  "title": "Rents for 2+kk flats by cadastral area",
+  "unit": "Kč/m² per month",
+  "category": "size category 2 (VK2: \"2+kk, 2+2\" as listed by the Ministry)",
+  "source": {
+   "name": "Ministry of Finance – Cenová mapa nájemného, edition of 15 Aug 2026",
+   "page": "https://mf.gov.cz/cs/rozpoctova-politika/podpora-projektoveho-rizeni/cenova-mapa/cenova-mapa-infografika",
+   "file": "https://mf.gov.cz/assets/attachments/2026-08-15_Cenova-mapa.xlsx",
+   "period": "data from 1 Jul 2021 to 30 Jun 2026, weighted most to 2026",
+   "retrieved": "2026-10-29"
+  },
+  "columns": {
+   "reference_rent": "Nájemné referenčního bytu za m² v Kč za 1 měsíc (model rent of an unfurnished reference flat)",
+   "median_rent": "Mediánová hodnota nájemného za m² v Kč (median of offered rents)",
+   "data_coverage": "Datová pokrytost, 1 (0–30 observations) to 5 (150+)"
+  },
+  "note": "Values come from rental offers, adjusted by the Ministry's model. The Ministry publishes no single figure for a whole city or for Czechia.",
+  "praha": [
+   {
+    "cadastral_area": "Benice",
+    "reference_rent": 377,
+    "median_rent": 294,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Bohnice",
+    "reference_rent": 360,
+    "median_rent": 319,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Braník",
+    "reference_rent": 346,
+    "median_rent": 320,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Bubeneč",
+    "reference_rent": 381,
+    "median_rent": 347,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Běchovice",
+    "reference_rent": 332,
+    "median_rent": 323,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Břevnov",
+    "reference_rent": 362,
+    "median_rent": 334,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Březiněves",
+    "reference_rent": 311,
+    "median_rent": 325,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Chodov",
+    "reference_rent": 370,
+    "median_rent": 341,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Cholupice",
+    "reference_rent": 330,
+    "median_rent": 334,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Dejvice",
+    "reference_rent": 364,
+    "median_rent": 353,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Dolní Chabry",
+    "reference_rent": 393,
+    "median_rent": 370,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Dolní Měcholupy",
+    "reference_rent": 376,
+    "median_rent": 333,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Dolní Počernice",
+    "reference_rent": 340,
+    "median_rent": 365,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Dubeč",
+    "reference_rent": 337,
+    "median_rent": 283,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Hloubětín",
+    "reference_rent": 355,
+    "median_rent": 352,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Hlubočepy",
+    "reference_rent": 363,
+    "median_rent": 335,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Hodkovičky",
+    "reference_rent": 394,
+    "median_rent": 378,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Holešovice",
+    "reference_rent": 383,
+    "median_rent": 363,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Holyně",
+    "reference_rent": 374,
+    "median_rent": 335,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Horní Měcholupy",
+    "reference_rent": 376,
+    "median_rent": 333,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Horní Počernice",
+    "reference_rent": 326,
+    "median_rent": 316,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Hostavice",
+    "reference_rent": 399,
+    "median_rent": 348,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Hostivař",
+    "reference_rent": 357,
+    "median_rent": 325,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Hradčany",
+    "reference_rent": 397,
+    "median_rent": 379,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Hrdlořezy",
+    "reference_rent": 330,
+    "median_rent": 333,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Háje",
+    "reference_rent": 385,
+    "median_rent": 339,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Hájek u Uhříněvsi",
+    "reference_rent": 359,
+    "median_rent": 309,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Jinonice",
+    "reference_rent": 392,
+    "median_rent": 339,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Josefov",
+    "reference_rent": 435,
+    "median_rent": 365,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Kamýk",
+    "reference_rent": 369,
+    "median_rent": 322,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Karlín",
+    "reference_rent": 412,
+    "median_rent": 397,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Kbely",
+    "reference_rent": 327,
+    "median_rent": 341,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Klánovice",
+    "reference_rent": 346,
+    "median_rent": 332,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Kobylisy",
+    "reference_rent": 373,
+    "median_rent": 327,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Koloděje",
+    "reference_rent": 337,
+    "median_rent": 307,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Kolovraty",
+    "reference_rent": 350,
+    "median_rent": 309,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Komořany",
+    "reference_rent": 299,
+    "median_rent": 300,
+    "data_coverage": 3
+   },
+   {
+    "cadastral_area": "Košíře",
+    "reference_rent": 364,
+    "median_rent": 328,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Královice",
+    "reference_rent": 353,
+    "median_rent": 348,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Krč",
+    "reference_rent": 367,
+    "median_rent": 316,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Kunratice",
+    "reference_rent": 318,
+    "median_rent": 322,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Kyje",
+    "reference_rent": 377,
+    "median_rent": 334,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Křeslice",
+    "reference_rent": 324,
+    "median_rent": 333,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Lahovice",
+    "reference_rent": 356,
+    "median_rent": 385,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Letňany",
+    "reference_rent": 367,
+    "median_rent": 318,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Lhotka",
+    "reference_rent": 339,
+    "median_rent": 305,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Libeň",
+    "reference_rent": 354,
+    "median_rent": 346,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Liboc",
+    "reference_rent": 351,
+    "median_rent": 311,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Libuš",
+    "reference_rent": 342,
+    "median_rent": 307,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Lipany",
+    "reference_rent": 343,
+    "median_rent": 289,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Lipence",
+    "reference_rent": 335,
+    "median_rent": 337,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Lochkov",
+    "reference_rent": 347,
+    "median_rent": 321,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Lysolaje",
+    "reference_rent": 322,
+    "median_rent": 299,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Malešice",
+    "reference_rent": 372,
+    "median_rent": 331,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Malá Chuchle",
+    "reference_rent": 300,
+    "median_rent": 377,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Malá Strana",
+    "reference_rent": 435,
+    "median_rent": 367,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Michle",
+    "reference_rent": 357,
+    "median_rent": 335,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Miškovice",
+    "reference_rent": 345,
+    "median_rent": 289,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Modřany",
+    "reference_rent": 360,
+    "median_rent": 349,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Motol",
+    "reference_rent": 354,
+    "median_rent": 350,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Nebušice",
+    "reference_rent": 373,
+    "median_rent": 328,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Nedvězí u Říčan",
+    "reference_rent": 328,
+    "median_rent": 314,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Nové Město",
+    "reference_rent": 419,
+    "median_rent": 367,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Nusle",
+    "reference_rent": 358,
+    "median_rent": 321,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Petrovice",
+    "reference_rent": 301,
+    "median_rent": 311,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Pitkovice",
+    "reference_rent": 360,
+    "median_rent": 327,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Podolí",
+    "reference_rent": 353,
+    "median_rent": 332,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Prosek",
+    "reference_rent": 356,
+    "median_rent": 331,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Písnice",
+    "reference_rent": 363,
+    "median_rent": 287,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Přední Kopanina",
+    "reference_rent": 283,
+    "median_rent": 331,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Radlice",
+    "reference_rent": 377,
+    "median_rent": 362,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Radotín",
+    "reference_rent": 322,
+    "median_rent": 307,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Ruzyně",
+    "reference_rent": 315,
+    "median_rent": 355,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Satalice",
+    "reference_rent": 343,
+    "median_rent": 298,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Sedlec",
+    "reference_rent": 319,
+    "median_rent": 317,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Slivenec",
+    "reference_rent": 429,
+    "median_rent": 355,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Smíchov",
+    "reference_rent": 369,
+    "median_rent": 363,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Sobín",
+    "reference_rent": 380,
+    "median_rent": 363,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Staré Město",
+    "reference_rent": 430,
+    "median_rent": 341,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Stodůlky",
+    "reference_rent": 363,
+    "median_rent": 336,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Strašnice",
+    "reference_rent": 346,
+    "median_rent": 321,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Střešovice",
+    "reference_rent": 366,
+    "median_rent": 360,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Střížkov",
+    "reference_rent": 388,
+    "median_rent": 326,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Suchdol",
+    "reference_rent": 332,
+    "median_rent": 307,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Točná",
+    "reference_rent": 330,
+    "median_rent": 310,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Troja",
+    "reference_rent": 360,
+    "median_rent": 330,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Třebonice",
+    "reference_rent": 374,
+    "median_rent": 419,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Třeboradice",
+    "reference_rent": 286,
+    "median_rent": 309,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Uhříněves",
+    "reference_rent": 347,
+    "median_rent": 323,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Veleslavín",
+    "reference_rent": 369,
+    "median_rent": 333,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Velká Chuchle",
+    "reference_rent": 342,
+    "median_rent": 362,
+    "data_coverage": 3
+   },
+   {
+    "cadastral_area": "Vinohrady",
+    "reference_rent": 395,
+    "median_rent": 357,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Vinoř",
+    "reference_rent": 343,
+    "median_rent": 310,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Vokovice",
+    "reference_rent": 373,
+    "median_rent": 335,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Vršovice",
+    "reference_rent": 383,
+    "median_rent": 351,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Vysočany",
+    "reference_rent": 371,
+    "median_rent": 352,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Vyšehrad",
+    "reference_rent": 401,
+    "median_rent": 392,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Zadní Kopanina",
+    "reference_rent": 333,
+    "median_rent": 301,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Zbraslav",
+    "reference_rent": 331,
+    "median_rent": 303,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Zličín",
+    "reference_rent": 395,
+    "median_rent": 323,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Záběhlice",
+    "reference_rent": 336,
+    "median_rent": 315,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Újezd nad Lesy",
+    "reference_rent": 351,
+    "median_rent": 296,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Újezd u Průhonic",
+    "reference_rent": 340,
+    "median_rent": 303,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Čakovice",
+    "reference_rent": 346,
+    "median_rent": 298,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Černý Most",
+    "reference_rent": 376,
+    "median_rent": 324,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Čimice",
+    "reference_rent": 312,
+    "median_rent": 308,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Ďáblice",
+    "reference_rent": 361,
+    "median_rent": 370,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Řeporyje",
+    "reference_rent": 383,
+    "median_rent": 309,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Řepy",
+    "reference_rent": 360,
+    "median_rent": 342,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Šeberov",
+    "reference_rent": 342,
+    "median_rent": 312,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Štěrboholy",
+    "reference_rent": 376,
+    "median_rent": 333,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Žižkov",
+    "reference_rent": 370,
+    "median_rent": 343,
+    "data_coverage": 5
+   }
+  ],
+  "brno": [
+   {
+    "cadastral_area": "Bohunice",
+    "reference_rent": 310,
+    "median_rent": 298,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Bosonohy",
+    "reference_rent": 279,
+    "median_rent": 270,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Brněnské Ivanovice",
+    "reference_rent": 289,
+    "median_rent": 325,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Bystrc",
+    "reference_rent": 314,
+    "median_rent": 283,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Chrlice",
+    "reference_rent": 281,
+    "median_rent": 299,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Dolní Heršpice",
+    "reference_rent": 269,
+    "median_rent": 312,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Dvorska",
+    "reference_rent": 293,
+    "median_rent": 286,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Holásky",
+    "reference_rent": 286,
+    "median_rent": 311,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Horní Heršpice",
+    "reference_rent": 294,
+    "median_rent": 338,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Husovice",
+    "reference_rent": 295,
+    "median_rent": 293,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Ivanovice",
+    "reference_rent": 316,
+    "median_rent": 302,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Jehnice",
+    "reference_rent": 287,
+    "median_rent": 306,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Jundrov",
+    "reference_rent": 312,
+    "median_rent": 279,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Kníničky",
+    "reference_rent": 274,
+    "median_rent": 294,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Kohoutovice",
+    "reference_rent": 295,
+    "median_rent": 270,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Komárov",
+    "reference_rent": 308,
+    "median_rent": 325,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Komín",
+    "reference_rent": 269,
+    "median_rent": 287,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Královo Pole",
+    "reference_rent": 315,
+    "median_rent": 296,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Lesná",
+    "reference_rent": 312,
+    "median_rent": 279,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Líšeň",
+    "reference_rent": 305,
+    "median_rent": 291,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Maloměřice",
+    "reference_rent": 284,
+    "median_rent": 305,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Medlánky",
+    "reference_rent": 317,
+    "median_rent": 294,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Mokrá Hora",
+    "reference_rent": 298,
+    "median_rent": 279,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Město Brno",
+    "reference_rent": 324,
+    "median_rent": 317,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Nový Lískovec",
+    "reference_rent": 276,
+    "median_rent": 285,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Obřany",
+    "reference_rent": 291,
+    "median_rent": 273,
+    "data_coverage": 4
+   },
+   {
+    "cadastral_area": "Ořešín",
+    "reference_rent": 285,
+    "median_rent": 291,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Pisárky",
+    "reference_rent": 286,
+    "median_rent": 314,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Ponava",
+    "reference_rent": 312,
+    "median_rent": 309,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Přízřenice",
+    "reference_rent": 306,
+    "median_rent": 282,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Sadová",
+    "reference_rent": 375,
+    "median_rent": 319,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Slatina",
+    "reference_rent": 317,
+    "median_rent": 301,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Soběšice",
+    "reference_rent": 270,
+    "median_rent": 280,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Staré Brno",
+    "reference_rent": 321,
+    "median_rent": 308,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Starý Lískovec",
+    "reference_rent": 315,
+    "median_rent": 289,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Stránice",
+    "reference_rent": 316,
+    "median_rent": 310,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Trnitá",
+    "reference_rent": 313,
+    "median_rent": 317,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Tuřany",
+    "reference_rent": 293,
+    "median_rent": 299,
+    "data_coverage": 2
+   },
+   {
+    "cadastral_area": "Veveří",
+    "reference_rent": 305,
+    "median_rent": 310,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Zábrdovice",
+    "reference_rent": 307,
+    "median_rent": 302,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Útěchov u Brna",
+    "reference_rent": 264,
+    "median_rent": 239,
+    "data_coverage": 1
+   },
+   {
+    "cadastral_area": "Černovice",
+    "reference_rent": 315,
+    "median_rent": 302,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Černá Pole",
+    "reference_rent": 293,
+    "median_rent": 294,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Řečkovice",
+    "reference_rent": 304,
+    "median_rent": 276,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Štýřice",
+    "reference_rent": 300,
+    "median_rent": 305,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Žabovřesky",
+    "reference_rent": 303,
+    "median_rent": 289,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Žebětín",
+    "reference_rent": 319,
+    "median_rent": 292,
+    "data_coverage": 5
+   },
+   {
+    "cadastral_area": "Židenice",
+    "reference_rent": 297,
+    "median_rent": 283,
+    "data_coverage": 5
+   }
+  ]
+ },
+ "yield": {
+  "formula": "gross yield = rent per m² × 12 ÷ price per m²",
+  "inputs": "rents: Deloitte Rent Index Q2 2026 (private); prices: CZSO 2025 average purchase prices"
+ },
+ "rates": {
+  "title": "CNB 2-week repo rate and the average rate on new mortgages",
+  "unit": "% per year",
+  "repo": {
+   "source": {
+    "name": "Czech National Bank – Jak se vyvíjela dvoutýdenní repo sazba ČNB?",
+    "page": "https://www.cnb.cz/cs/casto-kladene-dotazy/Jak-se-vyvijela-dvoutydenni-repo-sazba-CNB/",
+    "file": "https://www.cnb.cz/cs/casto-kladene-dotazy/.galleries/vyvoj_repo_historie.txt",
+    "period": "every change from 29 Jun 2012 (the rate in force on 1 Jan 2015) to the latest, 19 Jun 2026",
+    "retrieved": "2026-10-29"
+   },
+   "changes": [
+    {
+     "valid_from": "2012-06-29",
+     "rate": 0.5
+    },
+    {
+     "valid_from": "2012-10-01",
+     "rate": 0.25
+    },
+    {
+     "valid_from": "2012-11-02",
+     "rate": 0.05
+    },
+    {
+     "valid_from": "2017-08-04",
+     "rate": 0.25
+    },
+    {
+     "valid_from": "2017-11-03",
+     "rate": 0.5
+    },
+    {
+     "valid_from": "2018-02-02",
+     "rate": 0.75
+    },
+    {
+     "valid_from": "2018-06-28",
+     "rate": 1.0
+    },
+    {
+     "valid_from": "2018-08-03",
+     "rate": 1.25
+    },
+    {
+     "valid_from": "2018-09-27",
+     "rate": 1.5
+    },
+    {
+     "valid_from": "2018-11-02",
+     "rate": 1.75
+    },
+    {
+     "valid_from": "2019-05-03",
+     "rate": 2.0
+    },
+    {
+     "valid_from": "2020-02-07",
+     "rate": 2.25
+    },
+    {
+     "valid_from": "2020-03-17",
+     "rate": 1.75
+    },
+    {
+     "valid_from": "2020-03-27",
+     "rate": 1.0
+    },
+    {
+     "valid_from": "2020-05-11",
+     "rate": 0.25
+    },
+    {
+     "valid_from": "2021-06-24",
+     "rate": 0.5
+    },
+    {
+     "valid_from": "2021-08-06",
+     "rate": 0.75
+    },
+    {
+     "valid_from": "2021-10-01",
+     "rate": 1.5
+    },
+    {
+     "valid_from": "2021-11-05",
+     "rate": 2.75
+    },
+    {
+     "valid_from": "2021-12-23",
+     "rate": 3.75
+    },
+    {
+     "valid_from": "2022-02-04",
+     "rate": 4.5
+    },
+    {
+     "valid_from": "2022-04-01",
+     "rate": 5.0
+    },
+    {
+     "valid_from": "2022-05-06",
+     "rate": 5.75
+    },
+    {
+     "valid_from": "2022-06-23",
+     "rate": 7.0
+    },
+    {
+     "valid_from": "2023-12-22",
+     "rate": 6.75
+    },
+    {
+     "valid_from": "2024-02-09",
+     "rate": 6.25
+    },
+    {
+     "valid_from": "2024-03-21",
+     "rate": 5.75
+    },
+    {
+     "valid_from": "2024-05-03",
+     "rate": 5.25
+    },
+    {
+     "valid_from": "2024-06-28",
+     "rate": 4.75
+    },
+    {
+     "valid_from": "2024-08-02",
+     "rate": 4.5
+    },
+    {
+     "valid_from": "2024-09-26",
+     "rate": 4.25
+    },
+    {
+     "valid_from": "2024-11-08",
+     "rate": 4.0
+    },
+    {
+     "valid_from": "2025-02-07",
+     "rate": 3.75
+    },
+    {
+     "valid_from": "2025-05-09",
+     "rate": 3.5
+    },
+    {
+     "valid_from": "2026-06-19",
+     "rate": 3.75
+    }
+   ]
+  },
+  "mortgage": {
+   "source": {
+    "name": "Czech National Bank – ARAD, indicator SMIRNOOBUVMIRS405CZK011111 (interest rate on new loans to households for house purchase, CZK, banks incl. building societies, monthly)",
+    "page": "https://www.cnb.cz/arad/#/cs/indicators?tree_node_id=8180988&filters=D20001%2CD19961%2CD458%2CD21619%2CD19964%2CD19983%2CD23266%2CD20007%2CD20044%2CD19955",
+    "period": "2015-01 to 2026-08, monthly",
+    "retrieved": "2026-10-29"
+   },
+   "series": [
+    [
+     "2015-01",
+     2.88
+    ],
+    [
+     "2015-02",
+     2.79
+    ],
+    [
+     "2015-03",
+     2.68
+    ],
+    [
+     "2015-04",
+     2.65
+    ],
+    [
+     "2015-05",
+     2.56
+    ],
+    [
+     "2015-06",
+     2.51
+    ],
+    [
+     "2015-07",
+     2.54
+    ],
+    [
+     "2015-08",
+     2.55
+    ],
+    [
+     "2015-09",
+     2.58
+    ],
+    [
+     "2015-10",
+     2.59
+    ],
+    [
+     "2015-11",
+     2.52
+    ],
+    [
+     "2015-12",
+     2.51
+    ],
+    [
+     "2016-01",
+     2.53
+    ],
+    [
+     "2016-02",
+     2.53
+    ],
+    [
+     "2016-03",
+     2.38
+    ],
+    [
+     "2016-04",
+     2.41
+    ],
+    [
+     "2016-05",
+     2.34
+    ],
+    [
+     "2016-06",
+     2.26
+    ],
+    [
+     "2016-07",
+     2.31
+    ],
+    [
+     "2016-08",
+     2.25
+    ],
+    [
+     "2016-09",
+     2.22
+    ],
+    [
+     "2016-10",
+     2.23
+    ],
+    [
+     "2016-11",
+     2.13
+    ],
+    [
+     "2016-12",
+     2.16
+    ],
+    [
+     "2017-01",
+     2.24
+    ],
+    [
+     "2017-02",
+     2.23
+    ],
+    [
+     "2017-03",
+     2.28
+    ],
+    [
+     "2017-04",
+     2.28
+    ],
+    [
+     "2017-05",
+     2.29
+    ],
+    [
+     "2017-06",
+     2.31
+    ],
+    [
+     "2017-07",
+     2.33
+    ],
+    [
+     "2017-08",
+     2.32
+    ],
+    [
+     "2017-09",
+     2.32
+    ],
+    [
+     "2017-10",
+     2.37
+    ],
+    [
+     "2017-11",
+     2.37
+    ],
+    [
+     "2017-12",
+     2.38
+    ],
+    [
+     "2018-01",
+     2.44
+    ],
+    [
+     "2018-02",
+     2.49
+    ],
+    [
+     "2018-03",
+     2.57
+    ],
+    [
+     "2018-04",
+     2.62
+    ],
+    [
+     "2018-05",
+     2.62
+    ],
+    [
+     "2018-06",
+     2.62
+    ],
+    [
+     "2018-07",
+     2.64
+    ],
+    [
+     "2018-08",
+     2.67
+    ],
+    [
+     "2018-09",
+     2.7
+    ],
+    [
+     "2018-10",
+     2.77
+    ],
+    [
+     "2018-11",
+     2.83
+    ],
+    [
+     "2018-12",
+     2.92
+    ],
+    [
+     "2019-01",
+     2.92
+    ],
+    [
+     "2019-02",
+     2.98
+    ],
+    [
+     "2019-03",
+     2.97
+    ],
+    [
+     "2019-04",
+     2.94
+    ],
+    [
+     "2019-05",
+     2.91
+    ],
+    [
+     "2019-06",
+     2.87
+    ],
+    [
+     "2019-07",
+     2.82
+    ],
+    [
+     "2019-08",
+     2.77
+    ],
+    [
+     "2019-09",
+     2.65
+    ],
+    [
+     "2019-10",
+     2.57
+    ],
+    [
+     "2019-11",
+     2.52
+    ],
+    [
+     "2019-12",
+     2.49
+    ],
+    [
+     "2020-01",
+     2.5
+    ],
+    [
+     "2020-02",
+     2.57
+    ],
+    [
+     "2020-03",
+     2.55
+    ],
+    [
+     "2020-04",
+     2.43
+    ],
+    [
+     "2020-05",
+     2.51
+    ],
+    [
+     "2020-06",
+     2.42
+    ],
+    [
+     "2020-07",
+     2.33
+    ],
+    [
+     "2020-08",
+     2.29
+    ],
+    [
+     "2020-09",
+     2.24
+    ],
+    [
+     "2020-10",
+     2.19
+    ],
+    [
+     "2020-11",
+     2.13
+    ],
+    [
+     "2020-12",
+     2.1
+    ],
+    [
+     "2021-01",
+     2.07
+    ],
+    [
+     "2021-02",
+     2.07
+    ],
+    [
+     "2021-03",
+     2.06
+    ],
+    [
+     "2021-04",
+     2.09
+    ],
+    [
+     "2021-05",
+     2.14
+    ],
+    [
+     "2021-06",
+     2.19
+    ],
+    [
+     "2021-07",
+     2.28
+    ],
+    [
+     "2021-08",
+     2.35
+    ],
+    [
+     "2021-09",
+     2.45
+    ],
+    [
+     "2021-10",
+     2.56
+    ],
+    [
+     "2021-11",
+     2.71
+    ],
+    [
+     "2021-12",
+     2.92
+    ],
+    [
+     "2022-01",
+     3.25
+    ],
+    [
+     "2022-02",
+     3.57
+    ],
+    [
+     "2022-03",
+     3.84
+    ],
+    [
+     "2022-04",
+     4.01
+    ],
+    [
+     "2022-05",
+     4.18
+    ],
+    [
+     "2022-06",
+     4.43
+    ],
+    [
+     "2022-07",
+     4.72
+    ],
+    [
+     "2022-08",
+     4.77
+    ],
+    [
+     "2022-09",
+     4.89
+    ],
+    [
+     "2022-10",
+     4.86
+    ],
+    [
+     "2022-11",
+     4.84
+    ],
+    [
+     "2022-12",
+     4.88
+    ],
+    [
+     "2023-01",
+     5.04
+    ],
+    [
+     "2023-02",
+     5.21
+    ],
+    [
+     "2023-03",
+     5.32
+    ],
+    [
+     "2023-04",
+     5.42
+    ],
+    [
+     "2023-05",
+     5.43
+    ],
+    [
+     "2023-06",
+     5.49
+    ],
+    [
+     "2023-07",
+     5.49
+    ],
+    [
+     "2023-08",
+     5.51
+    ],
+    [
+     "2023-09",
+     5.51
+    ],
+    [
+     "2023-10",
+     5.43
+    ],
+    [
+     "2023-11",
+     5.42
+    ],
+    [
+     "2023-12",
+     5.41
+    ],
+    [
+     "2024-01",
+     5.26
+    ],
+    [
+     "2024-02",
+     5.22
+    ],
+    [
+     "2024-03",
+     5.16
+    ],
+    [
+     "2024-04",
+     5.04
+    ],
+    [
+     "2024-05",
+     4.99
+    ],
+    [
+     "2024-06",
+     5.0
+    ],
+    [
+     "2024-07",
+     5.03
+    ],
+    [
+     "2024-08",
+     5.0
+    ],
+    [
+     "2024-09",
+     4.94
+    ],
+    [
+     "2024-10",
+     4.85
+    ],
+    [
+     "2024-11",
+     4.78
+    ],
+    [
+     "2024-12",
+     4.71
+    ],
+    [
+     "2025-01",
+     4.78
+    ],
+    [
+     "2025-02",
+     4.75
+    ],
+    [
+     "2025-03",
+     4.74
+    ],
+    [
+     "2025-04",
+     4.73
+    ],
+    [
+     "2025-05",
+     4.69
+    ],
+    [
+     "2025-06",
+     4.67
+    ],
+    [
+     "2025-07",
+     4.63
+    ],
+    [
+     "2025-08",
+     4.62
+    ],
+    [
+     "2025-09",
+     4.61
+    ],
+    [
+     "2025-10",
+     4.58
+    ],
+    [
+     "2025-11",
+     4.56
+    ],
+    [
+     "2025-12",
+     4.57
+    ],
+    [
+     "2026-01",
+     4.55
+    ],
+    [
+     "2026-02",
+     4.55
+    ],
+    [
+     "2026-03",
+     4.53
+    ],
+    [
+     "2026-04",
+     4.55
+    ],
+    [
+     "2026-05",
+     4.66
+    ],
+    [
+     "2026-06",
+     4.73
+    ],
+    [
+     "2026-07",
+     4.84
+    ],
+    [
+     "2026-08",
+     4.94
+    ]
+   ]
+  }
+ },
+ "index_prague_vs_rest": {
+  "title": "Prices of existing flats: Prague vs the rest of Czechia",
+  "unit": "index, average 2010 = 100",
+  "source": {
+   "name": "CZSO – Indexy realizovaných cen bytů, 2. čtvrtletí 2026, table 2.1 (starší byty)",
+   "page": "https://csu.gov.cz/produkty/indexy-realizovanych-cen-bytu-2-ctvrtleti-2026",
+   "file": "https://csu.gov.cz/docs/107508/4981ed9b-235a-b4cd-e9a3-fc78659d0745/01400726q2s.xlsx?version=1.0",
+   "published": "2026-09-14",
+   "period": "2015-Q1 to 2026-Q2, quarterly",
+   "retrieved": "2026-10-29"
+  },
+  "note": "Values rounded to one decimal place, as published (the spreadsheet stores binary floats such as 135.80000000000001).",
+  "quarters": [
+   "2015-Q1",
+   "2015-Q2",
+   "2015-Q3",
+   "2015-Q4",
+   "2016-Q1",
+   "2016-Q2",
+   "2016-Q3",
+   "2016-Q4",
+   "2017-Q1",
+   "2017-Q2",
+   "2017-Q3",
+   "2017-Q4",
+   "2018-Q1",
+   "2018-Q2",
+   "2018-Q3",
+   "2018-Q4",
+   "2019-Q1",
+   "2019-Q2",
+   "2019-Q3",
+   "2019-Q4",
+   "2020-Q1",
+   "2020-Q2",
+   "2020-Q3",
+   "2020-Q4",
+   "2021-Q1",
+   "2021-Q2",
+   "2021-Q3",
+   "2021-Q4",
+   "2022-Q1",
+   "2022-Q2",
+   "2022-Q3",
+   "2022-Q4",
+   "2023-Q1",
+   "2023-Q2",
+   "2023-Q3",
+   "2023-Q4",
+   "2024-Q1",
+   "2024-Q2",
+   "2024-Q3",
+   "2024-Q4",
+   "2025-Q1",
+   "2025-Q2",
+   "2025-Q3",
+   "2025-Q4",
+   "2026-Q1",
+   "2026-Q2"
+  ],
+  "series": {
+   "Prague": [
+    102.9,
+    104.4,
+    106.7,
+    107.1,
+    108.9,
+    112.2,
+    116.7,
+    122.0,
+    126.5,
+    133.5,
+    135.8,
+    135.5,
+    137.0,
+    138.9,
+    143.9,
+    147.3,
+    149.9,
+    151.0,
+    153.3,
+    157.7,
+    159.2,
+    163.1,
+    167.7,
+    174.4,
+    181.9,
+    188.9,
+    195.6,
+    209.3,
+    216.5,
+    220.4,
+    226.1,
+    226.9,
+    219.2,
+    212.5,
+    214.1,
+    221.0,
+    221.5,
+    230.8,
+    239.4,
+    247.8,
+    256.5,
+    262.2,
+    271.5,
+    281.7,
+    286.0,
+    293.5
+   ],
+   "Rest of Czechia": [
+    90.2,
+    92.3,
+    95.0,
+    97.0,
+    99.2,
+    102.7,
+    107.5,
+    111.3,
+    116.4,
+    121.8,
+    124.3,
+    125.1,
+    127.5,
+    133.1,
+    137.4,
+    140.5,
+    142.7,
+    148.0,
+    151.7,
+    154.6,
+    159.7,
+    164.0,
+    169.5,
+    176.5,
+    184.4,
+    194.3,
+    208.1,
+    223.6,
+    239.2,
+    254.1,
+    261.4,
+    257.7,
+    249.6,
+    243.4,
+    242.0,
+    241.5,
+    249.2,
+    256.9,
+    267.4,
+    277.1,
+    288.6,
+    300.6,
+    311.7,
+    323.1,
+    333.0,
+    344.1
+   ]
+  }
+ },
+ "index_cz_vs_eu": {
+  "title": "House prices: Czechia vs the EU, all dwellings (houses and flats)",
+  "unit": "index, 2015 = 100",
+  "source": {
+   "name": "Eurostat – House price index, quarterly (prc_hpi_q), purchases: total",
+   "page": "https://ec.europa.eu/eurostat/databrowser/view/prc_hpi_q/default/table",
+   "file": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hpi_q?format=JSON&lang=EN&geo=CZ&geo=EU27_2020&purchase=TOTAL&unit=I15_Q",
+   "updated": "2026-10-01",
+   "period": "2015-Q1 to 2026-Q2, quarterly",
+   "retrieved": "2026-10-29"
+  },
+  "quarters": [
+   "2015-Q1",
+   "2015-Q2",
+   "2015-Q3",
+   "2015-Q4",
+   "2016-Q1",
+   "2016-Q2",
+   "2016-Q3",
+   "2016-Q4",
+   "2017-Q1",
+   "2017-Q2",
+   "2017-Q3",
+   "2017-Q4",
+   "2018-Q1",
+   "2018-Q2",
+   "2018-Q3",
+   "2018-Q4",
+   "2019-Q1",
+   "2019-Q2",
+   "2019-Q3",
+   "2019-Q4",
+   "2020-Q1",
+   "2020-Q2",
+   "2020-Q3",
+   "2020-Q4",
+   "2021-Q1",
+   "2021-Q2",
+   "2021-Q3",
+   "2021-Q4",
+   "2022-Q1",
+   "2022-Q2",
+   "2022-Q3",
+   "2022-Q4",
+   "2023-Q1",
+   "2023-Q2",
+   "2023-Q3",
+   "2023-Q4",
+   "2024-Q1",
+   "2024-Q2",
+   "2024-Q3",
+   "2024-Q4",
+   "2025-Q1",
+   "2025-Q2",
+   "2025-Q3",
+   "2025-Q4",
+   "2026-Q1",
+   "2026-Q2"
+  ],
+  "series": {
+   "Czechia": [
+    98.3,
+    99.4,
+    100.6,
+    101.7,
+    103.0,
+    105.1,
+    107.7,
+    112.8,
+    116.2,
+    119.1,
+    121.2,
+    122.3,
+    125.0,
+    128.7,
+    131.9,
+    134.4,
+    137.2,
+    140.6,
+    143.4,
+    146.4,
+    149.0,
+    151.5,
+    155.4,
+    159.5,
+    168.9,
+    177.6,
+    189.8,
+    200.6,
+    210.0,
+    217.2,
+    219.4,
+    214.5,
+    211.8,
+    211.0,
+    211.7,
+    212.3,
+    214.3,
+    219.9,
+    224.7,
+    230.2,
+    235.6,
+    243.0,
+    249.0,
+    254.1,
+    259.3,
+    263.9
+   ],
+   "EU-27": [
+    98.27,
+    99.83,
+    100.81,
+    101.09,
+    102.01,
+    103.75,
+    105.36,
+    106.11,
+    106.89,
+    108.76,
+    110.39,
+    111.19,
+    112.27,
+    114.23,
+    115.93,
+    116.81,
+    117.59,
+    119.78,
+    121.54,
+    122.7,
+    124.44,
+    126.28,
+    128.05,
+    129.81,
+    132.12,
+    135.99,
+    140.21,
+    143.17,
+    146.22,
+    149.59,
+    150.9,
+    148.73,
+    147.58,
+    148.18,
+    149.13,
+    148.85,
+    149.78,
+    152.65,
+    155.05,
+    156.19,
+    158.45,
+    160.95,
+    163.54,
+    164.62,
+    166.51,
+    168.56
+   ]
+  }
+ }
+}
