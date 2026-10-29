@@ -2,41 +2,48 @@
 // has no currency switch. Every number comes from data/market.json, which records its source.
 // Formatting (kc, percent, sourceLine, …) is shared in common.js.
 
-let data = null;
+// raw = the file as published; data = the same with its notes, periods and area names in the current language
+let raw = null, data = null, failed = false;
 
 fetch('data/market.json', { cache: 'no-cache' })
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-  .then(d => { data = d; render(); revealSections(); })
-  .catch(() => {
-    const n = $('loadNote');
-    n.hidden = false;
-    n.innerHTML = location.protocol === 'file:'
-      ? '<b>The market data couldn’t be loaded.</b> Browsers block pages opened straight from your disk from reading data files. Open the site from a web server (for example once it is online) to see this page.'
-      : '<b>The market data couldn’t be loaded.</b> Please reload the page.';
-  });
+  .then(d => { raw = d; data = localData(d); render(); revealSections(); })
+  .catch(() => { failed = true; loadNote(); });
+
+function loadNote() {
+  const n = $('loadNote');
+  n.hidden = false;
+  n.innerHTML = t(location.protocol === 'file:' ? 'mk.loadFile' : 'mk.loadRetry');
+}
+document.addEventListener('langchange', () => {
+  if (raw) { data = localData(raw); render(); } else if (failed) loadNote();
+});
+
+// Index values as published (215.3 / 215,3)
+const indexText = v => (lang === 'cs' ? String(v).replace('.', ',') : String(v));
 
 function render() {
   const d = data;
   $('content').hidden = false;
 
   // Data last updated
-  $('freshRetrieved').innerHTML = `All figures were retrieved from their sources on <b>${dayName(d.retrieved)}</b>.`;
+  $('freshRetrieved').innerHTML = t('mk.freshRetrieved', { date: dayName(d.retrieved) });
   $('freshRows').innerHTML = dataFreshness(d).map(f => `<tr><td>${esc(f.what)}</td><td>${esc(f.source)}</td><td>${esc(f.latest)}</td></tr>`).join('');
 
   // 1. Prices per m²
   const P = d.prices_per_m2;
   P.years.forEach((y, k) => { $('pYear' + k).textContent = y; });
   $('priceRows').innerHTML = P.rows.map(r => `<tr><td>${esc(r.label)} <span class="muted">(${esc(r.source_label)})</span></td>${r.values.map(v => `<td>${kc(v)}</td>`).join('')}</tr>`).join('');
-  $('priceSource').innerHTML = sourceLine(P.source, ' · tables: ' + P.rows.map(r => link(r.file, `${r.label} – ${r.table}`)).join(', '));
+  $('priceSource').innerHTML = sourceLine(P.source, t('mk.tables') + P.rows.map(r => link(r.file, `${r.label} – ${r.table}`)).join(', '));
   const D = d.prague_districts;
   $('districtRows').innerHTML = D.rows.map(r => `<tr><td>${esc(r.district)}</td><td>${kc(r.value)}</td></tr>`).join('')
-    + `<tr class="total"><td>Prague overall</td><td>${kc(D.prague_overall)}</td></tr>`;
+    + `<tr class="total"><td>${t('mk.pragueOverall')}</td><td>${kc(D.prague_overall)}</td></tr>`;
   $('districtNote').textContent = D.note;
   $('districtSource').innerHTML = sourceLine(D.source);
 
   // 2. Rents per m²
   const R = d.rents_deloitte;
-  $('rentRows').innerHTML = R.rows.map(r => `<tr><td>${esc(r.label)} <span class="private">private source</span></td><td>${kc(r.value)}</td></tr>`).join('');
+  $('rentRows').innerHTML = R.rows.map(r => `<tr><td>${esc(r.label)} <span class="private">${t('mk.private')}</span></td><td>${kc(r.value)}</td></tr>`).join('');
   $('rentNote').textContent = R.note;
   $('rentSource').innerHTML = sourceLine(R.source);
   const M = d.rents_mf;
@@ -44,25 +51,25 @@ function render() {
   const mfRows = list => list.map(r => `<tr><td>${esc(r.cadastral_area)}</td><td>${kc(r.reference_rent)}</td><td>${kc(r.median_rent)}</td><td>${r.data_coverage}</td></tr>`).join('');
   $('mfPrague').innerHTML = mfRows(M.praha);
   $('mfBrno').innerHTML = mfRows(M.brno);
-  $('mfPragueSummary').textContent = `Prague — ${M.praha.length} cadastral areas`;
-  $('mfBrnoSummary').textContent = `Brno — ${M.brno.length} cadastral areas`;
-  $('mfDefs').innerHTML = Object.entries({ 'Reference rent': M.columns.reference_rent, 'Median rent': M.columns.median_rent, 'Data coverage': M.columns.data_coverage })
+  $('mfPragueSummary').textContent = tn('mk.mfPragueN', M.praha.length);
+  $('mfBrnoSummary').textContent = tn('mk.mfBrnoN', M.brno.length);
+  $('mfDefs').innerHTML = Object.entries({ [t('mk.refRent')]: M.columns.reference_rent, [t('mk.medRent')]: M.columns.median_rent, [t('mk.coverage')]: M.columns.data_coverage })
     .map(([k, v]) => `<li><b>${k}:</b> ${esc(v)}.</li>`).join('');
-  $('mfSource').innerHTML = sourceLine(M.source, ` · unit: ${esc(M.unit)}`);
+  $('mfSource').innerHTML = sourceLine(M.source, t('mk.unit', { u: esc(M.unit) }));
 
   // 3. Gross rental yield = rent per m² × 12 ÷ price per m²
   const price = id => P.rows.find(r => r.id === id).values[P.years.length - 1];
   const rent = id => R.rows.find(r => r.id === id).value;
   const yields = R.rows.map(r => ({ label: r.label, id: r.id, rent: rent(r.id), price: price(r.id), y: rent(r.id) * 12 / price(r.id) * 100 }));
-  $('yieldFormula').innerHTML = `<b>Gross yield</b> = rent per m² × 12 ÷ price per m² <span class="muted">— before any costs, empty months or tax.</span>`;
+  $('yieldFormula').innerHTML = t('mk.formula');
   $('yieldRows').innerHTML = yields.map(x => `<tr><td>${esc(x.label)}</td><td>${kc(x.rent)}</td><td>${kc(x.price)}</td><td><b>${percent(x.y)}</b></td></tr>`).join('');
   const pragueAlt = rent('praha') * 12 / D.prague_overall * 100;
-  $('yieldNote').textContent = `These yields combine Deloitte’s asking rents (${R.source.period}) with CZSO’s ${P.years[P.years.length - 1]} average purchase prices; Deloitte’s own Prague price of ${kc(D.prague_overall)}/m² would give a lower Prague yield of ${percent(pragueAlt)}.`;
-  $('yieldSource').innerHTML = `<b>Inputs:</b> rents — ${esc(R.source.name)}, ${esc(R.source.period)}; prices — ${esc(P.source.name)}, ${P.years[P.years.length - 1]}. See sections 1 and 2 for the links.`;
+  $('yieldNote').textContent = t('mk.yieldNote', { period: R.source.period, year: P.years[P.years.length - 1], price: kc(D.prague_overall), y: percent(pragueAlt) });
+  $('yieldSource').innerHTML = t('mk.yieldSource', { rname: esc(R.source.name), rperiod: esc(R.source.period), pname: esc(P.source.name), year: P.years[P.years.length - 1] });
 
   // 4. Rates
   const RT = d.rates, last = RT.mortgage.series[RT.mortgage.series.length - 1], repoNow = RT.repo.changes[RT.repo.changes.length - 1];
-  $('rateLatest').textContent = `Latest: repo rate ${percent(repoNow.rate)} since ${dayName(repoNow.valid_from)}; average new-mortgage rate ${percent(last[1])} in ${monthName(last[0])}. The repo line steps on the dates the CNB changed it.`;
+  $('rateLatest').textContent = t('mk.rateLatest', { repo: percent(repoNow.rate), date: dayName(repoNow.valid_from), mort: percent(last[1]), month: monthName(last[0]) });
   $('repoSource').innerHTML = sourceLine(RT.repo.source);
   $('mortSource').innerHTML = sourceLine(RT.mortgage.source);
 
@@ -75,46 +82,57 @@ function render() {
   drawCharts();
 }
 
-// ---------- Plain-English summary, worked out from the data above ----------
+// ---------- Plain-words summary, worked out from the data above ----------
 function summary(yields) {
   const d = data, P = d.prices_per_m2, n = P.years.length;
   const pr = P.rows.find(r => r.id === 'praha').values, cr = P.rows.find(r => r.id === 'cr').values;
   const mort = d.rates.mortgage.series, last = mort[mort.length - 1], repoNow = d.rates.repo.changes[d.rates.repo.changes.length - 1];
   const recent = mort.slice(-12), low = recent.reduce((a, b) => (b[1] < a[1] ? b : a));
-  const below = yields.filter(x => x.y < last[1]).map(x => x.label), above = yields.filter(x => x.y >= last[1]).map(x => x.label);
+  // Area names for the sentences ("Prague and Brno" / "v Praze a v Brně"); the first word starts with a capital
+  const areas = list => { const s = list.map(x => t('mk.area.' + x.id)).join(t('mk.and')); return s.charAt(0).toUpperCase() + s.slice(1); };
+  const below = yields.filter(x => x.y < last[1]), above = yields.filter(x => x.y >= last[1]);
   const ci = d.index_prague_vs_rest, ce = d.index_cz_vs_eu;
   const growth = s => s[s.length - 1] / s[0];
+  const rate = { rate: percent(last[1]), month: monthName(last[0]) };
+  const compare = (below.length ? tn('mk.s2below', below.length, { areas: areas(below), ...rate }) : t('mk.s2none', rate))
+    + (above.length ? t('mk.s2above', { areas: above.map(x => t('mk.area.' + x.id)).join(t('mk.and')) }) : '');
+  // "since 2015 Q1" in English (as before), "od 1. čtvrtletí 2015" in Czech
+  const since = lang === 'cs' ? quarterName(ci.quarters[0]) : ci.quarters[0].replace('-', ' ');
   const items = [
-    `<b>Prague is expensive:</b> flats there sold for ${kc(pr[n - 1])}/m² in ${P.years[n - 1]}, about ${(pr[n - 1] / cr[n - 1]).toFixed(1)} times the Czech average of ${kc(cr[n - 1])}/m², and Prague prices were ${percent((pr[n - 1] / pr[n - 2] - 1) * 100, 1)} higher than a year earlier.`,
-    `<b>Rent covers less in Prague:</b> gross yields are ${yields.map(x => `${percent(x.y)} in ${x.label}`).join(', ')} — before any costs. ${below.length ? `${below.join(' and ')} ${below.length > 1 ? 'are' : 'is'} below` : 'None is below'} the ${percent(last[1])} average new-mortgage rate (${monthName(last[0])})${above.length ? `, ${above.join(' and ')} above it` : ''}, so with a large mortgage the rent alone rarely pays the loan in the big cities.`,
-    `<b>Borrowing got a little dearer this year:</b> the CNB set its repo rate to ${percent(repoNow.rate)} on ${dayName(repoNow.valid_from)}, and the average new-mortgage rate rose from ${percent(low[1])} (${monthName(low[0])}) to ${percent(last[1])} (${monthName(last[0])}).`,
-    `<b>Prices have risen fast:</b> since ${ci.quarters[0].replace('-', ' ')}, existing flats rose to about ${growth(ci.series.Prague).toFixed(1)} times their level in Prague and ${growth(ci.series['Rest of Czechia']).toFixed(1)} times in the rest of Czechia; Czech dwelling prices (index ${ce.series.Czechia[ce.series.Czechia.length - 1]}) also rose far faster than the EU's (${ce.series['EU-27'][ce.series['EU-27'].length - 1]}), both 2015 = 100.`,
-    `<b>Use these as a starting point:</b> the rents are asking rents and the prices are averages, so a specific flat can differ a lot. Try your own numbers in the investor tool below.`,
+    t('mk.s1', { price: kc(pr[n - 1]), year: P.years[n - 1], ratio: dec(pr[n - 1] / cr[n - 1], 1), avg: kc(cr[n - 1]), growth: percent((pr[n - 1] / pr[n - 2] - 1) * 100, 1) }),
+    t('mk.s2', { yields: yields.map(x => `${percent(x.y)} ${t('mk.in.' + x.id)}`).join(', '), compare }),
+    t('mk.s3', { repo: percent(repoNow.rate), date: dayName(repoNow.valid_from), low: percent(low[1]), lowMonth: monthName(low[0]), last: percent(last[1]), lastMonth: monthName(last[0]) }),
+    t('mk.s4', { since, pg: dec(growth(ci.series.Prague), 1), rg: dec(growth(ci.series['Rest of Czechia']), 1),
+      cz: indexText(ce.series.Czechia[ce.series.Czechia.length - 1]), eu: indexText(ce.series['EU-27'][ce.series['EU-27'].length - 1]) }),
+    t('mk.s5'),
   ];
   $('summary').innerHTML = items.map(t => `<li>${t}</li>`).join('');
 }
 
 // ---------- Copy Prague's figures into the investor tool ----------
+// (render() runs again on a language switch; the input listener is added once)
+let copyUpdate = null;
 function setupCopy() {
   const pricePerM2 = data.prices_per_m2.rows.find(r => r.id === 'praha').values.slice(-1)[0];
   const rentPerM2 = data.rents_deloitte.rows.find(r => r.id === 'praha').value;
   const btn = $('copyBtn');
   const update = () => {
     // Input check (js/common.js): no link or figures until the size makes sense
-    const problem = inputProblem({ id: 'flatSize', min: 10, max: 400, msg: 'Use a flat size between 10 and 400 m².' });
+    const problem = inputProblem({ id: 'flatSize', min: 10, max: 400, msg: 'mk.checkSize' });
     showProblem($('flatSize'), problem);
     btn.removeAttribute('aria-disabled');
     if (problem) {
       btn.removeAttribute('href'); btn.setAttribute('aria-disabled', 'true');
-      $('copyPreview').textContent = 'Enter a flat size between 10 and 400 m² to see the figures.';
+      $('copyPreview').textContent = t('mk.copyNone');
       return;
     }
     const size = Math.min(400, Math.max(10, Math.round(parseFloat($('flatSize').value) || 55)));
     const price = pricePerM2 * size, rent = rentPerM2 * size;
     btn.href = `invest.html?from=market&price=${price}&rent=${rent}`;
-    $('copyPreview').textContent = `${size} m² × ${kc(pricePerM2)} = ${kc(price)} price; ${size} m² × ${kc(rentPerM2)} = ${kc(rent)} rent per month. Opens the investor tool in CZK with these two values; everything else uses its usual starting numbers.`;
+    $('copyPreview').textContent = t('mk.copy', { size, ppm: kc(pricePerM2), price: kc(price), rpm: kc(rentPerM2), rent: kc(rent) });
   };
-  $('flatSize').addEventListener('input', update);
+  if (!copyUpdate) $('flatSize').addEventListener('input', () => copyUpdate());
+  copyUpdate = update;
   update();
 }
 
@@ -166,7 +184,7 @@ function drawCharts() {
   lineChart($('rateChart'), months, [
     { values: months.map(repoAt), color: '--interest', step: true },
     { values: months.map(m => mortMap[m] ?? null), color: '--principal' },
-  ], { zero: true, step: 1, yFmt: v => v.toFixed(0) + '%', xTick: yearTick });
+  ], { zero: true, step: 1, yFmt: v => pctText(v.toFixed(0)), xTick: yearTick });
 
   const qTick = q => (q.endsWith('Q1') && +q.slice(0, 4) % 2 === 1 ? q.slice(0, 4) : null);
   const CZ = data.index_prague_vs_rest, EU = data.index_cz_vs_eu;

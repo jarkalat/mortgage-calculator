@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Czech Housing Market: Prices, Rents, Yields &amp; Mortgage Rates</title>
-<meta name="description" content="Czech flat prices and rents per m², gross rental yields, CNB and mortgage rates and price indices for Prague, Brno and Czechia — with every source cited.">
+<title data-i18n="mk.title">Czech Housing Market: Prices, Rents, Yields &amp; Mortgage Rates</title>
+<meta name="description" data-i18n-attr="content:mk.desc" content="Czech flat prices and rents per m², gross rental yields, CNB and mortgage rates and price indices for Prague, Brno and Czechia — with every source cited.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script src="js/theme-init.js"></script>
+<script src="js/lang-init.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/market.css">
 </head>
@@ -14,8 +15,8 @@
 <nav class="topnav" id="topnav" data-page="market" aria-label="Abodex tools"></nav>
 <header>
   <div>
-    <h1>Housing Market</h1>
-    <p>Czech flat prices, rents, yields and interest rates from official sources — every number shows where it comes from.</p>
+    <h1 data-i18n="mk.h1">Housing Market</h1>
+    <p data-i18n="mk.lead">Czech flat prices, rents, yields and interest rates from official sources — every number shows where it comes from.</p>
   </div>
 </header>
 
@@ -24,32 +25,32 @@
 
   <div class="stack" id="content" hidden>
     <section class="card" id="freshness">
-      <h2>Data last updated</h2>
+      <h2 data-i18n="mk.fresh">Data last updated</h2>
       <p class="lead" id="freshRetrieved"></p>
       <div class="table-wrap"><table>
-        <thead><tr><th>Data</th><th>Source</th><th>Latest period</th></tr></thead>
+        <thead><tr><th data-i18n="mk.thData">Data</th><th data-i18n="mk.thSource">Source</th><th data-i18n="mk.thLatest">Latest period</th></tr></thead>
         <tbody id="freshRows"></tbody>
       </table></div>
-      <p class="hint">Sources publish on their own schedules, so the latest period differs from one to the next. Full links are under each table and chart below.</p>
+      <p class="hint" data-i18n="mk.freshHint">Sources publish on their own schedules, so the latest period differs from one to the next. Full links are under each table and chart below.</p>
     </section>
 
     <section class="card" id="summaryCard">
-      <h2>What this means for buyers and investors</h2>
+      <h2 data-i18n="mk.summary">What this means for buyers and investors</h2>
       <ul class="summary" id="summary"></ul>
     </section>
 
     <section class="card">
-      <h2>1. Prices per m²</h2>
-      <p class="lead">What flats actually sold for on average, per square metre.</p>
+      <h2 data-i18n="mk.prices">1. Prices per m²</h2>
+      <p class="lead" data-i18n="mk.pricesLead">What flats actually sold for on average, per square metre.</p>
       <div class="table-wrap"><table>
-        <thead><tr><th>Area</th><th id="pYear0"></th><th id="pYear1"></th><th id="pYear2"></th></tr></thead>
+        <thead><tr><th data-i18n="mk.thArea">Area</th><th id="pYear0"></th><th id="pYear1"></th><th id="pYear2"></th></tr></thead>
         <tbody id="priceRows"></tbody>
       </table></div>
       <p class="source" id="priceSource"></p>
 
-      <h3 class="sub">Prague by district <span class="private">private source</span></h3>
+      <h3 class="sub" data-i18n-html="mk.districts">Prague by district <span class="private">private source</span></h3>
       <div class="table-wrap"><table>
-        <thead><tr><th>District</th><th>Average sale price</th></tr></thead>
+        <thead><tr><th data-i18n="mk.thDistrict">District</th><th data-i18n="mk.thSalePrice">Average sale price</th></tr></thead>
         <tbody id="districtRows"></tbody>
       </table></div>
       <p class="hint" id="districtNote"></p>
@@ -57,28 +58,28 @@
     </section>
 
     <section class="card">
-      <h2>2. Rents per m²</h2>
-      <p class="lead">Average monthly asking rent per square metre.</p>
+      <h2 data-i18n="mk.rents">2. Rents per m²</h2>
+      <p class="lead" data-i18n="mk.rentsLead">Average monthly asking rent per square metre.</p>
       <div class="table-wrap"><table>
-        <thead><tr><th>Area</th><th>Rent per m² / month</th></tr></thead>
+        <thead><tr><th data-i18n="mk.thArea">Area</th><th data-i18n="mk.thRent">Rent per m² / month</th></tr></thead>
         <tbody id="rentRows"></tbody>
       </table></div>
       <p class="hint" id="rentNote"></p>
       <p class="source" id="rentSource"></p>
 
-      <h3 class="sub">Ministry of Finance rent map: 2+kk flats by cadastral area</h3>
+      <h3 class="sub" data-i18n="mk.mf">Ministry of Finance rent map: 2+kk flats by cadastral area</h3>
       <p class="hint" id="mfNote"></p>
       <details>
-        <summary id="mfPragueSummary">Prague</summary>
+        <summary id="mfPragueSummary" data-i18n="mk.mfPrague">Prague</summary>
         <div class="table-wrap"><table>
-          <thead><tr><th>Cadastral area</th><th>Reference rent</th><th>Median rent</th><th>Data coverage (1–5)</th></tr></thead>
+          <thead><tr><th data-i18n="mk.thCadastral">Cadastral area</th><th data-i18n="mk.refRent">Reference rent</th><th data-i18n="mk.medRent">Median rent</th><th data-i18n="mk.thCoverage">Data coverage (1–5)</th></tr></thead>
           <tbody id="mfPrague"></tbody>
         </table></div>
       </details>
       <details>
-        <summary id="mfBrnoSummary">Brno</summary>
+        <summary id="mfBrnoSummary" data-i18n="mk.mfBrno">Brno</summary>
         <div class="table-wrap"><table>
-          <thead><tr><th>Cadastral area</th><th>Reference rent</th><th>Median rent</th><th>Data coverage (1–5)</th></tr></thead>
+          <thead><tr><th data-i18n="mk.thCadastral">Cadastral area</th><th data-i18n="mk.refRent">Reference rent</th><th data-i18n="mk.medRent">Median rent</th><th data-i18n="mk.thCoverage">Data coverage (1–5)</th></tr></thead>
           <tbody id="mfBrno"></tbody>
         </table></div>
       </details>
@@ -87,10 +88,10 @@
     </section>
 
     <section class="card">
-      <h2>3. Gross rental yield</h2>
+      <h2 data-i18n="mk.yield">3. Gross rental yield</h2>
       <p class="formula" id="yieldFormula"></p>
       <div class="table-wrap"><table>
-        <thead><tr><th>Area</th><th>Rent per m² / month</th><th>Price per m²</th><th>Gross yield</th></tr></thead>
+        <thead><tr><th data-i18n="mk.thArea">Area</th><th data-i18n="mk.thRent">Rent per m² / month</th><th data-i18n="mk.thPrice">Price per m²</th><th data-i18n="mk.thYield">Gross yield</th></tr></thead>
         <tbody id="yieldRows"></tbody>
       </table></div>
       <p class="hint" id="yieldNote"></p>
@@ -98,12 +99,12 @@
     </section>
 
     <section class="card">
-      <h2>4. Interest rates since 2015</h2>
-      <p class="lead">The central bank’s main rate and what households actually paid on new mortgages.</p>
+      <h2 data-i18n="mk.rates">4. Interest rates since 2015</h2>
+      <p class="lead" data-i18n="mk.ratesLead">The central bank’s main rate and what households actually paid on new mortgages.</p>
       <canvas id="rateChart" height="280"></canvas>
       <div class="chart-legend">
-        <span><i style="background:var(--interest)"></i>CNB 2-week repo rate</span>
-        <span><i style="background:var(--principal)"></i>Average rate on new mortgages</span>
+        <span><i style="background:var(--interest)"></i><span data-i18n="mk.keyRepo">CNB 2-week repo rate</span></span>
+        <span><i style="background:var(--principal)"></i><span data-i18n="mk.keyMort">Average rate on new mortgages</span></span>
       </div>
       <p class="hint" id="rateLatest"></p>
       <p class="source" id="repoSource"></p>
@@ -111,33 +112,33 @@
     </section>
 
     <section class="card">
-      <h2>5. Price indices over time</h2>
-      <h3 class="sub">Prague vs the rest of Czechia</h3>
+      <h2 data-i18n="mk.indices">5. Price indices over time</h2>
+      <h3 class="sub" data-i18n="mk.czTitle">Prague vs the rest of Czechia</h3>
       <canvas id="czChart" height="260"></canvas>
       <div class="chart-legend">
-        <span><i style="background:var(--principal)"></i>Prague</span>
-        <span><i style="background:var(--interest)"></i>Rest of Czechia</span>
+        <span><i style="background:var(--principal)"></i><span data-i18n="mk.keyPrague">Prague</span></span>
+        <span><i style="background:var(--interest)"></i><span data-i18n="mk.keyRest">Rest of Czechia</span></span>
       </div>
       <p class="source" id="czSource"></p>
 
-      <h3 class="sub">Czechia vs the EU — all dwellings (houses and flats)</h3>
+      <h3 class="sub" data-i18n="mk.euTitle">Czechia vs the EU — all dwellings (houses and flats)</h3>
       <canvas id="euChart" height="260"></canvas>
       <div class="chart-legend">
-        <span><i style="background:var(--principal)"></i>Czechia</span>
-        <span><i style="background:var(--tax)"></i>EU-27</span>
+        <span><i style="background:var(--principal)"></i><span data-i18n="mk.keyCz">Czechia</span></span>
+        <span><i style="background:var(--tax)"></i><span data-i18n="mk.keyEu">EU-27</span></span>
       </div>
       <p class="source" id="euSource"></p>
     </section>
 
     <section class="card">
-      <h2>Try a Prague flat in the investor tool</h2>
-      <p class="lead">Copies Prague’s price per m² and rent per m², multiplied by the flat size, into the Buy-to-let investor as a starting point.</p>
+      <h2 data-i18n="mk.copyTitle">Try a Prague flat in the investor tool</h2>
+      <p class="lead" data-i18n="mk.copyLead">Copies Prague’s price per m² and rent per m², multiplied by the flat size, into the Buy-to-let investor as a starting point.</p>
       <div class="copy-row">
         <div class="field">
-          <label for="flatSize">Flat size</label>
+          <label for="flatSize" data-i18n="mk.flatSize">Flat size</label>
           <div class="unit post"><span>m²</span><input id="flatSize" type="number" min="10" max="400" step="1" value="55"></div>
         </div>
-        <a class="btn primary" id="copyBtn" href="invest.html">Open in investor tool →</a>
+        <a class="btn primary" id="copyBtn" href="invest.html" data-i18n="mk.copyBtn">Open in investor tool →</a>
       </div>
       <p class="hint" id="copyPreview"></p>
     </section>
@@ -145,9 +146,11 @@
 </main>
 
 <footer>
-  <p>For illustration only. Not financial advice. Real offers depend on your lender.</p>
+  <p data-i18n="footer">For illustration only. Not financial advice. Real offers depend on your lender.</p>
 </footer>
 
+<script src="js/lang/en.js"></script>
+<script src="js/lang/cs.js"></script>
 <script src="js/common.js"></script>
 <script src="js/market.js"></script>
 </body>

@@ -15,7 +15,7 @@
 </head>
 <body>
 <h1>Chart stability test</h1>
-<p>Opens every page that draws charts, redraws the charts many times (window resizes, phone and desktop widths, light and dark mode)
+<p>Opens every page that draws charts, in English and in Czech, redraws the charts many times (window resizes, phone and desktop widths, light and dark mode)
 and checks each chart keeps the same size and is still drawn. Catches charts that grow on every redraw until the browser
 refuses to draw them (Chrome shows a white box with a broken-content icon). Run it from a web server, e.g.
 <code>python3 -m http.server</code> in the project folder, then open <code>/tests/chart-stability.html</code>.</p>
@@ -87,9 +87,16 @@ async function testPage(p) {
 }
 
 (async () => {
-  for (const p of PAGES) {
-    try { await testPage(p); } catch (e) { check(`${p.url}: no errors`, false, e.message); }
+  // Every chart page in both languages (Czech labels are longer); the visitor's own language is put back afterwards
+  let savedLang = null;
+  try { savedLang = localStorage.getItem('mortgage-lang'); } catch (e) {}
+  for (const lang of ['en', 'cs']) {
+    for (const p of PAGES) {
+      const page = { ...p, url: `${p.url}?lang=${lang}` };
+      try { await testPage(page); } catch (e) { check(`${page.url}: no errors`, false, e.message); }
+    }
   }
+  try { savedLang === null ? localStorage.removeItem('mortgage-lang') : localStorage.setItem('mortgage-lang', savedLang); } catch (e) {}
   const failed = results.filter(r => !r.ok);
   document.getElementById('summary').innerHTML = failed.length
     ? `<span class="fail">FAILED: ${failed.length} of ${results.length} checks</span>`

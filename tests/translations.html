@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abodex test: translations</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 24px; background: #fff; color: #111; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .pass { color: #116329; } .fail { color: #b3261e; font-weight: 600; }
+  #summary { font-size: 18px; margin: 12px 0; }
+  li { margin: 2px 0; }
+  iframe { width: 1280px; height: 900px; border: 1px solid #ccc; position: absolute; left: -10000px; }
+</style>
+</head>
+<body>
+<h1>Translation test</h1>
+<p>Checks that every text exists in English and Czech (<code>js/lang/en.js</code>, <code>js/lang/cs.js</code>), that every key
+the pages and scripts use is defined, that both languages contain the same numbers, and that every page shows the same
+numbers in both languages. Run it from a web server, e.g. <code>python3 -m http.server</code> in the project folder,
+then open <code>/tests/translations.html</code>.</p>
+<p id="summary">Running…</p>
+<ul id="results"></ul>
+<iframe id="frame" title="page under test"></iframe>
+
+<script src="../js/lang/en.js"></script>
+<script src="../js/lang/cs.js"></script>
+<script>
+const EN = I18N.en, CS = I18N.cs;
+const HTML_PAGES = ['index.html', 'mortgage.html', 'invest.html', 'rent-or-buy.html', 'market.html', '404.html'];
+const SCRIPTS = ['common.js', 'home.js', 'mortgage.js', 'invest.js', 'rent-or-buy.js', 'market.js'];
+// Keys the scripts build from a prefix ('mk.area.' + id, …) and what they are completed with
+const DYNAMIC = {
+  'nav.lang.': ['cs', 'en'],
+  'csv.': ['payment', 'date', 'principal', 'interest', 'extra', 'pmi', 'balance', 'file'],
+  'mk.area.': ['praha', 'brno', 'cr'],
+  'mk.in.': ['praha', 'brno', 'cr'],
+  'data.': [],   // localData() in common.js; the data texts have their own checks below
+};
+const PLURAL = ['one', 'few', 'many'];
+
+const results = [];
+const check = (name, ok, detail = '') => results.push({ name, ok: !!ok, detail });
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const frame = document.getElementById('frame');
+async function until(fn, ms = 6000) { const end = Date.now() + ms; while (Date.now() < end) { try { if (fn()) return true; } catch (e) {} await wait(50); } return false; }
+const text = url => fetch(url, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(url + ': HTTP ' + r.status); return r.text(); });
+const list = (a, max = 12) => a.length > max ? a.slice(0, max).join(', ') + ` … (${a.length} in all)` : a.join(', ');
+
+// Numbers in a text, in either format: "7 233 600" (Czech, non-breaking spaces), "1,234.56", "4,22", "4.22"
+function nums(s) {
+  return (String(s).match(/\d+(?:[  ]\d{3})*(?:,\d{3}(?!\d))*(?:[.,]\d+)?/g) || [])
+    .map(t => t.replace(/[  ]/g, '').replace(/,(\d{3})(?!\d)/g, '$1').replace(',', '.'))
+    .map(t => String(parseFloat(t)));
+}
+const bag = a => a.slice().sort().join(' ');
+const placeholders = s => bag(String(s).match(/\{\w+\}/g) || []);
+const tags = s => bag((String(s).match(/<\/?[a-z]+/g) || []));
+
+// ---------- 1. Both language files ----------
+function checkFiles() {
+  const en = Object.keys(EN), cs = Object.keys(CS);
+  const onlyEn = en.filter(k => !(k in CS)), onlyCs = cs.filter(k => !(k in EN));
+  check(`every English text has a Czech version (${en.length} texts)`, !onlyEn.length, 'missing in cs.js: ' + list(onlyEn));
+  check('every Czech text has an English version', !onlyCs.length, 'missing in en.js: ' + list(onlyCs));
+  const empty = [...en.filter(k => !String(EN[k]).trim()).map(k => 'en ' + k), ...cs.filter(k => !String(CS[k]).trim()).map(k => 'cs ' + k)];
+  check('no empty texts', !empty.length, list(empty));
+  const both = en.filter(k => k in CS);
+  const ph = both.filter(k => placeholders(EN[k]) !== placeholders(CS[k]));
+  check('the same {placeholders} in both languages', !ph.length, ph.map(k => `${k}: ${placeholders(EN[k])} | ${placeholders(CS[k])}`).join('; '));
+  const mk = both.filter(k => tags(EN[k]) !== tags(CS[k]));
+  check('the same markup (<b>, <a>, <span>) in both languages', !mk.length, list(mk));
+  const digits = both.filter(k => bag(nums(EN[k])) !== bag(nums(CS[k])));
+  check('the same numbers in both languages’ texts', !digits.length, digits.map(k => `${k}: [${bag(nums(EN[k]))}] vs [${bag(nums(CS[k]))}]`).join('; '));
+  const plural = [...new Set(en.filter(k => /\.(one|few|many)$/.test(k)).map(k => k.replace(/\.(one|few|many)$/, '')))]
+    .filter(base => PLURAL.some(f => !(`${base}.${f}` in EN) || !(`${base}.${f}` in CS)));
+  check('plural texts have all three forms (.one, .few, .many)', !plural.length, list(plural));
+  const same = both.filter(k => EN[k] === CS[k] && !/^(nav\.lang\.|mk\.keyEu$|i\.thCoc$|mk\.mfBrno$|data\..*\.rows\.1\.label$|data\.index_cz_vs_eu\.unit$)/.test(k) && /[a-z]{3}/i.test(EN[k]));
+  check('no Czech text is left in English', !same.length, list(same));
+}
+
+// ---------- 2. Keys used by the pages and scripts ----------
+const used = new Set();
+const known = key => key in EN || PLURAL.every(f => `${key}.${f}` in EN);
+function markUsed(key) { used.add(key); PLURAL.forEach(f => used.add(`${key}.${f}`)); }
+
+async function checkHtml(page) {
+  const doc = new DOMParser().parseFromString(await text('../' + page), 'text/html');
+  const missing = [], differ = [];
+  const norm = s => s.replace(/\s+/g, ' ').trim();
+  doc.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n; markUsed(k);
+    if (!known(k)) missing.push(k); else if (norm(el.textContent) !== norm(EN[k])) differ.push(`${k}: «${norm(el.textContent)}»`);
+  });
+  doc.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const k = el.dataset.i18nHtml; markUsed(k);
+    const probe = document.createElement('div'); probe.innerHTML = EN[k] || '';
+    if (!known(k)) missing.push(k); else if (norm(el.innerHTML) !== norm(probe.innerHTML)) differ.push(`${k}: «${norm(el.innerHTML)}»`);
+  });
+  doc.querySelectorAll('[data-i18n-attr]').forEach(el => el.dataset.i18nAttr.split(';').forEach(pair => {
+    const [attr, k] = pair.split(':').map(s => s.trim()); markUsed(k);
+    if (!known(k)) missing.push(k); else if (el.getAttribute(attr) !== EN[k]) differ.push(`${k} (${attr}): «${el.getAttribute(attr)}»`);
+  }));
+  check(`${page}: every text key exists`, !missing.length, list(missing));
+  check(`${page}: the English written in the page matches en.js`, !differ.length, list(differ, 5));
+  // Visible text with no key would stay English in Czech: every text node must sit inside a translated element
+  // (#resultsTitle on rent-or-buy is always rewritten by its script, with the number of years)
+  const loose = [];
+  const skip = el => el.closest('script, style, [data-i18n], [data-i18n-html], .currency, nav, tbody, #resultsTitle');
+  const walk = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+    const s = n.textContent.trim();
+    if (!s || !/[A-Za-z]{2}/.test(s) || skip(n.parentElement)) continue;
+    if (/^(USD|CZK|EUR|m²|Brno|Abodex|EU-27)$/.test(s)) continue;
+    loose.push(s.slice(0, 50));
+  }
+  check(`${page}: no fixed text without a key`, !loose.length, list(loose, 8));
+  ['title', 'aria-label'].forEach(attr => {
+    const bare = [...doc.querySelectorAll(`[${attr}]`)].filter(el => el.tagName !== 'NAV' && !(el.dataset.i18nAttr || '').includes(attr + ':'));
+    check(`${page}: every ${attr} attribute is translated`, !bare.length, list(bare.map(el => el.getAttribute(attr))));
+  });
+}
+
+async function checkScript(file) {
+  const src = await text('../js/' + file);
+  const missing = [];
+  // Every string literal that looks like a key ("m.title", 'check.pct', …)
+  const prefixes = [...new Set(Object.keys(EN).map(k => k.split('.')[0]))];
+  const re = new RegExp(`['"\`]((?:${prefixes.join('|')})\\.[A-Za-z0-9_.]*)['"\`]`, 'g');
+  for (const [, key] of src.matchAll(re)) {
+    if (key.endsWith('.')) {   // a prefix completed at run time
+      if (!DYNAMIC[key]) missing.push(key + '…  (add it to DYNAMIC in this test)');
+      else DYNAMIC[key].forEach(rest => { markUsed(key + rest); if (!known(key + rest)) missing.push(key + rest); });
+      continue;
+    }
+    markUsed(key);
+    if (!known(key)) missing.push(key);
+  }
+  check(`js/${file}: every text key exists`, !missing.length, list(missing));
+}
+
+// ---------- 3. Texts copied from data/market.json ----------
+async function checkData() {
+  const d = JSON.parse(await text('../data/market.json'));
+  const keys = Object.keys(EN).filter(k => k.startsWith('data.'));
+  keys.forEach(markUsed);
+  const stale = keys.filter(k => k.split('.').slice(1).reduce((o, p) => (o ? o[p] : undefined), d) !== EN[k]);
+  check(`en.js "data.*" texts still match data/market.json (${keys.length})`, !stale.length,
+    stale.map(k => `${k}: file says «${k.split('.').slice(1).reduce((o, p) => (o ? o[p] : undefined), d)}»`).join('; '));
+  // Texts the pages show from the file must all be covered
+  const shown = ['prices_per_m2.source.period', 'prague_districts.source.period', 'prague_districts.note', 'rents_deloitte.source.period',
+    'rents_deloitte.note', 'rents_mf.unit', 'rents_mf.category', 'rents_mf.source.period', 'rents_mf.columns.reference_rent',
+    'rents_mf.columns.median_rent', 'rents_mf.columns.data_coverage', 'rents_mf.note', 'rates.repo.source.period',
+    'rates.mortgage.source.period', 'index_prague_vs_rest.unit', 'index_prague_vs_rest.source.period', 'index_cz_vs_eu.unit',
+    'index_cz_vs_eu.source.period',
+    ...d.prices_per_m2.rows.flatMap((r, i) => [`prices_per_m2.rows.${i}.label`, `prices_per_m2.rows.${i}.table`]),
+    ...d.rents_deloitte.rows.map((r, i) => `rents_deloitte.rows.${i}.label`)];
+  const uncovered = shown.filter(p => !(('data.' + p) in EN));
+  check('every text the pages show from data/market.json has a translation', !uncovered.length, list(uncovered));
+  const ids = [...new Set([...d.prices_per_m2.rows, ...d.rents_deloitte.rows].map(r => r.id))];
+  const areaMissing = ids.flatMap(id => ['mk.area.', 'mk.in.'].map(p => p + id)).filter(k => !(k in EN));
+  check('every area in the data has its sentence forms (mk.area.*, mk.in.*)', !areaMissing.length, list(areaMissing));
+}
+
+// ---------- 4. Every page in both languages ----------
+function load(url) {
+  return new Promise(resolve => { frame.onload = () => resolve(frame.contentWindow); frame.src = url; });
+}
+const READY = {
+  'index.html': d => d.querySelector('#facts .fact'), '404.html': d => d.getElementById('topnav').children.length,
+  'mortgage.html': d => d.getElementById('kMonthly').textContent !== '–', 'invest.html': d => d.getElementById('rCash').textContent !== '–',
+  'rent-or-buy.html': d => d.getElementById('rBuyer').textContent !== '–', 'market.html': d => !d.getElementById('content').hidden,
+};
+const TOOL = ['mortgage.html', 'invest.html', 'rent-or-buy.html'];
+
+async function snapshot(page, lang, currency) {
+  try { localStorage.setItem('mortgage-currency', currency); } catch (e) {}
+  const win = await load(`../${page}?lang=${lang}`), doc = win.document;
+  if (!await until(() => READY[page](doc))) return null;
+  await wait(page === 'index.html' ? 1300 : 150);   // home page numbers count up first
+  const sw = doc.querySelector('.lang-switch');
+  const out = {
+    lang: doc.documentElement.lang, title: doc.title, active: sw && sw.querySelector('[aria-pressed="true"]')?.dataset.lang,
+    desc: (doc.querySelector('meta[name="description"]') || {}).content || '',
+  };
+  if (sw) sw.style.display = 'none';
+  out.blocks = [...doc.querySelectorAll('nav, header, footer, main > *, main > .stack > *')]
+    .filter(e => !e.classList.contains('stack') && e.checkVisibility()).map(e => e.innerText);
+  out.rows = [...doc.querySelectorAll('tr')].filter(e => e.checkVisibility()).map(e => e.innerText);
+  out.full = doc.body.textContent;
+  if (sw) sw.style.display = '';
+  if (page === 'mortgage.html') {   // the CSV download
+    let blob = null;
+    const keep = win.URL.createObjectURL, click = win.HTMLAnchorElement.prototype.click;
+    win.URL.createObjectURL = b => { blob = b; return 'about:blank'; };
+    win.HTMLAnchorElement.prototype.click = function () {};
+    doc.getElementById('csv').click();
+    win.URL.createObjectURL = keep; win.HTMLAnchorElement.prototype.click = click;
+    out.csv = blob ? await blob.text() : '';
+  }
+  return out;
+}
+
+async function checkPage(page) {
+  for (const currency of TOOL.includes(page) ? ['USD', 'CZK', 'EUR'] : ['USD']) {
+    const name = `${page}${TOOL.includes(page) ? ' ' + currency : ''}`;
+    const en = await snapshot(page, 'en', currency), cs = await snapshot(page, 'cs', currency);
+    check(`${name}: loads in both languages`, en && cs);
+    if (!en || !cs) continue;
+    check(`${name}: ?lang=cs gives <html lang="cs"> and a Czech title`, cs.lang === 'cs' && cs.title === CS[page === '404.html' ? 'nf.title' : { 'index.html': 'h', 'mortgage.html': 'm', 'invest.html': 'i', 'rent-or-buy.html': 'rb', 'market.html': 'mk' }[page] + '.title'], `${cs.lang} · ${cs.title}`);
+    check(`${name}: ?lang=en gives English`, en.lang.startsWith('en') && en.active === 'en' && cs.active === 'cs', `${en.lang} · switch shows ${en.active}/${cs.active}`);
+    check(`${name}: Czech description`, page === '404.html' || (cs.desc && cs.desc !== en.desc));
+    const leftover = (cs.full.match(/\{\w+\}|\b(?:nav|common|check|ltv|src|fresh|card|h|nf|m|i|rb|mk|csv|date|dur|unit|chart|data)\.[a-z][A-Za-z0-9.]*[A-Za-z0-9]\b/g) || [])
+      .filter(s => !/^(m|i)\.[a-z]$/.test(s));
+    check(`${name}: no unfilled {placeholder} or bare key in Czech`, !leftover.length, list(leftover));
+    check(`${name}: same number of sections and table rows`, en.blocks.length === cs.blocks.length && en.rows.length === cs.rows.length,
+      `${en.blocks.length}/${cs.blocks.length} sections, ${en.rows.length}/${cs.rows.length} rows`);
+    const badBlocks = en.blocks.map((b, k) => [b, cs.blocks[k]]).filter(([a, b]) => bag(nums(a)) !== bag(nums(b)));
+    check(`${name}: every section shows the same numbers in Czech`, !badBlocks.length,
+      badBlocks.slice(0, 2).map(([a, b]) => `EN «${a.slice(0, 160)}» vs CS «${String(b).slice(0, 160)}»`).join(' | '));
+    const badRows = en.rows.map((r, k) => [r, cs.rows[k]]).filter(([a, b]) => nums(a).join(' ') !== nums(b).join(' '));
+    check(`${name}: every table row shows the same numbers, in the same order`, !badRows.length,
+      badRows.slice(0, 3).map(([a, b]) => `${a} | ${b}`).join(' · '));
+    if (en.csv !== undefined) {
+      const a = en.csv.split('\n'), b = cs.csv.split('\n');
+      const bad = a.filter((line, k) => {
+        const x = line.split(','), y = (b[k] || '').split(';');
+        return x.length !== y.length || (k > 0 && x.some((v, j) => j === 1 ? nums(v).join() !== nums(y[j]).join() : v !== y[j].replace(',', '.')));
+      });
+      check(`${name}: CSV has the same values (Czech: semicolons, decimal comma)`, a.length === b.length && !bad.length, list(bad, 3));
+    }
+  }
+}
+
+(async () => {
+  let keep = {};
+  ['mortgage-lang', 'mortgage-currency'].forEach(k => { try { keep[k] = localStorage.getItem(k); } catch (e) {} });
+  try {
+    checkFiles();
+    for (const p of HTML_PAGES) await checkHtml(p);
+    for (const f of SCRIPTS) await checkScript(f);
+    await checkData();
+    const unused = Object.keys(EN).filter(k => !used.has(k));
+    check('every text in en.js is used somewhere', !unused.length, list(unused));
+    for (const p of HTML_PAGES) await checkPage(p);
+  } catch (e) { check('no errors', false, e.message); }
+  // Leave the visitor's own language and currency as they were
+  for (const [k, v] of Object.entries(keep)) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+
+  const failed = results.filter(r => !r.ok);
+  document.getElementById('summary').innerHTML = failed.length
+    ? `<span class="fail">FAILED: ${failed.length} of ${results.length} checks</span>`
+    : `<span class="pass">PASSED: all ${results.length} checks</span>`;
+  document.getElementById('results').innerHTML = results.map(r =>
+    `<li class="${r.ok ? 'pass' : 'fail'}">${r.ok ? '✓' : '✗'} ${r.name}${r.ok || !r.detail ? '' : ' — ' + r.detail.replace(/</g, '&lt;')}</li>`).join('');
+  document.title = (failed.length ? 'FAIL' : 'PASS') + ' – translations';
+  window.TEST_RESULT = { passed: results.length - failed.length, total: results.length, failed };
+})();
+</script>
+</body>
+</html>

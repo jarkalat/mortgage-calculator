@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rent or Buy Calculator: Compare Your Net Worth Over Time</title>
-<meta name="description" content="Should you rent or buy? Compare a buyer's and a renter's net worth year by year in USD, CZK or EUR, with the break-even year and a plain-English verdict.">
+<title data-i18n="rb.title">Rent or Buy Calculator: Compare Your Net Worth Over Time</title>
+<meta name="description" data-i18n-attr="content:rb.desc" content="Should you rent or buy? Compare a buyer's and a renter's net worth year by year in USD, CZK or EUR, with the break-even year and a plain-English verdict.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script src="js/theme-init.js"></script>
+<script src="js/lang-init.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/rent-or-buy.css">
 </head>
@@ -14,21 +15,21 @@
 <nav class="topnav" id="topnav" data-page="rent-or-buy" aria-label="Abodex tools"></nav>
 <header>
   <div>
-    <h1>Rent or Buy</h1>
-    <p>Two people, the same flat, the same years: one buys, one rents and invests the difference. Who ends up richer?</p>
+    <h1 data-i18n="rb.h1">Rent or Buy</h1>
+    <p data-i18n="rb.lead">Two people, the same flat, the same years: one buys, one rents and invests the difference. Who ends up richer?</p>
   </div>
 </header>
 
 <main class="two-col">
   <!-- ============ INPUTS ============ -->
-  <section class="card" aria-label="Your numbers">
+  <section class="card" aria-label="Your numbers" data-i18n-attr="aria-label:rb.inputs">
     <div class="card-head">
-      <h2>Your numbers</h2>
-      <button class="btn" id="reset" title="Put every input back to its starting value">Reset</button>
+      <h2 data-i18n="rb.inputs">Your numbers</h2>
+      <button class="btn" id="reset" title="Put every input back to its starting value" data-i18n="common.reset" data-i18n-attr="title:common.resetTitle">Reset</button>
     </div>
 
     <div class="field">
-      <label id="currencyLabel">Currency</label>
+      <label id="currencyLabel" data-i18n="common.currency">Currency</label>
       <div class="currency" role="group" aria-labelledby="currencyLabel">
         <button type="button" data-cur="USD" class="active" aria-pressed="true">USD</button>
         <button type="button" data-cur="CZK" aria-pressed="false">CZK</button>
@@ -36,108 +37,108 @@
       </div>
     </div>
 
-    <h3 class="group">Buying</h3>
+    <h3 class="group" data-i18n="rb.buying">Buying</h3>
     <div class="field">
-      <label for="price">Price</label>
+      <label for="price" data-i18n="rb.price">Price</label>
       <div class="unit pre money"><span>$</span><input id="price" type="number" min="0" step="5000" value="400000"></div>
-      <div class="hint">What the home costs to buy.</div>
+      <div class="hint" data-i18n="rb.priceHint">What the home costs to buy.</div>
     </div>
     <div class="field">
-      <label for="buying">Buying costs</label>
+      <label for="buying" data-i18n="common.buyingCosts">Buying costs</label>
       <div class="unit pre money"><span>$</span><input id="buying" type="number" min="0" step="1000" value="10000"></div>
-      <div class="hint">Fees and taxes paid on top of the price when you buy; the renter invests this instead.</div>
+      <div class="hint" data-i18n="rb.buyingHint">Fees and taxes paid on top of the price when you buy; the renter invests this instead.</div>
     </div>
     <div class="row">
       <div class="field">
-        <label for="downPct">Down payment</label>
+        <label for="downPct" data-i18n="common.downPayment">Down payment</label>
         <div class="unit post"><span>%</span><input id="downPct" type="number" min="0" max="100" step="5" value="20"></div>
-        <div class="hint">The part of the price paid from your own money.</div>
+        <div class="hint" data-i18n="rb.downHint">The part of the price paid from your own money.</div>
       </div>
       <div class="field">
-        <label for="rate">Interest rate</label>
+        <label for="rate" data-i18n="common.interestRate">Interest rate</label>
         <div class="unit post"><span>%</span><input id="rate" type="number" min="0" step="0.05" value="6.5"></div>
-        <div class="hint">The mortgage’s yearly interest rate.</div>
+        <div class="hint" data-i18n="rb.rateHint">The mortgage’s yearly interest rate.</div>
       </div>
     </div>
     <div class="warn" id="ltvWarn" hidden></div>
     <div class="field">
-      <label for="term">Loan term</label>
+      <label for="term" data-i18n="common.loanTerm">Loan term</label>
       <select id="term">
-        <option value="30" selected>30 years</option>
-        <option value="25">25 years</option>
-        <option value="20">20 years</option>
-        <option value="15">15 years</option>
-        <option value="10">10 years</option>
+        <option value="30" selected data-i18n="common.y30">30 years</option>
+        <option value="25" data-i18n="common.y25">25 years</option>
+        <option value="20" data-i18n="common.y20">20 years</option>
+        <option value="15" data-i18n="common.y15">15 years</option>
+        <option value="10" data-i18n="common.y10">10 years</option>
       </select>
-      <div class="hint">How long the mortgage runs; once it’s paid off the buyer only has ownership costs.</div>
+      <div class="hint" data-i18n="rb.termHint">How long the mortgage runs; once it’s paid off the buyer only has ownership costs.</div>
     </div>
 
     <details open>
-      <summary>Ownership costs</summary>
+      <summary data-i18n="rb.ownership">Ownership costs</summary>
       <div class="field">
-        <label for="hoa" id="hoaLabel">HOA / month</label>
+        <label for="hoa" id="hoaLabel" data-i18n="common.hoaMonth">HOA / month</label>
         <div class="unit pre money"><span>$</span><input id="hoa" type="number" min="0" step="10" value="150"></div>
-        <div class="hint" id="hoaHint">A monthly fee to the building or association for shared upkeep.</div>
+        <div class="hint" id="hoaHint" data-i18n="rb.hoaHint">A monthly fee to the building or association for shared upkeep.</div>
       </div>
       <div class="row">
         <div class="field">
-          <label for="taxPct" class="us-only">Property tax / year</label>
-          <label for="taxAmt" class="eu-only">Property tax / year</label>
+          <label for="taxPct" class="us-only" data-i18n="common.taxYear">Property tax / year</label>
+          <label for="taxAmt" class="eu-only" data-i18n="common.taxYear">Property tax / year</label>
           <div class="unit post us-only"><span>%</span><input id="taxPct" type="number" min="0" step="0.05" value="1.1"></div>
           <div class="unit pre money eu-only"><span>$</span><input id="taxAmt" type="number" min="0" step="100" value="0"></div>
-          <div class="hint us-only">A yearly tax as a % of the home’s value.</div>
-          <div class="hint eu-only">A fixed yearly tax on owning the home.</div>
+          <div class="hint us-only" data-i18n="rb.taxHintUs">A yearly tax as a % of the home’s value.</div>
+          <div class="hint eu-only" data-i18n="rb.taxHintEu">A fixed yearly tax on owning the home.</div>
         </div>
         <div class="field">
-          <label for="ins">Insurance / year</label>
+          <label for="ins" data-i18n="common.insYear">Insurance / year</label>
           <div class="unit pre money"><span>$</span><input id="ins" type="number" min="0" step="50" value="1500"></div>
-          <div class="hint">Home insurance the owner pays each year.</div>
+          <div class="hint" data-i18n="rb.insHint">Home insurance the owner pays each year.</div>
         </div>
       </div>
       <div class="field">
-        <label for="maint">Maintenance / year</label>
+        <label for="maint" data-i18n="rb.maint">Maintenance / year</label>
         <div class="unit post"><span>%</span><input id="maint" type="number" min="0" step="0.1" value="1"></div>
-        <div class="hint">Repairs and upkeep inside the home, as a % of its value each year.</div>
+        <div class="hint" data-i18n="rb.maintHint">Repairs and upkeep inside the home, as a % of its value each year.</div>
       </div>
     </details>
 
-    <h3 class="group">Renting</h3>
+    <h3 class="group" data-i18n="rb.renting">Renting</h3>
     <div class="row">
       <div class="field">
-        <label for="rent">Rent / month</label>
+        <label for="rent" data-i18n="common.rentMonth">Rent / month</label>
         <div class="unit pre money"><span>$</span><input id="rent" type="number" min="0" step="50" value="2200"></div>
-        <div class="hint">Rent for the same home today.</div>
+        <div class="hint" data-i18n="rb.rentHint">Rent for the same home today.</div>
       </div>
       <div class="field">
-        <label for="rentGrowth">Rent growth</label>
+        <label for="rentGrowth" data-i18n="common.rentGrowth">Rent growth</label>
         <div class="unit post"><span>%</span><input id="rentGrowth" type="number" step="0.5" value="3"></div>
-        <div class="hint">How much rent rises each year; fixed ownership costs rise at the same rate.</div>
+        <div class="hint" data-i18n="rb.rentGrowthHint">How much rent rises each year; fixed ownership costs rise at the same rate.</div>
       </div>
     </div>
 
-    <h3 class="group">Markets &amp; period</h3>
+    <h3 class="group" data-i18n="rb.markets">Markets &amp; period</h3>
     <div class="row">
       <div class="field">
-        <label for="priceGrowth">Price growth</label>
+        <label for="priceGrowth" data-i18n="common.priceGrowth">Price growth</label>
         <div class="unit post"><span>%</span><input id="priceGrowth" type="number" step="0.5" value="3.5"></div>
-        <div class="hint">How much the home’s value rises each year.</div>
+        <div class="hint" data-i18n="rb.priceGrowthHint">How much the home’s value rises each year.</div>
       </div>
       <div class="field">
-        <label for="ret">Investment return</label>
+        <label for="ret" data-i18n="rb.ret">Investment return</label>
         <div class="unit post"><span>%</span><input id="ret" type="number" step="0.5" value="7"></div>
-        <div class="hint">The yearly return on money either person invests.</div>
+        <div class="hint" data-i18n="rb.retHint">The yearly return on money either person invests.</div>
       </div>
     </div>
     <div class="row">
       <div class="field">
-        <label for="sell">Selling costs</label>
+        <label for="sell" data-i18n="rb.sell">Selling costs</label>
         <div class="unit post"><span>%</span><input id="sell" type="number" min="0" step="0.5" value="6"></div>
-        <div class="hint">Agent fees and costs to sell, as a % of the value; taken off the buyer’s net worth.</div>
+        <div class="hint" data-i18n="rb.sellHint">Agent fees and costs to sell, as a % of the value; taken off the buyer’s net worth.</div>
       </div>
       <div class="field">
-        <label for="years">Years to compare</label>
-        <div class="unit post"><span>yr</span><input id="years" type="number" min="1" max="30" step="1" value="10"></div>
-        <div class="hint">How long you’d stay; 1 to 30 years.</div>
+        <label for="years" data-i18n="rb.years">Years to compare</label>
+        <div class="unit post"><span data-i18n="unit.yr">yr</span><input id="years" type="number" min="1" max="30" step="1" value="10"></div>
+        <div class="hint" data-i18n="rb.yearsHint">How long you’d stay; 1 to 30 years.</div>
       </div>
     </div>
   </section>
@@ -148,77 +149,79 @@
       <h2 id="resultsTitle">After 10 years</h2>
       <div class="over results">
         <div>
-          <div class="label">Buyer’s net worth</div>
+          <div class="label" data-i18n="rb.buyerNW">Buyer’s net worth</div>
           <div class="value" id="rBuyer">–</div>
-          <div class="sub">The home’s value minus the loan left and selling costs, plus anything the buyer invested.</div>
+          <div class="sub" data-i18n="rb.buyerNWSub">The home’s value minus the loan left and selling costs, plus anything the buyer invested.</div>
         </div>
         <div>
-          <div class="label">Renter’s net worth</div>
+          <div class="label" data-i18n="rb.renterNW">Renter’s net worth</div>
           <div class="value" id="rRenter">–</div>
-          <div class="sub">Everything the renter invested — the down payment and buying costs plus monthly savings — with its returns.</div>
+          <div class="sub" data-i18n="rb.renterNWSub">Everything the renter invested — the down payment and buying costs plus monthly savings — with its returns.</div>
         </div>
         <div class="highlight">
-          <div class="label">Buyer minus renter</div>
+          <div class="label" data-i18n="rb.diff">Buyer minus renter</div>
           <div class="value" id="rDiff">–</div>
-          <div class="sub">Positive means buying leaves you better off; negative means renting does.</div>
+          <div class="sub" data-i18n="rb.diffSub">Positive means buying leaves you better off; negative means renting does.</div>
         </div>
         <div>
-          <div class="label">Break-even year</div>
+          <div class="label" data-i18n="rb.be">Break-even year</div>
           <div class="value" id="rBreakEven">–</div>
-          <div class="sub">The year from which the buyer is ahead and stays ahead to the end of the period.</div>
+          <div class="sub" data-i18n="rb.beSub">The year from which the buyer is ahead and stays ahead to the end of the period.</div>
         </div>
       </div>
       <p class="verdict" id="verdict"></p>
 
-      <h3 class="group">What if prices grow differently?</h3>
-      <p class="lead">The buyer-minus-renter difference at four price growth rates, with everything else as you entered it.</p>
+      <h3 class="group" data-i18n="rb.whatIf">What if prices grow differently?</h3>
+      <p class="lead" data-i18n="rb.whatIfLead">The buyer-minus-renter difference at four price growth rates, with everything else as you entered it.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Price growth</th><th>Buyer’s net worth</th><th>Renter’s net worth</th><th>Buyer minus renter</th></tr></thead>
+          <thead><tr><th data-i18n="common.priceGrowth">Price growth</th><th data-i18n="rb.buyerNW">Buyer’s net worth</th><th data-i18n="rb.renterNW">Renter’s net worth</th><th data-i18n="rb.diff">Buyer minus renter</th></tr></thead>
           <tbody id="growthRows"></tbody>
         </table>
       </div>
-      <div class="hint">The row closest to your price growth is in bold.</div>
+      <div class="hint" data-i18n="rb.whatIfHint">The row closest to your price growth is in bold.</div>
     </section>
 
     <section class="card">
-      <h2>Net worth year by year</h2>
-      <p class="lead">Each person’s net worth at the end of every year; where the lines cross, the other person takes the lead.</p>
+      <h2 data-i18n="rb.chartTitle">Net worth year by year</h2>
+      <p class="lead" data-i18n="rb.chartLead">Each person’s net worth at the end of every year; where the lines cross, the other person takes the lead.</p>
       <canvas id="chart" height="280"></canvas>
       <div class="chart-legend">
-        <span><i style="background:var(--principal)"></i>Buyer</span>
-        <span><i style="background:var(--interest)"></i>Renter</span>
-        <span id="beKey" hidden><i style="background:var(--accent)"></i>Buying ahead from here</span>
+        <span><i style="background:var(--principal)"></i><span data-i18n="rb.keyBuyer">Buyer</span></span>
+        <span><i style="background:var(--interest)"></i><span data-i18n="rb.keyRenter">Renter</span></span>
+        <span id="beKey" hidden><i style="background:var(--accent)"></i><span data-i18n="rb.keyAhead">Buying ahead from here</span></span>
       </div>
     </section>
 
     <section class="card">
-      <h2>Yearly table</h2>
-      <p class="lead">The numbers behind the chart, at the end of each year (year 0 is the day you buy).</p>
+      <h2 data-i18n="rb.table">Yearly table</h2>
+      <p class="lead" data-i18n="rb.tableLead">The numbers behind the chart, at the end of each year (year 0 is the day you buy).</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Year</th><th>Buyer pays / mo</th><th>Rent / mo</th><th>Home equity</th><th>Buyer invested</th><th>Buyer net worth</th><th>Renter net worth</th><th>Buyer minus renter</th></tr></thead>
+          <thead><tr><th data-i18n="common.year">Year</th><th data-i18n="rb.thPays">Buyer pays / mo</th><th data-i18n="rb.thRent">Rent / mo</th><th data-i18n="rb.thEquity">Home equity</th><th data-i18n="rb.thInvested">Buyer invested</th><th data-i18n="rb.thBuyerNW">Buyer net worth</th><th data-i18n="rb.thRenterNW">Renter net worth</th><th data-i18n="rb.diff">Buyer minus renter</th></tr></thead>
           <tbody id="yearRows"></tbody>
         </table>
       </div>
       <ul class="defs">
-        <li><b>Buyer pays / mo:</b> the mortgage payment plus ownership costs that year.</li>
-        <li><b>Rent / mo:</b> the renter’s rent that year.</li>
-        <li><b>Home equity:</b> the home’s value minus the loan left and minus selling costs — what selling would leave you.</li>
-        <li><b>Buyer invested:</b> the buyer’s savings, built up in months when renting would have cost more.</li>
-        <li><b>Buyer net worth:</b> home equity plus the buyer’s investments.</li>
-        <li><b>Renter net worth:</b> the renter’s investments, started with the down payment and buying costs.</li>
-        <li><b>Buyer minus renter:</b> how far the buyer is ahead (positive) or behind (negative).</li>
+        <li data-i18n-html="rb.defPays"><b>Buyer pays / mo:</b> the mortgage payment plus ownership costs that year.</li>
+        <li data-i18n-html="rb.defRent"><b>Rent / mo:</b> the renter’s rent that year.</li>
+        <li data-i18n-html="rb.defEquity"><b>Home equity:</b> the home’s value minus the loan left and minus selling costs — what selling would leave you.</li>
+        <li data-i18n-html="rb.defInvested"><b>Buyer invested:</b> the buyer’s savings, built up in months when renting would have cost more.</li>
+        <li data-i18n-html="rb.defBuyerNW"><b>Buyer net worth:</b> home equity plus the buyer’s investments.</li>
+        <li data-i18n-html="rb.defRenterNW"><b>Renter net worth:</b> the renter’s investments, started with the down payment and buying costs.</li>
+        <li data-i18n-html="rb.defDiff"><b>Buyer minus renter:</b> how far the buyer is ahead (positive) or behind (negative).</li>
       </ul>
-      <p class="note">Each month, whoever pays less invests the difference. All figures are before tax: taxes on investment gains and on selling a home depend on your country (in Czechia, both can become tax-free after certain holding periods).</p>
+      <p class="note" data-i18n="rb.note">Each month, whoever pays less invests the difference. All figures are before tax: taxes on investment gains and on selling a home depend on your country (in Czechia, both can become tax-free after certain holding periods).</p>
     </section>
   </div>
 </main>
 
 <footer>
-  <p>For illustration only. Not financial advice. Real offers depend on your lender.</p>
+  <p data-i18n="footer">For illustration only. Not financial advice. Real offers depend on your lender.</p>
 </footer>
 
+<script src="js/lang/en.js"></script>
+<script src="js/lang/cs.js"></script>
 <script src="js/common.js"></script>
 <script src="js/finance.js"></script>
 <script src="js/rent-or-buy.js"></script>
