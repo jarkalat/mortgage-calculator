@@ -1,20 +1,20 @@
 /* Rent or buy styles (loaded after style.css; page layout is the shared .two-col). */
-h3.group { margin: 16px 0 8px; font-size: 14px; letter-spacing: 0.3px; }
-section.card > h3.group:first-of-type { margin-top: 18px; }
+h3.group { margin: var(--space-5) 0 var(--space-3); font-size: 14px; font-weight: 600; letter-spacing: 0.01em; color: var(--muted); }
+section.card > h3.group:first-of-type { margin-top: var(--space-5); }
 .results { grid-template-columns: repeat(2, 1fr); }
 @media (max-width: 700px) { .results { grid-template-columns: 1fr; } }
 .results .highlight { background: var(--accent-soft); border-color: transparent; }
-.results .sub { margin-top: 4px; }
-.verdict { margin: 14px 0 0; padding: 12px 14px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 6px; }
-.card .table-wrap + .hint { margin-top: 8px; }
+.results .sub { margin-top: var(--space-1); }
+.verdict { margin: var(--space-4) 0 0; padding: 14px 16px; line-height: 1.55; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: var(--radius-sm); }
+.card .table-wrap + .hint { margin-top: var(--space-3); }
 tr.chosen td { font-weight: 700; }
 tr.start td { color: var(--muted); }
 canvas { width: 100%; display: block; }
-.chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+.chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: var(--space-3); flex-wrap: wrap; }
 .chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
-.defs { margin: 12px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
-.defs li { margin: 2px 0; }
+.defs { margin: var(--space-4) 0 0; padding-left: 18px; font-size: 13px; line-height: 1.55; color: var(--muted); }
+.defs li { margin: var(--space-1) 0; }
 .defs b { color: var(--text); font-weight: 600; }
-.note { margin: 10px 0 0; font-size: 13px; font-style: italic; color: var(--muted); }
+.note { margin: var(--space-3) 0 0; font-size: 13px; line-height: 1.55; font-style: italic; color: var(--muted); }
 .good { color: var(--tax); }
 .bad { color: var(--pmi); }

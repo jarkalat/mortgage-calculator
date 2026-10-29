@@ -1,33 +1,31 @@
-/* Mortgage calculator styles (loaded after style.css). */
-main { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
-@media (max-width: 900px) { main { grid-template-columns: 1fr; } }
-.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-@media (max-width: 700px) { .kpis { grid-template-columns: 1fr 1fr; } }
-.kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
-.kpi .label { font-size: 12px; color: var(--muted); }
-.kpi .value { font-size: 22px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
-.kpi.main { background: var(--accent-soft); border-color: transparent; }
+/* Mortgage calculator styles (loaded after style.css; page layout is the shared .two-col). */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); }
+@media (max-width: 700px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4) 18px; box-shadow: var(--shadow); }
+.kpi .label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.kpi .value { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-top: var(--space-1); font-variant-numeric: tabular-nums; }
+.kpi.main { background: var(--accent-soft); border-color: transparent; box-shadow: none; }
 .kpi.main .value { color: var(--accent); }
 
-.breakdown { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: center; }
+.breakdown { display: grid; grid-template-columns: 180px 1fr; gap: var(--space-5); align-items: center; }
 @media (max-width: 560px) { .breakdown { grid-template-columns: 1fr; justify-items: center; } }
 .legend { width: 100%; }
-.legend div { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--border); font-variant-numeric: tabular-nums; }
+.legend div { display: flex; align-items: center; gap: var(--space-2); padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 15px; font-variant-numeric: tabular-nums; }
 .legend div:last-child { border-bottom: 0; font-weight: 700; }
 .legend i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
 .legend b { margin-left: auto; font-weight: 600; }
 
-.savings { background: var(--accent-soft); border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 14px; }
+.savings { background: var(--accent-soft); border-radius: var(--radius-md); padding: 14px 16px; margin-top: var(--space-4); font-size: 14px; line-height: 1.55; }
 .savings:empty { display: none; }
 
 canvas { width: 100%; display: block; }
-.chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+.chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: var(--space-3); flex-wrap: wrap; }
 .chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
 
 /* Rate fixation stress test */
-#stressCard .over { margin: 4px 0 8px; }
-.stress-table { margin-top: 12px; }
+#stressCard .over { margin: var(--space-1) 0 var(--space-3); }
+.stress-table { margin-top: var(--space-4); }
 .stress-table tr.chosen td { font-weight: 700; }
 
-.afford .result { font-size: 14px; margin-top: 4px; }
-.afford .big { font-size: 20px; font-weight: 700; color: var(--accent); }
+.afford .result { font-size: 14px; margin-top: var(--space-1); }
+.afford .big { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; color: var(--accent); }

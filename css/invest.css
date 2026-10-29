@@ -1,12 +1,12 @@
 /* Buy-to-let investor styles (loaded after style.css; page layout is the shared .two-col). */
 
 .results .highlight { background: var(--accent-soft); border-color: transparent; }
-.results .sub { margin-top: 4px; }
-.card .table-wrap + .hint { margin-top: 8px; }
+.results .sub { margin-top: var(--space-1); }
+.card .table-wrap + .hint { margin-top: var(--space-3); }
 tr.chosen td { font-weight: 700; }
-.defs { margin: 12px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
-.defs li { margin: 2px 0; }
+.defs { margin: var(--space-4) 0 0; padding-left: 18px; font-size: 13px; line-height: 1.55; color: var(--muted); }
+.defs li { margin: var(--space-1) 0; }
 .defs b { color: var(--text); font-weight: 600; }
-.note { margin: 10px 0 0; font-size: 13px; font-style: italic; color: var(--muted); }
+.note { margin: var(--space-3) 0 0; font-size: 13px; line-height: 1.55; font-style: italic; color: var(--muted); }
 .good { color: var(--tax); }
 .bad { color: var(--pmi); }
