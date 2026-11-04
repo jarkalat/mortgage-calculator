@@ -7,13 +7,11 @@
 <meta name="robots" content="noindex">
 <script>
   // GitHub Pages shows this page for any missing address, however deep, so point relative links at the
-  // site's root folder: the first folder on a github.io project site (/mortgage-calculator/), else "/".
-  // Opened straight from disk, links already work as they are.
+  // site's root (https://abodex.eu/). Opened straight from disk, links already work as they are.
   (function () {
     if (location.protocol === 'file:') return;
-    var parts = location.pathname.split('/');
     var base = document.createElement('base');
-    base.href = /\.github\.io$/.test(location.hostname) && parts.length > 2 ? '/' + parts[1] + '/' : '/';
+    base.href = '/';
     document.head.appendChild(base);
   })();
 </script>

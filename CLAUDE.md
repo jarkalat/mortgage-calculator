@@ -3,6 +3,9 @@
 Abodex is a small, free property toolkit: plain static HTML, CSS and JavaScript, no build step,
 no dependencies, no frameworks. Repo: https://github.com/jarkalat/mortgage-calculator
 
+Live site: **https://abodex.eu/** (custom domain on GitHub Pages, set by the `CNAME` file). The site sits at the
+root of the domain, not in a subfolder. Use `https://abodex.eu/` for any full address and relative paths for everything else.
+
 | Page | Tool |
 |---|---|
 | `index.html` | Home: intro and tool cards |
@@ -25,6 +28,7 @@ no dependencies, no frameworks. Repo: https://github.com/jarkalat/mortgage-calcu
 - `tests/chart-stability.html` — browser test for charts (both languages).
 - `tests/translations.html` — browser test: every key in both languages, every key the pages/scripts use exists, same numbers in both.
 - `google34bc03fa02bbb9b0.html` — Google Search Console verification. **Never touch, move or rename.**
+- `CNAME` — the custom domain for GitHub Pages; contains only `abodex.eu`. Removing it takes the site off the domain.
 
 ## Languages (English / Czech)
 - Never write visible text into HTML or JS without a key. In HTML: `data-i18n="key"` (text), `data-i18n-html="key"` (text with
