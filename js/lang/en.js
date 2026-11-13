@@ -17,6 +17,7 @@ I18N.en = {
   'nav.lang.cs': 'Čeština',
   'nav.lang.en': 'English',
   'footer': 'For illustration only. Not financial advice. Real offers depend on your lender.',
+  'footer.privacy': 'Privacy',
 
   'common.currency': 'Currency',
   'common.reset': 'Reset',
@@ -132,7 +133,7 @@ I18N.en = {
   'h.how2': 'Calculations you can check',
   'h.how2p': 'Every result comes with a plain-English explanation of what it means, and the mortgage schedule can be downloaded as a CSV file to check line by line.',
   'h.how3': 'No sign-up, nothing collected',
-  'h.how3p': 'There are no accounts, cookies, analytics or trackers. Your numbers stay in your browser; only your language, currency and theme choices are saved there.',
+  'h.how3p': 'There are no accounts, cookies, analytics or trackers. Your numbers stay in your browser unless you ask for an AI explanation; only your language, currency and theme choices are saved there.',
   'h.f1': 'Prague flat price per m²',
   'h.f1t': 'What flats in Prague sold for on average in {year}, about {ratio} times the Czech average of {avg}.',
   'h.f2': 'Prague gross rental yield',
@@ -154,6 +155,28 @@ I18N.en = {
   'nf.lead': 'The page you were looking for isn’t here. It may have moved, or there may be a typo in the address.',
   'nf.home': 'Go to the home page →',
   'nf.tools': 'Or open a tool',
+
+  // ---------- Privacy page ----------
+  'pv.title': 'Privacy – Abodex',
+  'pv.desc': 'How Abodex handles your data: the calculators run in your browser, and the optional AI advisor sends only the calculator’s numbers, only when you ask.',
+  'pv.h1': 'Privacy',
+  'pv.lead': 'Abodex runs in your browser. The one exception is the optional “Explain my results” advisor, described below.',
+  'pv.toolsH': 'The calculators',
+  'pv.toolsP': 'There are no accounts, analytics or trackers, and no cookies. Your numbers stay in your browser. Only your language, currency and theme choices are saved there, in your browser’s own storage, and they never leave it.',
+  'pv.advH': 'The “Explain my results” advisor',
+  'pv.sentH': 'What is sent, and when',
+  'pv.sentP': 'Only when you click “Explain my results”. Then the calculator’s numbers (your inputs and the results shown, such as the loan amount, interest rates and monthly payments) and the page language are sent. Nothing is sent before you click, and nothing else from the page or your browser is included.',
+  'pv.whoH': 'Who processes it',
+  'pv.whoP': 'Our advisor server runs on Cloudflare. It passes the numbers to Anthropic, which runs the Claude AI that writes the explanation. The explanation then comes back to your browser.',
+  'pv.storedH': 'What is stored',
+  'pv.stored1': 'The explanation, saved under its numbers for 30 days, so that when anyone asks about exactly the same numbers again the answer comes from storage at no cost.',
+  'pv.stored2': 'A scrambled visitor code (a one-way hash of your connection’s IP address and the current hour), kept for 1 hour to enforce the limit on how many explanations one visitor can ask for.',
+  'pv.stored3': 'A count of how many explanations the whole site gave each day, to enforce a daily limit. It says nothing about you.',
+  'pv.stored4': 'Your IP address itself is never stored.',
+  'pv.cookiesH': 'Cookies',
+  'pv.cookiesP': 'The advisor uses no cookies.',
+  'pv.aiH': 'About the answers',
+  'pv.aiP': 'The explanation is written by AI and can contain mistakes. It is education, not financial advice. Check anything important with your bank or a qualified adviser.',
 
   // ---------- Mortgage calculator ----------
   'm.title': 'Mortgage Calculator with Extra Payments',
@@ -261,6 +284,14 @@ I18N.en = {
   'csv.pmi': 'PMI',
   'csv.balance': 'Balance',
   'csv.file': 'amortization-schedule.csv',
+
+  // ---------- "Explain my results" advisor (js/advisor.js) ----------
+  'adv.button': 'Explain my results',
+  'adv.thinking': 'Thinking…',
+  'adv.notice': 'Your numbers are sent to our server and to Anthropic’s Claude AI to write the explanation. Nothing that identifies you is stored. AI can make mistakes; this is education, not financial advice. <a href="privacy.html">Privacy</a>',
+  'adv.errVisitor': 'You’ve asked for a lot of explanations in a short time. Please try again a bit later.',
+  'adv.errDaily': 'The advisor has reached its daily limit. Please try again tomorrow.',
+  'adv.errOther': 'The advisor isn’t available right now. Please try again later.',
 
   // ---------- Buy-to-let investor ----------
   'i.title': 'Buy-to-Let Calculator: Rental Yield, Cash Flow & ROI',

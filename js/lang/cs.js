@@ -17,6 +17,7 @@ I18N.cs = {
   'nav.lang.cs': 'Čeština',
   'nav.lang.en': 'English',
   'footer': 'Pouze pro ilustraci, nejde o finanční poradenství. Skutečné nabídky závisí na vaší bance.',
+  'footer.privacy': 'Ochrana soukromí',
 
   'common.currency': 'Měna',
   'common.reset': 'Obnovit',
@@ -132,7 +133,7 @@ I18N.cs = {
   'h.how2': 'Výpočty, které si můžete ověřit',
   'h.how2p': 'Ke každému výsledku je srozumitelné vysvětlení, co znamená, a splátkový kalendář hypotéky si můžete stáhnout jako soubor CSV a projít řádek po řádku.',
   'h.how3': 'Bez registrace, nic se nesbírá',
-  'h.how3p': 'Žádné účty, cookies, analytika ani sledovací kódy. Vaše čísla zůstávají ve vašem prohlížeči; ukládá se tam jen volba jazyka, měny a vzhledu.',
+  'h.how3p': 'Žádné účty, cookies, analytika ani sledovací kódy. Vaše čísla zůstávají ve vašem prohlížeči, pokud si sami nevyžádáte vysvětlení od AI; ukládá se tam jen volba jazyka, měny a vzhledu.',
   'h.f1': 'Cena bytu v Praze za m²',
   'h.f1t': 'Průměrná cena, za kterou se v roce {year} prodávaly byty v Praze, zhruba {ratio}násobek českého průměru {avg}.',
   'h.f2': 'Hrubý výnos z pronájmu v Praze',
@@ -154,6 +155,28 @@ I18N.cs = {
   'nf.lead': 'Hledaná stránka tu není. Možná byla přesunuta, nebo je v adrese překlep.',
   'nf.home': 'Přejít na úvodní stránku →',
   'nf.tools': 'Nebo otevřete některý nástroj',
+
+  // ---------- Ochrana soukromí ----------
+  'pv.title': 'Ochrana soukromí – Abodex',
+  'pv.desc': 'Jak Abodex zachází s vašimi údaji: kalkulačky běží ve vašem prohlížeči a volitelný poradce s AI odesílá jen čísla z kalkulačky, a to jen na vaše vyžádání.',
+  'pv.h1': 'Ochrana soukromí',
+  'pv.lead': 'Abodex běží ve vašem prohlížeči. Jedinou výjimkou je volitelný poradce „Vysvětlit mé výsledky“, popsaný níže.',
+  'pv.toolsH': 'Kalkulačky',
+  'pv.toolsP': 'Žádné účty, analytika ani sledovací kódy a žádné cookies. Vaše čísla zůstávají ve vašem prohlížeči. Ukládá se v něm jen volba jazyka, měny a vzhledu, a ta se nikam neodesílá.',
+  'pv.advH': 'Poradce „Vysvětlit mé výsledky“',
+  'pv.sentH': 'Co se odesílá a kdy',
+  'pv.sentP': 'Jen když kliknete na „Vysvětlit mé výsledky“. Teprve tehdy se odešlou čísla z kalkulačky (vaše zadání a zobrazené výsledky, například výše úvěru, úrokové sazby a měsíční splátky) a jazyk stránky. Před kliknutím se neodesílá nic a nic dalšího ze stránky ani z vašeho prohlížeče se nepřikládá.',
+  'pv.whoH': 'Kdo údaje zpracovává',
+  'pv.whoP': 'Náš server poradce běží u společnosti Cloudflare. Ten čísla předá společnosti Anthropic, která provozuje umělou inteligenci Claude, jež vysvětlení napíše. Vysvětlení se pak vrátí do vašeho prohlížeče.',
+  'pv.storedH': 'Co se ukládá',
+  'pv.stored1': 'Vysvětlení, uložené podle svých čísel na 30 dní, aby se na stejný dotaz se stejnými čísly dalo příště odpovědět z úložiště a nic to nestálo.',
+  'pv.stored2': 'Zamíchaný kód návštěvníka (jednosměrný hash z IP adresy vašeho připojení a aktuální hodiny). Uchovává se 1 hodinu, aby šlo hlídat limit počtu vysvětlení na jednoho návštěvníka.',
+  'pv.stored3': 'Počet vysvětlení, která celý web za den poskytl, kvůli dennímu limitu. O vás neříká nic.',
+  'pv.stored4': 'Samotná IP adresa se nikdy neukládá.',
+  'pv.cookiesH': 'Soubory cookies',
+  'pv.cookiesP': 'Poradce nepoužívá žádné cookies.',
+  'pv.aiH': 'K odpovědím',
+  'pv.aiP': 'Vysvětlení píše umělá inteligence a může obsahovat chyby. Jde o vzdělávací text, ne o finanční poradenství. Cokoli důležitého si ověřte u své banky nebo u odborného poradce.',
 
   // ---------- Hypoteční kalkulačka ----------
   'm.title': 'Hypoteční kalkulačka s mimořádnými splátkami',
@@ -261,6 +284,14 @@ I18N.cs = {
   'csv.pmi': 'Pojištění PMI',
   'csv.balance': 'Zůstatek',
   'csv.file': 'splatkovy-kalendar.csv',
+
+  // ---------- Poradce „Vysvětlit mé výsledky“ (js/advisor.js) ----------
+  'adv.button': 'Vysvětlit mé výsledky',
+  'adv.thinking': 'Přemýšlím…',
+  'adv.notice': 'Vaše čísla se odešlou na náš server a umělé inteligenci Claude od společnosti Anthropic, která z nich napíše vysvětlení. Nic, co by vás mohlo identifikovat, se neukládá. AI se může mýlit; jde o vzdělávací text, ne o finanční poradenství. <a href="privacy.html">Ochrana soukromí</a>',
+  'adv.errVisitor': 'Za krátkou dobu jste si vyžádali hodně vysvětlení. Zkuste to prosím o něco později.',
+  'adv.errDaily': 'Poradce dnes dosáhl denního limitu. Zkuste to prosím zítra.',
+  'adv.errOther': 'Poradce teď není k dispozici. Zkuste to prosím později.',
 
   // ---------- Kalkulačka investičního bytu ----------
   'i.title': 'Kalkulačka investičního bytu: výnos z pronájmu, cash flow a návratnost',

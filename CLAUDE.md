@@ -24,6 +24,9 @@ root of the domain, not in a subfolder. Use `https://abodex.eu/` for any full ad
 - `js/common.js` — loaded first on every page (see below).
 - `js/finance.js` — shared loan maths.
 - `js/<page>.js` — each tool's own code.
+- `js/advisor.js` — "Explain my results" button (stress test on `mortgage.html`): `ADVISOR_URL` (the server's address, kept only here),
+  `setupAdvisor()`; shows the streamed answer as plain text (`textContent`) and clears it when inputs change.
+- `privacy.html` — privacy page (linked from every footer); describes exactly what the advisor sends and stores.
 - `data/market.json` — every market number with source, page/file link, period and retrieval date.
 - `tests/chart-stability.html` — browser test for charts (both languages).
 - `tests/translations.html` — browser test: every key in both languages, every key the pages/scripts use exists, same numbers in both.
@@ -76,6 +79,9 @@ root of the domain, not in a subfolder. Use `https://abodex.eu/` for any full ad
   Record source name, exact link, period and retrieval date for every number, and show source + period under every table and chart.
 - No data collection: no analytics, trackers, cookies, accounts or sending user input anywhere.
   Only local browser settings (language, currency, theme) are stored.
+  The one exception is the "Explain my results" advisor (`js/advisor.js`): only on click, it sends that calculator's
+  numbers and the language to the advisor server (`ADVISOR_URL`, code in `../abodex-advisor`, which accepts only the
+  fields listed in its `src/calculators.ts`). Any change to what is sent or stored must also update `privacy.html`.
 - Every result gets a one-sentence plain-English explanation. Keep the footer disclaimer on every page.
 
 ## Testing

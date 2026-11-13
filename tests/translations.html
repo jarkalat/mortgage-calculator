@@ -27,8 +27,8 @@ then open <code>/tests/translations.html</code>.</p>
 <script src="../js/lang/cs.js"></script>
 <script>
 const EN = I18N.en, CS = I18N.cs;
-const HTML_PAGES = ['index.html', 'mortgage.html', 'invest.html', 'rent-or-buy.html', 'market.html', '404.html'];
-const SCRIPTS = ['common.js', 'home.js', 'mortgage.js', 'invest.js', 'rent-or-buy.js', 'market.js'];
+const HTML_PAGES = ['index.html', 'mortgage.html', 'invest.html', 'rent-or-buy.html', 'market.html', '404.html', 'privacy.html'];
+const SCRIPTS = ['common.js', 'advisor.js', 'home.js', 'mortgage.js', 'invest.js', 'rent-or-buy.js', 'market.js'];
 // Keys the scripts build from a prefix ('mk.area.' + id, …) and what they are completed with
 const DYNAMIC = {
   'nav.lang.': ['cs', 'en'],
@@ -168,6 +168,7 @@ function load(url) {
 }
 const READY = {
   'index.html': d => d.querySelector('#facts .fact'), '404.html': d => d.getElementById('topnav').children.length,
+  'privacy.html': d => d.getElementById('topnav').children.length,
   'mortgage.html': d => d.getElementById('kMonthly').textContent !== '–', 'invest.html': d => d.getElementById('rCash').textContent !== '–',
   'rent-or-buy.html': d => d.getElementById('rBuyer').textContent !== '–', 'market.html': d => !d.getElementById('content').hidden,
 };
@@ -207,10 +208,10 @@ async function checkPage(page) {
     const en = await snapshot(page, 'en', currency), cs = await snapshot(page, 'cs', currency);
     check(`${name}: loads in both languages`, en && cs);
     if (!en || !cs) continue;
-    check(`${name}: ?lang=cs gives <html lang="cs"> and a Czech title`, cs.lang === 'cs' && cs.title === CS[page === '404.html' ? 'nf.title' : { 'index.html': 'h', 'mortgage.html': 'm', 'invest.html': 'i', 'rent-or-buy.html': 'rb', 'market.html': 'mk' }[page] + '.title'], `${cs.lang} · ${cs.title}`);
+    check(`${name}: ?lang=cs gives <html lang="cs"> and a Czech title`, cs.lang === 'cs' && cs.title === CS[page === '404.html' ? 'nf.title' : { 'index.html': 'h', 'privacy.html': 'pv', 'mortgage.html': 'm', 'invest.html': 'i', 'rent-or-buy.html': 'rb', 'market.html': 'mk' }[page] + '.title'], `${cs.lang} · ${cs.title}`);
     check(`${name}: ?lang=en gives English`, en.lang.startsWith('en') && en.active === 'en' && cs.active === 'cs', `${en.lang} · switch shows ${en.active}/${cs.active}`);
     check(`${name}: Czech description`, page === '404.html' || (cs.desc && cs.desc !== en.desc));
-    const leftover = (cs.full.match(/\{\w+\}|\b(?:nav|common|check|ltv|src|fresh|card|h|nf|m|i|rb|mk|csv|date|dur|unit|chart|data)\.[a-z][A-Za-z0-9.]*[A-Za-z0-9]\b/g) || [])
+    const leftover = (cs.full.match(/\{\w+\}|\b(?:nav|common|check|ltv|src|fresh|card|h|nf|pv|adv|footer|m|i|rb|mk|csv|date|dur|unit|chart|data)\.[a-z][A-Za-z0-9.]*[A-Za-z0-9]\b/g) || [])
       .filter(s => !/^(m|i)\.[a-z]$/.test(s));
     check(`${name}: no unfilled {placeholder} or bare key in Czech`, !leftover.length, list(leftover));
     check(`${name}: same number of sections and table rows`, en.blocks.length === cs.blocks.length && en.rows.length === cs.rows.length,
