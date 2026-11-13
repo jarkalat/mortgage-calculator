@@ -95,7 +95,9 @@ const rule = id => RULES.find(r => r.id === id);
 let state = null, view = 'year';
 
 function calc() {
-  if (!checkInputs(RULES, document.querySelector('main > .stack'), [$('affordOut')])) return;
+  stressValues = null;   // no explanation for numbers that are not on screen
+  const ok = checkInputs(RULES, document.querySelector('main > .stack'), [$('affordOut')]);
+  if (!ok) { advisor.refresh(); return; }
   const price = num('price');
   const down = Math.min(num('downAmt'), price);
   const loan = price - down;
@@ -179,6 +181,7 @@ function calc() {
 
   affordability();
   stressTest();
+  advisor.refresh();
   drawChart();
   renderTable();
 }
@@ -243,13 +246,39 @@ function stressTest() {
   $('sInt').className = 'value ' + upDown(s.interestChange);
   $('sIntSub').textContent = `${money(withExtra.totalInterest)} → ${money(withExtra.totalInterest + s.interestChange)}`;
 
-  $('stressRows').innerHTML = [1, 2, 3].map(step => {
-    const r = rate + step, x = scenario(r), d = x.payment - pi;
+  const steps = [1, 2, 3].map(step => {
+    const r = rate + step, x = scenario(r);
+    return { step, r, payment: x.payment, diff: x.payment - pi, interestChange: x.interestChange };
+  });
+  $('stressRows').innerHTML = steps.map(({ step, r, payment, diff: d, interestChange }) => {
     const chosen = Math.abs(r - newRate) < 0.001 ? ' class="chosen"' : '';
-    return `<tr${chosen}><td>${pctLabel(r)} (+${pctText(step)})</td><td>${money(x.payment, true)}</td>
-      <td class="${upDown(d)}">${signed(d, true)}</td><td class="${upDown(x.interestChange)}">${signed(x.interestChange)}</td></tr>`;
+    return `<tr${chosen}><td>${pctLabel(r)} (+${pctText(step)})</td><td>${money(payment, true)}</td>
+      <td class="${upDown(d)}">${signed(d, true)}</td><td class="${upDown(interestChange)}">${signed(interestChange)}</td></tr>`;
   }).join('');
+
+  // What "Explain my results" sends (only when clicked): the inputs and results shown above, rounded to cents.
+  // Names and limits match the "stress-test" entry in ../abodex-advisor/src/calculators.ts.
+  const r2 = v => Math.round(v * 100) / 100;
+  stressValues = {
+    currency: ISO_CODES[cur], loanAmount: r2(loan), interestRate: r2(rate), loanTermYears: months / 12,
+    fixationYears: fix / 12, resetRate: r2(newRate), includesExtraPayments: hasExtras ? 1 : 0,
+    balanceAtFixationEnd: r2(balance), paymentNow: r2(pi), paymentAfterReset: r2(s.payment), paymentDifference: r2(diff),
+    totalInterestBefore: r2(withExtra.totalInterest), totalInterestAfter: r2(withExtra.totalInterest + s.interestChange),
+    totalInterestChange: r2(s.interestChange),
+  };
+  steps.forEach(x => Object.assign(stressValues, {
+    [`paymentAtPlus${x.step}`]: r2(x.payment), [`paymentDiffAtPlus${x.step}`]: r2(x.diff),
+    [`interestChangeAtPlus${x.step}`]: r2(x.interestChange),
+  }));
 }
+
+// ---------- "Explain my results" (js/advisor.js) ----------
+// Currencies are sent as their ISO 4217 number codes.
+const ISO_CODES = { CZK: 203, EUR: 978, USD: 840 };
+let stressValues = null;
+const advisor = setupAdvisor({
+  button: $('advisorBtn'), output: $('advisorOut'), calculator: 'stress-test', values: () => stressValues,
+});
 
 // ---------- Affordability (28/36 rule) ----------
 function affordability() {
@@ -418,6 +447,7 @@ function applyDefaults() {
   for (const [id, v] of Object.entries(mset().defaults)) $(id).value = v;
   lastDownEdited = 'pct';
   resetRateAuto = true;
+  advisor.clear();
   syncDown();
   calc();
 }
@@ -429,17 +459,20 @@ const hoaLabel = () => { $('hoaLabel').textContent = t(cfg().eu ? 'common.repair
 document.addEventListener('currencychange', e => {
   for (const [id, step] of Object.entries(mset().steps)) $(id).step = step;
   hoaLabel();
+  advisor.clear();
   if (e.detail.fill) applyDefaults(); else calc();
 });
-// Language switch (js/common.js has already swapped the page's fixed texts)
-document.addEventListener('langchange', () => { hoaLabel(); calc(); });
+// Language switch (js/common.js has already swapped the page's fixed texts).
+// An explanation in the old language is cleared too.
+document.addEventListener('langchange', () => { hoaLabel(); advisor.clear(); calc(); });
 
 // Typing your own expected rate stops it following "current rate + 2%"; clearing the box resumes it.
 // (Registered before the general recalc listener below, so it runs first.)
 $('resetRate').addEventListener('input', () => { resetRateAuto = $('resetRate').value.trim() === ''; });
 
-// Recalculate on any other input change
+// Any change to an input clears the old explanation, then recalculates
 document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', advisor.clear);
   if (!['downAmt', 'downPct', 'price'].includes(el.id)) el.addEventListener('input', calc);
 });
 window.addEventListener('resize', () => state && drawChart());

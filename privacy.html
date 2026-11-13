@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" data-cur="USD">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="pv.title">Privacy – Abodex</title>
+<meta name="description" data-i18n-attr="content:pv.desc" content="How Abodex handles your data: the calculators run in your browser, and the optional AI advisor sends only the calculator’s numbers, only when you ask.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script src="js/theme-init.js"></script>
+<script src="js/lang-init.js"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="topnav" id="topnav" data-page="privacy" aria-label="Abodex tools"></nav>
+<header>
+  <div>
+    <h1 data-i18n="pv.h1">Privacy</h1>
+    <p data-i18n="pv.lead">Abodex runs in your browser. The one exception is the optional “Explain my results” advisor, described below.</p>
+  </div>
+</header>
+
+<main class="prose">
+  <section class="card">
+    <h2 data-i18n="pv.toolsH">The calculators</h2>
+    <p data-i18n="pv.toolsP">There are no accounts, analytics or trackers, and no cookies. Your numbers stay in your browser. Only your language, currency and theme choices are saved there, in your browser’s own storage, and they never leave it.</p>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="pv.advH">The “Explain my results” advisor</h2>
+    <h3 data-i18n="pv.sentH">What is sent, and when</h3>
+    <p data-i18n="pv.sentP">Only when you click “Explain my results”. Then the calculator’s numbers (your inputs and the results shown, such as the loan amount, interest rates and monthly payments) and the page language are sent. Nothing is sent before you click, and nothing else from the page or your browser is included.</p>
+    <h3 data-i18n="pv.whoH">Who processes it</h3>
+    <p data-i18n="pv.whoP">Our advisor server runs on Cloudflare. It passes the numbers to Anthropic, which runs the Claude AI that writes the explanation. The explanation then comes back to your browser.</p>
+    <h3 data-i18n="pv.storedH">What is stored</h3>
+    <ul>
+      <li data-i18n="pv.stored1">The explanation, saved under its numbers for 30 days, so that when anyone asks about exactly the same numbers again the answer comes from storage at no cost.</li>
+      <li data-i18n="pv.stored2">A scrambled visitor code (a one-way hash of your connection’s IP address and the current hour), kept for 1 hour to enforce the limit on how many explanations one visitor can ask for.</li>
+      <li data-i18n="pv.stored3">A count of how many explanations the whole site gave each day, to enforce a daily limit. It says nothing about you.</li>
+      <li data-i18n="pv.stored4">Your IP address itself is never stored.</li>
+    </ul>
+    <h3 data-i18n="pv.cookiesH">Cookies</h3>
+    <p data-i18n="pv.cookiesP">The advisor uses no cookies.</p>
+    <h3 data-i18n="pv.aiH">About the answers</h3>
+    <p data-i18n="pv.aiP">The explanation is written by AI and can contain mistakes. It is education, not financial advice. Check anything important with your bank or a qualified adviser.</p>
+  </section>
+</main>
+
+<footer>
+  <p data-i18n="footer">For illustration only. Not financial advice. Real offers depend on your lender.</p>
+  <p class="footer-links"><a href="privacy.html" data-i18n="footer.privacy">Privacy</a></p>
+</footer>
+
+<script src="js/lang/en.js"></script>
+<script src="js/lang/cs.js"></script>
+<script src="js/common.js"></script>
+</body>
+</html>

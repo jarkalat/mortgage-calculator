@@ -257,6 +257,11 @@
             <tbody id="stressRows"></tbody>
           </table>
         </div>
+        <div class="advisor">
+          <button type="button" class="btn primary" id="advisorBtn" data-i18n="adv.button">Explain my results</button>
+          <p class="advisor-note" data-i18n-html="adv.notice">Your numbers are sent to our server and to Anthropic’s Claude AI to write the explanation. Nothing that identifies you is stored. AI can make mistakes; this is education, not financial advice. <a href="privacy.html">Privacy</a></p>
+          <div class="advisor-out" id="advisorOut" role="status" aria-live="polite" hidden></div>
+        </div>
       </div>
     </section>
   </div>
@@ -264,12 +269,14 @@
 
 <footer>
   <p data-i18n="footer">For illustration only. Not financial advice. Real offers depend on your lender.</p>
+  <p class="footer-links"><a href="privacy.html" data-i18n="footer.privacy">Privacy</a></p>
 </footer>
 
 <script src="js/lang/en.js"></script>
 <script src="js/lang/cs.js"></script>
 <script src="js/common.js"></script>
 <script src="js/finance.js"></script>
+<script src="js/advisor.js"></script>
 <script src="js/mortgage.js"></script>
 </body>
 </html>
