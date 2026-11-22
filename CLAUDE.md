@@ -84,6 +84,14 @@ root of the domain, not in a subfolder. Use `https://abodex.eu/` for any full ad
   fields listed in its `src/calculators.ts`). Any change to what is sent or stored must also update `privacy.html`.
 - Every result gets a one-sentence plain-English explanation. Keep the footer disclaimer on every page.
 
+## SEO
+- `robots.txt` allows everything except `/tests/` and points to `sitemap.xml`.
+- Every new page must be added to `sitemap.xml` (full `https://abodex.eu/` URL, `lastmod`) and get in its `<head>`:
+  a canonical link with its clean URL (no `?lang`), Open Graph + Twitter tags (`og:type`, `og:site_name`, `og:url` = canonical,
+  `og:title` / `og:description` = the English title/description, `twitter:card summary`) and a JSON-LD block
+  (`WebSite` on the home page, `WebApplication` on tools). Keep `og:title` / `og:description` in sync when the English title or description changes.
+- Leave `404.html`, `tests/` and the Google verification file out of the sitemap.
+
 ## Testing
 There is no test framework; tests run in a browser against a local server (not `file://`, which blocks
 `market.json` and, in Safari, shared settings):
