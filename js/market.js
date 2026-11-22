@@ -10,6 +10,34 @@ fetch('data/market.json', { cache: 'no-cache' })
   .then(d => { raw = d; data = localData(d); render(); revealSections(); })
   .catch(() => { failed = true; loadNote(); });
 
+// Photo hero (css/market.css): the "Scroll to the data" link smooth-scrolls to the data and moves keyboard focus
+// there; it fades away once the page has scrolled. The fixed photo dims into the page background as the hero
+// scrolls away. With "reduce motion" the hero is a still layout: no dimming, no fading, an instant jump.
+(function setupHero() {
+  const cue = $('scrollCue'), dim = $('heroDim'), hero = document.querySelector('.mk-hero');
+  if (!cue || !hero) return;
+  cue.addEventListener('click', e => {
+    e.preventDefault();
+    const target = $('data');
+    target.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'start' });
+    target.focus({ preventScroll: true });
+  });
+  if (reduceMotion()) return;
+  // p = how far the hero has scrolled away (0–1). The dimming starts slowly (p²) and the white headline fades out
+  // by p = 0.6, so it is gone before the light theme's pale background could make it hard to read.
+  const text = hero.querySelector('header');
+  let frame = 0;
+  const update = () => {
+    frame = 0;
+    const y = window.scrollY, p = Math.min(1, Math.max(0, y / (hero.offsetTop + hero.offsetHeight)));
+    dim.style.opacity = (p * p).toFixed(3);
+    text.style.opacity = Math.max(0, 1 - p / 0.6).toFixed(3);
+    cue.classList.toggle('gone', y > 24);
+  };
+  window.addEventListener('scroll', () => { if (!frame) frame = requestAnimationFrame(update); }, { passive: true });
+  update();
+})();
+
 function loadNote() {
   const n = $('loadNote');
   n.hidden = false;

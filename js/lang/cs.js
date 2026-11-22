@@ -149,6 +149,9 @@ I18N.cs = {
   'h.loadFile': '<b>Údaje o trhu se nepodařilo načíst.</b> Prohlížeče stránkám otevřeným přímo z disku nedovolí číst datové soubory.',
   'h.loadRetry': '<b>Údaje o trhu se nepodařilo načíst.</b> Načtěte prosím stránku znovu.',
   'h.loadMore': 'Všechna data najdete na <a href="market.html">stránce o trhu</a>.',
+  // Popisky fotografií (PHOTOS v js/common.js)
+  'img.prague1': 'Vltava s pražskými mosty za soumraku',
+  'img.prague2': 'Karlův most a Pražský hrad nad Vltavou při západu slunce',
 
   // ---------- Stránka 404 ----------
   'nf.title': 'Stránka nenalezena – Abodex',
@@ -458,7 +461,9 @@ I18N.cs = {
   'mk.title': 'Český trh s bydlením: ceny, nájemné, výnosy a sazby hypoték',
   'mk.desc': 'Ceny bytů a nájemné za m² v Česku, hrubé výnosy z pronájmu, sazby ČNB a hypoték a cenové indexy pro Prahu, Brno a Česko — u každého čísla je uveden zdroj.',
   'mk.h1': 'Trh s bydlením',
-  'mk.lead': 'Ceny bytů, nájemné, výnosy a úrokové sazby v Česku z oficiálních zdrojů — u každého čísla vidíte, odkud pochází.',
+  'mk.lead': 'Ceny bytů, nájemné, výnosy a úrokové sazby v Česku, u každého čísla jeho zdroj.',
+  'mk.scroll': 'Přejít k datům',
+  'mk.scrollLabel': 'Posunout dolů k údajům o trhu',
   'mk.loadFile': '<b>Údaje o trhu se nepodařilo načíst.</b> Prohlížeče stránkám otevřeným přímo z disku nedovolí číst datové soubory. Aby se tato stránka zobrazila, otevřete web přes webový server (například až bude online).',
   'mk.loadRetry': '<b>Údaje o trhu se nepodařilo načíst.</b> Načtěte prosím stránku znovu.',
   'mk.fresh': 'Aktuálnost dat',

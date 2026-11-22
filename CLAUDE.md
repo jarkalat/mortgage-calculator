@@ -17,7 +17,10 @@ root of the domain, not in a subfolder. Use `https://abodex.eu/` for any full ad
 ## Files
 - `css/style.css` — shared: Inter `@font-face`, colour/spacing/radius tokens and light theme, nav, cards, form fields, buttons, tables, result tiles, motion, footer, `.two-col`.
 - `fonts/` — Inter v4.1 variable font (`InterVariable.woff2`, `InterVariable-Italic.woff2`) from github.com/rsms/inter, with its `LICENSE.txt` (SIL OFL; keep it next to the fonts). Self-hosted: no Google Fonts or other outside requests. No `<link rel="preload">` (Chrome warns it is unused).
-- `css/<page>.css` — page-only styles (`mortgage`, `invest`, `rent-or-buy`, `market`).
+- `css/<page>.css` — page-only styles (`home`, `mortgage`, `invest`, `rent-or-buy`, `market`).
+- `images/` — Prague photos as web copies (`prague-N-800.jpg` / `prague-N-1600.jpg`, no metadata), `prague-skyline.svg`
+  and **`images/CREDITS.md`** (Unsplash photo page and photographer for every photo). Originals live outside the repo
+  in `../abodex-photos`; never commit that folder. See "Photos and skyline" below.
 - `js/theme-init.js` — in `<head>` on every page; applies a saved light theme before drawing.
 - `js/lang-init.js` — in `<head>` on every page; picks the language: `?lang=cs|en` (saved), else the saved choice, else Czech if the browser's language is Czech, else English. Sets `<html lang>`.
 - `js/lang/en.js`, `js/lang/cs.js` — **every visible text**, one file per language with the same keys (loaded just before `common.js`).
@@ -73,6 +76,27 @@ root of the domain, not in a subfolder. Use `https://abodex.eu/` for any full ad
   the title, `.home` = stronger hero version; only transform animates). With a mouse, cards get a soft light that follows the
   pointer (`.card::before`, `--mx`/`--my` set in `common.js`). Page slides: `js/transitions.js`. Only link cards (`a.card`) lift on hover. Never change text size or weight on hover. Everything
   checks `reduceMotion()` / `prefers-reduced-motion` and is off when the system setting is on.
+- **Photos and skyline**:
+  - `PHOTOS` in `common.js` is the one list of photos (file base name, size at 1600 px, alt-text key `img.*` in both language files).
+    The home page band behind "Market at a glance" (`#photoBand`, `setupPhotoBand()`) cross-fades them in order: 8 s each, 1.5 s fade,
+    very slight slow zoom, paused off screen or with the tab hidden. Only the first loads eagerly; all use `srcset` 800/1600.
+    The market page hero (`.mk-hero`, 65svh) shows the entry with `market: true` (decorative `alt=""`) as a `position: fixed`
+    layer (`#heroPhoto`; never `background-attachment: fixed`) under a dark shade, with white headline, intro and a
+    "Scroll to the data" link (`#scrollCue` → `main#data`). `market.js` (`setupHero`) dims the photo into `--bg` and fades the
+    headline as the hero scrolls away, and hides the link once scrolled. Cards are opaque and fade/rise in (`revealSections`);
+    the first card's top must show above the fold. With reduce motion the photo sits inside the hero only, nothing moves.
+    Tool pages have no photos. Home band with reduce motion: the first photo only, still.
+  - Home "Market at a glance": `home.js` `renderPlaceholder()` draws the four cards and the "Data last updated" line with
+    hidden stand-ins until `market.json` arrives, so the page doesn't jump (layout shift 0 even with a slow file). Only the
+    card titles show; the stand-ins are `visibility: hidden` and never seen or read out.
+  - To swap a photo: from the Unsplash original make `images/prague-N-1600.jpg` and `-800.jpg` with
+    `sips -s format jpeg -s formatOptions 45 --resampleWidth 1600 …` (65 and 800 for the small one), keep each under ~250 KB,
+    remove metadata (sips adds a small EXIF + Photoshop block; strip APP1–APP15 segments and check none are left),
+    update its `PHOTOS` entry (`w`/`h`), its `img.*` alt text in `en.js` **and** `cs.js`, and `images/CREDITS.md`.
+  - The skyline (`images/prague-skyline.svg`, drawn shapes unchanged, `fill="currentColor"`) is inlined in the HTML: full width at
+    the bottom of the home hero (`.hero-sky`, rises once on load) and small and faint in every footer (`.footer-sky`), both
+    `aria-hidden`. Colour: `--skyline` (soft light grey on dark, black on light). Images and skyline have fixed aspect ratios
+    (width/height); only transform and opacity animate.
 - Charts draw with `--font`; `common.js` fires `themechange` once Inter has loaded so charts redraw in it.
 - Currency rules: USD = US rules (PMI, property tax as %, HOA). CZK/EUR = European rules (no PMI,
   fixed property tax, "Repair fund", 80% loan warning). Each tool keeps its own per-currency defaults.

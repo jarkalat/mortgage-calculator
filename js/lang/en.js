@@ -149,6 +149,9 @@ I18N.en = {
   'h.loadFile': '<b>The market figures couldn’t be loaded.</b> Browsers block pages opened straight from your disk from reading data files.',
   'h.loadRetry': '<b>The market figures couldn’t be loaded.</b> Please reload the page.',
   'h.loadMore': 'The <a href="market.html">market page</a> has the full data.',
+  // Photo alt texts (PHOTOS in js/common.js)
+  'img.prague1': 'The Vltava and its bridges in Prague at dusk',
+  'img.prague2': 'Charles Bridge and Prague Castle above the Vltava at sunset',
 
   // ---------- 404 page ----------
   'nf.title': 'Page not found – Abodex',
@@ -458,7 +461,9 @@ I18N.en = {
   'mk.title': 'Czech Housing Market: Prices, Rents, Yields & Mortgage Rates',
   'mk.desc': 'Czech flat prices and rents per m², gross rental yields, CNB and mortgage rates and price indices for Prague, Brno and Czechia — with every source cited.',
   'mk.h1': 'Housing Market',
-  'mk.lead': 'Czech flat prices, rents, yields and interest rates from official sources — every number shows where it comes from.',
+  'mk.lead': 'Czech flat prices, rents, yields and interest rates, each with its source.',
+  'mk.scroll': 'Scroll to the data',
+  'mk.scrollLabel': 'Scroll down to the market data',
   'mk.loadFile': '<b>The market data couldn’t be loaded.</b> Browsers block pages opened straight from your disk from reading data files. Open the site from a web server (for example once it is online) to see this page.',
   'mk.loadRetry': '<b>The market data couldn’t be loaded.</b> Please reload the page.',
   'mk.fresh': 'Data last updated',
