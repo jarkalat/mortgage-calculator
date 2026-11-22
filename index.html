@@ -28,10 +28,12 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script src="js/theme-init.js"></script>
 <script src="js/lang-init.js"></script>
+<script src="js/transitions.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
+<div class="ambience home" aria-hidden="true"><i></i><i></i><i></i></div>
 <nav class="topnav" id="topnav" data-page="home" aria-label="Abodex tools"></nav>
 <header class="hero">
   <div>
@@ -59,7 +61,10 @@
         <p class="q" data-i18n="card.mQ">Can I afford this mortgage?</p>
         <h3 data-i18n="card.mH">Mortgage calculator</h3>
         <p data-i18n="card.mP">Monthly payment, extra payments, a rate fixation stress test and the full schedule — in USD, CZK or EUR.</p>
-        <span class="go" data-i18n="card.mGo">Open calculator →</span>
+        <span class="go-row">
+          <span class="go" data-i18n="card.mGo">Open calculator →</span>
+          <span class="tag-new" data-i18n="card.mNew">New: AI explanation</span>
+        </span>
       </a>
       <a class="card tool" href="invest.html">
         <p class="q" data-i18n="card.iQ">Does this flat pay for itself as a rental?</p>

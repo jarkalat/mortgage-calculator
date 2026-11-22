@@ -35,10 +35,12 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script src="js/theme-init.js"></script>
 <script src="js/lang-init.js"></script>
+<script src="js/transitions.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/mortgage.css">
 </head>
 <body>
+<div class="ambience" aria-hidden="true"><i></i><i></i><i></i></div>
 <nav class="topnav" id="topnav" data-page="mortgage" aria-label="Abodex tools"></nav>
 <header>
   <div>
@@ -172,6 +174,28 @@
 
   <!-- ============ RESULTS ============ -->
   <div class="stack">
+    <!-- "Explain my results" (js/advisor.js); the status, settings line and hint are filled in by js/mortgage.js -->
+    <section class="card advisor-card" id="advisorCard" aria-labelledby="advisorTitle">
+      <div class="advisor-head">
+        <svg class="sparkle" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+          <path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9z" fill="currentColor"/>
+          <path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z" fill="currentColor" opacity="0.7"/>
+        </svg>
+        <h2 id="advisorTitle" data-i18n="adv.title">Get your results explained by AI</h2>
+        <span class="advisor-status" id="advisorStatus"></span>
+      </div>
+      <ol class="advisor-steps">
+        <li data-i18n="adv.step1">Enter your loan details.</li>
+        <li data-i18n="adv.step2">If you like, set the fixation period and reset rate in the stress test below.</li>
+        <li data-i18n="adv.step3">Click “Explain my results”.</li>
+      </ol>
+      <p class="advisor-settings" id="advisorSettings" hidden><span id="advisorSettingsText"></span> <a href="#stressCard" id="advisorToStress" data-i18n="adv.change">Change</a></p>
+      <button type="button" class="btn primary" id="advisorBtn" data-i18n="adv.button">Explain my results</button>
+      <p class="advisor-hint" id="advisorHint" hidden></p>
+      <p class="advisor-note" data-i18n-html="adv.notice">Your numbers are sent to our server and to Anthropic’s Claude AI to write the explanation. Nothing that identifies you is stored. AI can make mistakes; this is education, not financial advice. <a href="privacy.html">Privacy</a></p>
+      <div class="advisor-out" id="advisorOut" role="status" aria-live="polite" hidden></div>
+    </section>
+
     <div class="kpis">
       <div class="kpi main"><div class="label" data-i18n="common.monthlyPayment">Monthly payment</div><div class="value" id="kMonthly">–</div></div>
       <div class="kpi"><div class="label" data-i18n="common.loanAmount">Loan amount</div><div class="value" id="kLoan">–</div></div>
@@ -283,11 +307,6 @@
             <thead><tr><th data-i18n="m.thResetRate">Reset rate</th><th data-i18n="common.monthlyPayment">Monthly payment</th><th data-i18n="m.thDiffMonth">Difference / month</th><th data-i18n="m.thIntChange">Total interest change</th></tr></thead>
             <tbody id="stressRows"></tbody>
           </table>
-        </div>
-        <div class="advisor">
-          <button type="button" class="btn primary" id="advisorBtn" data-i18n="adv.button">Explain my results</button>
-          <p class="advisor-note" data-i18n-html="adv.notice">Your numbers are sent to our server and to Anthropic’s Claude AI to write the explanation. Nothing that identifies you is stored. AI can make mistakes; this is education, not financial advice. <a href="privacy.html">Privacy</a></p>
-          <div class="advisor-out" id="advisorOut" role="status" aria-live="polite" hidden></div>
         </div>
       </div>
     </section>

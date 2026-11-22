@@ -24,8 +24,13 @@ root of the domain, not in a subfolder. Use `https://abodex.eu/` for any full ad
 - `js/common.js` — loaded first on every page (see below).
 - `js/finance.js` — shared loan maths.
 - `js/<page>.js` — each tool's own code.
-- `js/advisor.js` — "Explain my results" button (stress test on `mortgage.html`): `ADVISOR_URL` (the server's address, kept only here),
+- `js/transitions.js` — in `<head>` on every page: picks the slide direction for the cross-document View Transitions
+  (`@view-transition` and the animations are in `style.css`). Page order: index, mortgage, invest, rent-or-buy, market, privacy;
+  a later page slides in from the right, an earlier one from the left. Skipped with reduce motion or when the browser animates itself.
+- `js/advisor.js` — "Explain my results" button: `ADVISOR_URL` (the server's address, kept only here),
   `setupAdvisor()`; shows the streamed answer as plain text (`textContent`) and clears it when inputs change.
+  On `mortgage.html` it lives in its own card (`#advisorCard`) at the top of the results; `mortgage.js` (`advisorCard()`) fills its
+  status label (example vs. your numbers), the stress-test settings line and the hint shown while the button is off.
 - `privacy.html` — privacy page (linked from every footer); describes exactly what the advisor sends and stores.
 - `data/market.json` — every market number with source, page/file link, period and retrieval date.
 - `tests/chart-stability.html` — browser test for charts (both languages).
@@ -64,7 +69,9 @@ root of the domain, not in a subfolder. Use `https://abodex.eu/` for any full ad
 - **Motion** (`common.js` + `style.css`): `revealSections()` fades in sections still below the screen
   (call it again after showing late content, as `market.js` does); `onceVisible(el, fn)`; the theme
   cross-fade (`.theme-switching`); the home numbers count up once (`home.js`, always ending on the exact
-  text). Only link cards (`a.card`) lift on hover. Never change text size or weight on hover. Everything
+  text). Ambience: every page has a `<div class="ambience">` right after `<body>` (soft radial-gradient shapes behind
+  the title, `.home` = stronger hero version; only transform animates). With a mouse, cards get a soft light that follows the
+  pointer (`.card::before`, `--mx`/`--my` set in `common.js`). Page slides: `js/transitions.js`. Only link cards (`a.card`) lift on hover. Never change text size or weight on hover. Everything
   checks `reduceMotion()` / `prefers-reduced-motion` and is off when the system setting is on.
 - Charts draw with `--font`; `common.js` fires `themechange` once Inter has loaded so charts redraw in it.
 - Currency rules: USD = US rules (PMI, property tax as %, HOA). CZK/EUR = European rules (no PMI,

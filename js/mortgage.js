@@ -97,7 +97,8 @@ let state = null, view = 'year';
 function calc() {
   stressValues = null;   // no explanation for numbers that are not on screen
   const ok = checkInputs(RULES, document.querySelector('main > .stack'), [$('affordOut')]);
-  if (!ok) { advisor.refresh(); return; }
+  inputsOk = ok;
+  if (!ok) { advisor.refresh(); advisorCard(); return; }
   const price = num('price');
   const down = Math.min(num('downAmt'), price);
   const loan = price - down;
@@ -182,6 +183,7 @@ function calc() {
   affordability();
   stressTest();
   advisor.refresh();
+  advisorCard();
   drawChart();
   renderTable();
 }
@@ -278,6 +280,37 @@ const ISO_CODES = { CZK: 203, EUR: 978, USD: 840 };
 let stressValues = null;
 const advisor = setupAdvisor({
   button: $('advisorBtn'), output: $('advisorOut'), calculator: 'stress-test', values: () => stressValues,
+});
+
+// The advisor card at the top of the results: whose numbers these are, which stress-test settings
+// will be explained, and why the button is off when there is nothing to explain.
+let inputsOk = true, ownNumbers = false, advisorSeen = false, advisorPulsed = false;
+function advisorCard() {
+  $('advisorStatus').textContent = t(ownNumbers ? 'adv.yours' : 'adv.example');
+  $('advisorStatus').classList.toggle('own', ownNumbers);
+  const v = stressValues;
+  $('advisorSettings').hidden = !v;
+  if (v) $('advisorSettingsText').textContent = t('adv.settings', { years: tn('adv.years', v.fixationYears), rate: pctLabel(v.resetRate) });
+  // No result at all (invalid input or no loan), or a result where the rate never resets
+  const hint = v ? '' : !inputsOk || !(state && state.loan > 0) ? 'adv.hintNoResult' : 'adv.hintNoReset';
+  $('advisorHint').hidden = !hint;
+  $('advisorHint').textContent = hint ? t(hint) : '';
+  advisorPulse();
+}
+// One soft glow the first time the card is on screen with a result to explain (once per page load)
+function advisorPulse() {
+  if (advisorPulsed || !advisorSeen || !stressValues || reduceMotion()) return;
+  advisorPulsed = true;
+  $('advisorCard').classList.add('pulse');
+}
+onceVisible($('advisorCard'), () => { advisorSeen = true; advisorPulse(); });
+// "Change" scrolls smoothly to the stress test (just jumps with reduce motion) and puts the focus there
+$('advisorToStress').addEventListener('click', e => {
+  if ($('stressCard').hidden) return;
+  e.preventDefault();
+  const top = $('stressCard').getBoundingClientRect().top + scrollY - $('topnav').offsetHeight - 16;
+  window.scrollTo({ top, behavior: reduceMotion() ? 'auto' : 'smooth' });
+  $('fixYears').focus({ preventScroll: true });
 });
 
 // ---------- Affordability (28/36 rule) ----------
@@ -447,6 +480,7 @@ function applyDefaults() {
   for (const [id, v] of Object.entries(mset().defaults)) $(id).value = v;
   lastDownEdited = 'pct';
   resetRateAuto = true;
+  ownNumbers = false;   // back to the example numbers
   advisor.clear();
   syncDown();
   calc();
@@ -471,7 +505,9 @@ document.addEventListener('langchange', () => { hoaLabel(); advisor.clear(); cal
 $('resetRate').addEventListener('input', () => { resetRateAuto = $('resetRate').value.trim() === ''; });
 
 // Any change to an input clears the old explanation, then recalculates
+// (Any change by the visitor also means the advisor now uses their own numbers.)
 document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', () => { ownNumbers = true; });
   el.addEventListener('input', advisor.clear);
   if (!['downAmt', 'downPct', 'price'].includes(el.id)) el.addEventListener('input', calc);
 });
