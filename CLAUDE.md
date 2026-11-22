@@ -31,6 +31,7 @@ root of the domain, not in a subfolder. Use `https://abodex.eu/` for any full ad
 - `tests/chart-stability.html` — browser test for charts (both languages).
 - `tests/translations.html` — browser test: every key in both languages, every key the pages/scripts use exists, same numbers in both.
 - `google34bc03fa02bbb9b0.html` — Google Search Console verification. **Never touch, move or rename.**
+- `seznam-wmt-aMS1lDl3nzUeZTkD4IqlH52Ao3ZG3irC.txt` — Seznam Webmaster verification. **Never delete, edit or rename** (Seznam re-checks it); keep it out of `sitemap.xml`.
 - `CNAME` — the custom domain for GitHub Pages; contains only `abodex.eu`. Removing it takes the site off the domain.
 
 ## Languages (English / Czech)
