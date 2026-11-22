@@ -322,6 +322,63 @@ if (document.fonts && document.fonts.load) {
     { detail: { dark: !document.documentElement.hasAttribute('data-theme') } }))).catch(() => {});
 }
 
+// ---------- Prague photos ----------
+// The one list of photos (credits in images/CREDITS.md). Each has two web copies in images/:
+// <file>-800.jpg and <file>-1600.jpg, their size at 1600 px (w × h) and an alt-text key in both language files.
+// The home page band (#photoBand) shows them in this order; the market page hero (#heroPhoto) shows the one
+// marked market: true. To swap a photo: add its two copies, change its entry here and its alt text in en.js / cs.js.
+const PHOTOS = [
+  { file: 'prague-1', w: 1600, h: 1200, alt: 'img.prague1' },
+  { file: 'prague-2', w: 1600, h: 949, alt: 'img.prague2', market: true },
+];
+
+// An <img> for one photo: srcset 800/1600, fixed width/height (no layout shift), lazy unless it is the first.
+// Decorative copies get alt="".
+function photoImg(p, { eager = false, sizes = '100vw', decorative = false } = {}) {
+  const img = new Image(p.w, p.h);
+  img.decoding = 'async';
+  img.loading = eager ? 'eager' : 'lazy';
+  img.sizes = sizes;
+  img.srcset = `images/${p.file}-800.jpg 800w, images/${p.file}-1600.jpg 1600w`;
+  img.src = `images/${p.file}-1600.jpg`;
+  if (decorative) img.alt = '';
+  else { img.alt = t(p.alt); img.dataset.i18nAttr = `alt:${p.alt}`; }
+  return img;
+}
+
+// Home band: cross-fade every 8 s (1.5 s fade in css/home.css) with a very slight slow zoom. Pauses while the
+// band is off screen or the tab is hidden. With "reduce motion": only the first photo, still.
+function setupPhotoBand(box) {
+  const list = reduceMotion() ? PHOTOS.slice(0, 1) : PHOTOS;
+  const imgs = list.map((p, k) => photoImg(p, { eager: k === 0, sizes: '(max-width: 1232px) 100vw, 1200px' }));
+  imgs[0].classList.add('on');
+  box.append(...imgs);
+  if (imgs.length < 2) return;
+  let now = 0, timer = 0, onScreen = false;
+  const next = () => {
+    const k = (now + 1) % imgs.length;
+    if (!imgs[k].complete) { imgs[k].loading = 'eager'; return; }   // not loaded yet: try again next time
+    imgs[now].classList.remove('on');
+    imgs[k].classList.add('on');
+    now = k;
+  };
+  const update = () => {
+    const run = onScreen && !document.hidden;
+    box.classList.toggle('paused', !run);
+    if (run && !timer) timer = setInterval(next, 8000);
+    if (!run && timer) { clearInterval(timer); timer = 0; }
+  };
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; update(); }).observe(box);
+  } else { onScreen = true; update(); }
+  document.addEventListener('visibilitychange', update);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if ($('photoBand')) setupPhotoBand($('photoBand'));
+  if ($('heroPhoto')) $('heroPhoto').prepend(photoImg(PHOTOS.find(p => p.market) || PHOTOS[0], { eager: true, decorative: true }));
+});
+
 // Reopen in the currency chosen last time, once the page's own script has set itself up
 document.addEventListener('DOMContentLoaded', () => {
   try {

@@ -23,6 +23,44 @@ main.home { padding-top: 0; }
 .fact .source { padding-top: var(--space-3); border-top: 1px solid var(--border); }
 .load-note { padding: 14px 16px; border-left: 3px solid var(--pmi); background: var(--card); border-radius: var(--radius-sm); }
 
+/* Prague skyline along the bottom edge of the hero, full width; rises gently into place once on load.
+   Fixed aspect ratio (1600 × 240), so it never shifts the layout; only transform and opacity animate. */
+.hero-sky { overflow: hidden; margin-top: calc(-1 * var(--space-5)); pointer-events: none; }
+.hero-sky .sky {
+  display: block; width: 100%; height: auto; aspect-ratio: 1600 / 240; color: var(--skyline);
+  animation: sky-rise 1600ms var(--ease) 150ms both;
+}
+@keyframes sky-rise { from { transform: translateY(18%); opacity: 0; } }
+.hero-sky + main.home { padding-top: var(--space-6); }
+
+/* Photo band behind "Market at a glance" (js/common.js PHOTOS, set up by setupPhotos()): the photos
+   cross-fade slowly with a very slight zoom; an overlay and frosted cards keep the text easy to read.
+   The photos are absolutely placed, so they never change the band's size. */
+.photo-band {
+  position: relative; isolation: isolate; overflow: hidden; border-radius: var(--radius-lg);
+  padding: var(--space-9) var(--space-5) var(--space-5); background: var(--surface);
+}
+.photos { position: absolute; inset: 0; z-index: -1; }
+.photos img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0;
+  transition: opacity 1500ms ease-in-out; animation: photo-zoom 19s ease-in-out infinite alternate;
+}
+.photos img.on { opacity: 1; }
+.photos.paused img { animation-play-state: paused; }
+@keyframes photo-zoom { from { transform: scale(1); } to { transform: scale(1.05); } }
+/* Overlay: darker on dark, lighter on light, heaviest behind the cards */
+.photos::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(color-mix(in srgb, var(--bg) 10%, transparent), color-mix(in srgb, var(--bg) 55%, transparent) 70%);
+}
+.photo-band .fact {
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.photo-band .load-note { margin-top: 0; }
+/* Placeholder cards while market.json loads (js/home.js renderPlaceholder): they hold the space; only the titles show */
+.fact.pending > :not(h3), #glanceSource.pending { visibility: hidden; }
+
 /* Tool cards: the question first, then the tool's name */
 .tool .q { margin: 0; font-size: 14px; color: var(--accent); font-weight: 600; flex: none; }
 .tool h3 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -0.015em; }
@@ -45,4 +83,9 @@ main.home { padding-top: 0; }
   .hero p { font-size: 17px; }
   .block { margin-bottom: var(--space-7); }
   .block-head h2 { font-size: 22px; }
+  .photo-band { padding: var(--space-8) var(--space-3) var(--space-3); }
+}
+/* Reduce motion: the first photo, still (no fade, zoom or rise) */
+@media (prefers-reduced-motion: reduce) {
+  .photos img { transform: none; }
 }

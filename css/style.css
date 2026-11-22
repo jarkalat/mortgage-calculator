@@ -28,6 +28,8 @@
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1); --fast: 150ms; --slow: 500ms;
   /* Ambience behind the page titles, and the soft light that follows the pointer over cards */
   --amb: 0.16; --amb-home: 0.22; --glow: rgba(200, 162, 107, 0.08);
+  /* Prague skyline (home hero, footers): soft light grey on dark, black on light */
+  --skyline: #d4d4d8;
 }
 :root[data-theme="light"] {
   color-scheme: light;
@@ -41,6 +43,7 @@
   --principal: #1f5fd1; --interest: #d9741c; --tax: #16805a;
   --insurance: #7c4ddb; --pmi: #c53035; --hoa: #7d8aa3;
   --amb: 0.09; --amb-home: 0.13; --glow: rgba(138, 106, 58, 0.07);
+  --skyline: #111111;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -238,6 +241,11 @@ footer p { margin: 0; font-size: 13px; color: var(--muted); }
 footer .footer-links { margin-top: var(--space-2); }
 footer .footer-links a { color: var(--muted); }
 footer .footer-links a:hover { color: var(--text); }
+/* Quiet signature: a small, faint Prague skyline below the footer text (its own row, so it never covers text or links) */
+.footer-sky {
+  display: block; width: 200px; max-width: 60%; height: auto; aspect-ratio: 1600 / 240;
+  margin: var(--space-5) auto 0; color: var(--skyline); opacity: 0.18; pointer-events: none;
+}
 
 /* "Explain my results" advisor (js/advisor.js): its own card at the top of the results, with a thin brass
    border, three steps, whose numbers are used, the stress-test settings, the button, the privacy note and

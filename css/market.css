@@ -1,5 +1,59 @@
 /* Housing market styles (loaded after style.css). Single column; no currency switch on this page. */
 main.market, body:has(main.market) > header { max-width: 1000px; }
+/* Photo hero, about 65% of the screen (svh, so phones don't jump with the address bar). The photo (js/common.js
+   PHOTOS, the one marked "market") is a position: fixed layer behind the whole page (not background-attachment:
+   fixed, which iPhones ignore), under a soft dark shade; the data cards scroll over it and #heroDim fades it into
+   the page background as you scroll (js/market.js). White text in both themes, since the shade is always dark.
+   The photo and shade never change the layout; only opacity and transform animate. The ambience shapes are not
+   used on this page. */
+.ambience { display: none; }
+.mk-hero {
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: 65vh; min-height: 65svh; padding-bottom: var(--space-4); color: #fff;
+}
+.hero-photo { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: -1; overflow: hidden; pointer-events: none; }
+.hero-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 55%; }
+.hero-photo::after {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.2) 30%, rgba(0, 0, 0, 0.62) 65%, rgba(0, 0, 0, 0.62));
+}
+.hero-dim { position: absolute; inset: 0; z-index: 2; background: var(--bg); opacity: 0; }
+.mk-hero header { padding-top: var(--space-6); padding-bottom: var(--space-4); width: 100%; }
+.mk-hero h1 { color: #fff; font-size: 52px; line-height: 1.1; letter-spacing: -0.025em; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35); }
+.mk-hero header p { color: rgba(255, 255, 255, 0.9); text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45); }
+
+/* "Scroll to the data": bobs gently, smooth-scrolls to the data, fades away once the page has scrolled */
+.scroll-cue {
+  align-self: center; display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: var(--space-1) var(--space-3); border-radius: 999px; color: #fff; text-decoration: none;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.01em; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+  transition: opacity 400ms var(--ease), visibility 0s linear 0s;
+}
+.scroll-cue:hover { background: rgba(255, 255, 255, 0.12); }
+.scroll-cue:focus-visible { outline-color: #fff; }
+.scroll-cue svg { animation: cue-bob 1800ms ease-in-out infinite; }
+@keyframes cue-bob { 50% { transform: translateY(4px); } }
+.scroll-cue.gone { opacity: 0; visibility: hidden; transition: opacity 400ms var(--ease), visibility 0s linear 400ms; }
+
+/* The data: every card is opaque (var(--card)); cards fade and rise in as they scroll into view (revealSections) */
+main.market { scroll-margin-top: 76px; }
+main.market:focus { outline: none; }
+main.market .reveal { transform: translateY(24px); }
+main.market .reveal.in { transform: none; }
+
+@media (max-width: 760px) { main.market { scroll-margin-top: 112px; } }
+@media (max-width: 560px) {
+  .mk-hero h1 { font-size: 36px; }
+  .mk-hero header { padding-top: var(--space-5); }
+}
+/* Reduce motion: a still layout. The photo sits inside the hero only (no fixed layer, no dimming), the data
+   below is on the plain page background, and nothing bobs or fades in. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-hero { position: relative; isolation: isolate; overflow: hidden; }
+  .hero-photo { position: absolute; height: 100%; }
+  .hero-dim { display: none; }
+  main.market .reveal { transform: none; }
+}
 main.market .stack > * { min-width: 0; }
 h3.sub { margin: var(--space-5) 0 var(--space-3); font-size: 15px; font-weight: 600; }
 .private {
