@@ -26,6 +26,8 @@
   --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
   --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1); --fast: 150ms; --slow: 500ms;
+  /* Ambience behind the page titles, and the soft light that follows the pointer over cards */
+  --amb: 0.16; --amb-home: 0.22; --glow: rgba(200, 162, 107, 0.08);
 }
 :root[data-theme="light"] {
   color-scheme: light;
@@ -38,6 +40,7 @@
   /* Green and red darkened slightly so gain/loss text passes 4.5:1 on white */
   --principal: #1f5fd1; --interest: #d9741c; --tax: #16805a;
   --insurance: #7c4ddb; --pmi: #c53035; --hoa: #7d8aa3;
+  --amb: 0.09; --amb-home: 0.13; --glow: rgba(138, 106, 58, 0.07);
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -166,7 +169,7 @@ summary:hover { color: var(--accent); }
 input[aria-invalid="true"], input[aria-invalid="true"]:hover, input[aria-invalid="true"]:focus { border-color: var(--pmi); }
 .field-error { margin-top: var(--space-1); font-size: 13px; line-height: 1.5; color: var(--pmi); }
 .paused-note { margin: 0; }
-.paused > :not(.paused-note):not(:has([aria-invalid="true"])), .paused-item { opacity: 0.4; transition: opacity var(--fast) ease; }
+.paused > :not(.paused-note):not(.advisor-card):not(:has([aria-invalid="true"])), .paused-item { opacity: 0.4; transition: opacity var(--fast) ease; }
 
 /* Shared building blocks: buttons, tabs, tables, result tiles, notes, rise/fall colours */
 .tabs { display: flex; gap: 6px; margin-bottom: var(--space-4); flex-wrap: wrap; align-items: center; }
@@ -236,10 +239,35 @@ footer .footer-links { margin-top: var(--space-2); }
 footer .footer-links a { color: var(--muted); }
 footer .footer-links a:hover { color: var(--text); }
 
-/* "Explain my results" advisor (js/advisor.js): button, privacy note, then the plain-text answer */
-.advisor { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); }
-.advisor .btn:disabled { opacity: 0.6; cursor: default; }
-.advisor .btn.primary:disabled:hover { background: var(--accent); border-color: var(--accent); }
+/* "Explain my results" advisor (js/advisor.js): its own card at the top of the results, with a thin brass
+   border, three steps, whose numbers are used, the stress-test settings, the button, the privacy note and
+   then the plain-text answer. It glows softly once (.pulse) the first time it shows a result. */
+.advisor-card { position: relative; border-color: var(--accent); }
+.advisor-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-bottom: var(--space-3); }
+.advisor-head .sparkle { flex: none; color: var(--accent); }
+.advisor-head h2 { flex: 1 1 14em; min-width: 0; margin: 0; }
+.advisor-status {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 500; line-height: 1.6; white-space: nowrap;
+  border: 1px solid var(--border); color: var(--muted);
+}
+.advisor-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); }
+.advisor-status.own { color: var(--text); border-color: var(--border-strong); }
+.advisor-status.own::before { background: var(--accent); }
+.advisor-steps { margin: 0 0 var(--space-3); padding-left: 1.4em; font-size: 14px; line-height: 1.55; color: var(--muted); }
+.advisor-steps li + li { margin-top: 2px; }
+.advisor-steps li::marker { color: var(--accent); font-weight: 600; }
+.advisor-settings { margin: 0 0 var(--space-4); font-size: 13px; line-height: 1.5; }
+.advisor-settings a { font-weight: 500; text-underline-offset: 2px; }
+.advisor-hint { margin: var(--space-2) 0 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.advisor-card .btn:disabled { opacity: 0.6; cursor: default; }
+.advisor-card .btn.primary:disabled:hover { background: var(--accent); border-color: var(--accent); }
+.advisor-card::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0;
+  box-shadow: 0 0 0 1px var(--accent), 0 0 32px 4px var(--ring);
+}
+.advisor-card.pulse::after { animation: advisor-glow 1800ms var(--ease) 1; }
+@keyframes advisor-glow { 35% { opacity: 1; } }
 .advisor-note { margin: var(--space-2) 0 0; font-size: 12px; line-height: 1.5; color: var(--muted); max-width: 640px; }
 .advisor-note a { color: var(--muted); }
 .advisor-note a:hover { color: var(--text); }
@@ -260,6 +288,72 @@ footer .footer-links a:hover { color: var(--text); }
 .prose ul { padding-left: 1.2em; }
 .prose li { margin-bottom: var(--space-1); }
 
+/* Ambience: two or three large, very soft shapes behind the page title (stronger on the home page),
+   drifting slowly. Soft radial gradients, no blur filters; only transform moves, so it stays cheap.
+   The layer sits behind everything, never takes clicks, never changes layout and is clipped so it can't
+   widen the page. Lighter on small screens. */
+.ambience {
+  position: absolute; top: 0; left: 0; right: 0; height: 440px; z-index: -1;
+  overflow: hidden; pointer-events: none; contain: strict;
+  -webkit-mask-image: linear-gradient(#000 50%, transparent); mask-image: linear-gradient(#000 50%, transparent);
+}
+.ambience.home { height: 760px; }
+.ambience i {
+  position: absolute; border-radius: 50%; opacity: var(--amb); will-change: transform;
+  animation: amb-a 26s ease-in-out infinite alternate;
+}
+.ambience.home i { opacity: var(--amb-home); }
+.ambience i:nth-child(1) { width: 720px; height: 720px; top: -380px; left: -220px; background: radial-gradient(closest-side, var(--accent), transparent); }
+.ambience i:nth-child(2) { width: 640px; height: 640px; top: -340px; right: -180px; background: radial-gradient(closest-side, var(--principal), transparent); animation-name: amb-b; animation-duration: 30s; animation-delay: -9s; }
+.ambience i:nth-child(3) { width: 560px; height: 560px; top: -120px; left: 38%; background: radial-gradient(closest-side, var(--insurance), transparent); animation-name: amb-c; animation-duration: 22s; animation-delay: -15s; }
+.ambience:not(.home) i:nth-child(3) { display: none; }
+.ambience.home i:nth-child(1) { top: -260px; }
+.ambience.home i:nth-child(2) { top: -200px; }
+@keyframes amb-a { to { transform: translate3d(14vw, 70px, 0) scale(1.15); } }
+@keyframes amb-b { to { transform: translate3d(-12vw, 90px, 0) scale(0.9); } }
+@keyframes amb-c { to { transform: translate3d(-10vw, -60px, 0) scale(1.2); } }
+@media (max-width: 560px) {
+  .ambience { height: 320px; }
+  .ambience.home { height: 560px; }
+  .ambience i { opacity: calc(var(--amb) * 0.7); }
+  .ambience.home i { opacity: calc(var(--amb-home) * 0.7); }
+  .ambience i:nth-child(1) { width: 440px; height: 440px; top: -240px; left: -180px; }
+  .ambience i:nth-child(2) { width: 400px; height: 400px; top: -220px; right: -200px; }
+  .ambience.home i:nth-child(1) { top: -160px; }
+  .ambience.home i:nth-child(2) { top: -120px; }
+  .ambience i:nth-child(3) { display: none; }
+}
+
+/* A soft light follows the pointer over cards, only on devices with a real mouse (js/common.js sets
+   --mx / --my). It sits behind the card's content and only fades in and out. */
+@property --mx { syntax: "<length>"; inherits: false; initial-value: -999px; }
+@property --my { syntax: "<length>"; inherits: false; initial-value: -999px; }
+@media (hover: hover) and (pointer: fine) {
+  .card { position: relative; isolation: isolate; }
+  .card::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0;
+    background: radial-gradient(420px circle at var(--mx) var(--my), var(--glow), transparent 70%);
+    transition: opacity 300ms var(--ease);
+  }
+  .card:hover::before { opacity: 1; }
+}
+
+/* Page transitions (js/transitions.js picks the direction): the page content slides in from the right
+   when going to a later page and from the left to an earlier one, with a slight fade. The nav stays still.
+   Browsers without cross-document View Transitions just navigate. */
+@view-transition { navigation: auto; }
+.topnav { view-transition-name: topnav; }
+::view-transition-group(topnav), ::view-transition-new(topnav) { animation: none; }
+::view-transition-old(topnav) { display: none; }
+html:active-view-transition-type(forward)::view-transition-old(root) { animation: vt-out-left 350ms ease-out both; }
+html:active-view-transition-type(forward)::view-transition-new(root) { animation: vt-in-right 350ms ease-out both; }
+html:active-view-transition-type(back)::view-transition-old(root) { animation: vt-out-right 350ms ease-out both; }
+html:active-view-transition-type(back)::view-transition-new(root) { animation: vt-in-left 350ms ease-out both; }
+@keyframes vt-in-right { from { transform: translateX(56px); opacity: 0; } }
+@keyframes vt-in-left { from { transform: translateX(-56px); opacity: 0; } }
+@keyframes vt-out-left { to { transform: translateX(-56px); opacity: 0; } }
+@keyframes vt-out-right { to { transform: translateX(56px); opacity: 0; } }
+
 /* Motion: sections fade in as they scroll into view (js/common.js adds .reveal only to sections still
    off-screen), and colours cross-fade while the theme switches (.theme-switching, set for 300 ms). */
 .reveal { opacity: 0; transform: translateY(8px); transition: opacity var(--slow) var(--ease), transform var(--slow) var(--ease); }
@@ -267,9 +361,13 @@ footer .footer-links a:hover { color: var(--text); }
 :root.theme-switching, :root.theme-switching * {
   transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease, box-shadow 250ms ease !important;
 }
-/* "Reduce motion" on: no transitions, lifts, fades or count-ups */
+/* "Reduce motion" on: no transitions, lifts, fades, count-ups, page slides, drifting shapes,
+   pointer light or glow (the shapes stay as a still background) */
 @media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
   a.card:hover, a.card:focus-visible { transform: none; }
   .reveal { opacity: 1; transform: none; }
+  .card::before { display: none; }
+  .ambience i { will-change: auto; }
 }

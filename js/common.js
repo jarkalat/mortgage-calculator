@@ -297,6 +297,24 @@ function revealSections() {
 }
 document.addEventListener('DOMContentLoaded', revealSections);
 
+// A soft light follows the pointer over cards (css/style.css .card::before), only with a real mouse
+// and not with "reduce motion". Updated at most once per frame.
+if (!reduceMotion() && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  let frame = 0, last = null;
+  document.addEventListener('pointermove', e => {
+    last = e;
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      const card = last.target.closest && last.target.closest('.card');
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${Math.round(last.clientX - r.left)}px`);
+      card.style.setProperty('--my', `${Math.round(last.clientY - r.top)}px`);
+    });
+  }, { passive: true });
+}
+
 // Charts are drawn on canvases with the page font; redraw them (they listen for "themechange")
 // once Inter has loaded, so a first draw in the fallback font doesn't stay on screen.
 if (document.fonts && document.fonts.load) {

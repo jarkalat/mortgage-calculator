@@ -26,6 +26,13 @@ main.home { padding-top: 0; }
 /* Tool cards: the question first, then the tool's name */
 .tool .q { margin: 0; font-size: 14px; color: var(--accent); font-weight: 600; flex: none; }
 .tool h3 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -0.015em; }
+/* "New: AI explanation" tag next to the mortgage card's link (wraps under it when the card is narrow) */
+.tool .go-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-2); }
+.tool .go-row .go { margin-top: 0; }
+.tag-new {
+  padding: 1px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.6; white-space: nowrap;
+  background: var(--accent-soft); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+}
 
 /* How Abodex works */
 .points { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-4); }
